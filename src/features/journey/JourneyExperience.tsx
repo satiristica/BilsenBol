@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import { ActionButton } from "@/components/ActionButton";
 import { DEMO_DATA_BADGE } from "@/data/programs";
 import { buildDiagnosis } from "@/domain/diagnosis";
 import { rankPrograms, type ProgramMatch } from "@/domain/matching";
@@ -178,7 +179,7 @@ export function JourneyExperience({
         </p>
       </div>
 
-      <main className={styles.content}>
+      <main className={styles.content} key={step}>
         {step === "profile" ? (
           <ProfileForm
             onChange={setProfile}
@@ -225,22 +226,17 @@ export function JourneyExperience({
 
       <div className={styles.nav}>
         {stepIndex > 0 ? (
-          <button
-            className={styles.navBack}
+          <ActionButton
             onClick={() => goToStep(STEP_ORDER[stepIndex - 1])}
-            type="button"
+            variant="ghost"
           >
             ← Назад
-          </button>
+          </ActionButton>
         ) : null}
         {stepIndex < STEP_ORDER.length - 1 && step !== "profile" ? (
-          <button
-            className={styles.navNext}
-            onClick={() => goToStep(STEP_ORDER[stepIndex + 1])}
-            type="button"
-          >
-            Дальше: {STEP_NAMES[STEP_ORDER[stepIndex + 1]]} →
-          </button>
+          <ActionButton onClick={() => goToStep(STEP_ORDER[stepIndex + 1])} withArrow>
+            Дальше: {STEP_NAMES[STEP_ORDER[stepIndex + 1]]}
+          </ActionButton>
         ) : null}
       </div>
 

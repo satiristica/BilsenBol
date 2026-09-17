@@ -7,12 +7,13 @@
   display: grid;
   grid-template-columns: 20px 1fr;
   gap: 10px;
-  border: 1px dashed rgb(21 36 31 / 25%);
-  border-radius: 14px;
+  margin: 0;
+  border: 1px dashed var(--line-strong);
+  border-radius: 15px;
   color: var(--muted);
   font-size: 0.82rem;
-  line-height: 1.5;
-  padding: 12px 14px;
+  line-height: 1.55;
+  padding: 13px 15px;
 }
 
 .grid {
@@ -22,32 +23,35 @@
 
 .empty {
   display: grid;
-  gap: 14px;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  background: var(--surface);
-  padding: 22px;
+  gap: 16px;
+  border: 1px solid var(--warn-line);
+  border-radius: 22px;
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgb(255 180 92 / 10%), transparent 60%),
+    var(--surface);
+  padding: 24px;
+  animation: rise 520ms var(--ease-out);
 }
 
 .emptyTitle {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.4rem, 5vw, 1.9rem);
-  font-weight: 500;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+  max-width: 22ch;
+  font-size: clamp(1.4rem, 5vw, 1.95rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
 }
 
 .emptyText {
   margin: 0;
-  color: var(--muted);
+  color: var(--ink-dim);
   font-size: 0.92rem;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 .reasons {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -59,54 +63,24 @@
   justify-content: space-between;
   gap: 12px;
   border-bottom: 1px solid var(--line);
+  color: var(--ink-dim);
   font-size: 0.86rem;
-  padding-bottom: 6px;
+  padding-bottom: 8px;
 }
 
 .reasonCount {
-  color: var(--accent-dark);
-  font-weight: 700;
+  color: var(--warn);
+  font-size: 1rem;
+  font-weight: 800;
   white-space: nowrap;
 }
 
 .emptyActions {
   display: grid;
-  gap: 8px;
+  gap: 9px;
 }
 
-.emptyAction {
-  min-height: 48px;
-  border: 0;
-  border-radius: 12px;
-  background: var(--accent);
-  color: white;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 700;
-  padding: 13px 18px;
-}
-
-.emptyAction:hover {
-  background: var(--accent-dark);
-}
-
-.emptySecondary {
-  background: var(--surface);
-  border: 1px solid var(--accent);
-  color: var(--accent-dark);
-}
-
-.emptySecondary:hover {
-  background: var(--accent-soft);
-}
-
-.emptyAction:focus-visible {
-  outline: 3px solid #f0a96b;
-  outline-offset: 3px;
-}
-
-@media (min-width: 860px) {
+@media (min-width: 880px) {
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

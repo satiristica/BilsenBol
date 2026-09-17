@@ -1217,3 +1217,94 @@ FOLLOW_UP:
 - Add Vitest and port the scratchpad domain assertions into committed unit tests, then a Playwright run of the critical path.
 - Persist profile and progress to localStorage so a reload keeps the journey.
 - Replace the demo catalogue with source-backed programme data carrying a source URL per fact.
+
+## TASK TASK-CLAUDE-20260917-dark-visual-system
+
+AGENT: CLAUDE
+STATUS: DONE
+BASE_COMMIT: a90f2e38294f715d7c83b05c8f5188032dbbf1d0
+SCOPE: Replace the light cream theme with a dark green visual system, add motion throughout the journey, and rebuild the call-to-action buttons as a creative shared primitive.
+
+FILES:
+- `src/app/globals.css`
+- `src/app/page.tsx`
+- `src/components/**`
+- `src/lib/**`
+- `src/features/**/*.module.css`
+- `src/features/**/*.tsx`
+- `AGENTS_CHANGELOG.md`
+
+DEPENDENCIES:
+- `TASK-CLAUDE-20260917-journey-frontend`
+
+ASSUMPTIONS:
+- User asked for a dark green palette, strong animation and creative buttons; motion is implemented in CSS plus a small IntersectionObserver helper rather than an animation dependency.
+- All motion must degrade to no motion under `prefers-reduced-motion`, and the dark palette must keep text contrast at WCAG AA.
+
+ACCEPTANCE:
+- Every screen of the journey renders on the dark green palette with no leftover light-theme surfaces.
+- Landing and journey use entrance, scroll-reveal and hover motion; numbers animate when they change.
+- Primary actions use one shared creative button primitive with a visible focus state.
+- `npm run typecheck`, `npm run lint`, `npm run build` exit 0.
+
+### COMPLETE TASK-CLAUDE-20260917-dark-visual-system
+
+AGENT: CLAUDE
+STATUS: DONE
+
+SUMMARY:
+- Replaced the cream/green light theme with a deep green dark system driven entirely by tokens in `globals.css`, so every CSS Module re-themed without duplicating colour values.
+- Added motion across the product: a drifting aurora behind the landing, staggered entrance animations, scroll-triggered reveals, hover lift and light sweeps on cards, a rotating dialog close control, a shimmering progress bar, and a vertical rail per roadmap phase that fills as steps are completed.
+- Built `ActionButton`/`ActionLink` as the single call-to-action primitive: gradient fill, a highlight that tracks the pointer, a one-shot sheen on hover, a sliding arrow, and press feedback. It replaced six separate bespoke button styles.
+- Numbers now animate to their new value with `useCountUp`, so changing the profile visibly counts the match score and the readiness percentage up or down.
+- The recommendation score became a conic-gradient dial, and each scoring factor gained a proportional bar.
+- Dropped the serif display face in favour of a heavier sans with tighter tracking, and gave the hero a gradient keyword plus an honest stats strip.
+
+COMMITS:
+- UNCOMMITTED
+
+FILES:
+- `src/app/globals.css` (rewritten)
+- `src/app/page.tsx`
+- `src/components/{ActionButton.tsx,ActionButton.module.css,Reveal.tsx,Reveal.module.css,ChoiceGroup.module.css}`
+- `src/lib/useCountUp.ts`
+- `src/features/profile/{ProfileForm.tsx,ProfileForm.module.css,QuickAdjustBar.module.css}`
+- `src/features/diagnosis/{DiagnosisPanel.tsx,DiagnosisPanel.module.css}`
+- `src/features/recommendations/{RecommendationCard.tsx,RecommendationCard.module.css,RecommendationList.tsx,RecommendationList.module.css}`
+- `src/features/comparison/{ComparisonTray.tsx,ComparisonTray.module.css,ComparisonDialog.tsx,ComparisonDialog.module.css}`
+- `src/features/roadmap/{RoadmapTimeline.tsx,RoadmapTimeline.module.css}`
+- `src/features/progress/{ProgressPanel.tsx,Progress.module.css}`
+- `src/features/journey/{JourneyExperience.tsx,JourneyExperience.module.css}`
+
+BEHAVIORAL CHANGES:
+- Presentation only. No domain module, no recommendation rule and no roadmap rule was touched; `src/domain` and `src/data` are byte-identical to the previous task.
+- The journey content wrapper is keyed by the current step so each step replays its entrance animation on navigation.
+
+ARCHITECTURE / DECISIONS:
+- `Reveal` toggles classes on the DOM node inside its effect rather than through React state. The first implementation used `useState` and tripped `react-hooks/set-state-in-effect`; the DOM approach is what that rule recommends and it also keeps content visible when JavaScript never runs, since the hidden class is only applied once the observer is armed.
+- No animation library was added; everything is CSS keyframes plus one IntersectionObserver and one requestAnimationFrame loop.
+
+DEPENDENCIES / CONFIG:
+- No package change.
+
+VERIFICATION:
+- `npm run typecheck` → exit 0.
+- `npm run lint` → exit 0 (after fixing the `set-state-in-effect` error described above).
+- `npm run build` → exit 0; `/` and `/_not-found` static, `/journey` dynamic.
+- `git diff --check` → exit 0.
+- Grep for the old light palette hex values, `rgb(255 253 247`, `rgb(243 241 233`, `Georgia` and the removed `--accent-dark` token across `src/**/*.css` → no matches, so no light-theme surface survives.
+- Script comparing every `styles.X` reference in TSX against the classes defined in its CSS Module → no orphaned references after the button consolidation.
+- WCAG contrast computed for eleven foreground/background pairs of the new palette: all pass AA, nine of eleven pass AAA, lowest is muted text on a raised card at 5.22:1.
+- Server-rendered markup checked with curl: landing emits the aurora layer, 12 staggered entrance elements, the stats strip and three preset cards; the recommendations step emits six score dials; the roadmap step emits three phase-progress variables and eleven checkboxes; the dev log reports no errors.
+
+NOT VERIFIED:
+- No visual confirmation in a real browser: the Chrome extension is still not connected in this session, so the animations, hover states and the dark palette were verified through stylesheets, computed contrast and rendered markup, never by looking at the page.
+- Mobile rendering again reviewed through the stylesheets rather than measured at 360px.
+
+LIMITATIONS:
+- `prefers-reduced-motion` is honoured by a global override plus per-component rules; that path was not exercised with the media feature actually enabled.
+- The pointer-tracking button highlight is a hover affordance and does nothing on touch devices, where the button still reads correctly but shows only its gradient.
+
+FOLLOW_UP:
+- View the running app and adjust motion intensity; the entrance timings are deliberately conservative and can be pushed further.
+- Consider a light-theme token set behind `prefers-color-scheme` if a judge views the demo in a bright room.

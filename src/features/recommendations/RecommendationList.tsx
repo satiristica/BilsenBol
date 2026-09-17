@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionButton } from "@/components/ActionButton";
 import { DEMO_DATA_NOTICE } from "@/data/programs";
 import type { RecommendationResult } from "@/domain/matching";
 import {
@@ -100,21 +101,18 @@ function EmptyState({
       </ul>
       <div className={styles.emptyActions}>
         {suggestion ? (
-          <button
-            className={styles.emptyAction}
+          <ActionButton
+            block
             onClick={() => onProfileChange(suggestion.nextProfile)}
-            type="button"
+            variant="warm"
+            withArrow
           >
             {suggestion.label}
-          </button>
+          </ActionButton>
         ) : null}
-        <button
-          className={`${styles.emptyAction} ${styles.emptySecondary}`}
-          onClick={onEditFullProfile}
-          type="button"
-        >
+        <ActionButton block onClick={onEditFullProfile} variant="ghost">
           Вернуться к профилю
-        </button>
+        </ActionButton>
       </div>
     </div>
   );
@@ -150,13 +148,14 @@ export function RecommendationList({
         <span>{DEMO_DATA_NOTICE}</span>
       </p>
       <div className={styles.grid}>
-        {result.matches.slice(0, 6).map((match) => (
+        {result.matches.slice(0, 6).map((match, index) => (
           <RecommendationCard
             canSelectForComparison={canSelectMore}
             isSelectedForComparison={comparedProgramIds.includes(match.program.id)}
             key={match.program.id}
             match={match}
             onToggleComparison={onToggleComparison}
+            revealDelay={index * 80}
           />
         ))}
       </div>

@@ -1,44 +1,64 @@
 .timeline {
   display: grid;
   gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: phase;
 }
 
 .phase {
   position: relative;
   display: grid;
-  gap: 12px;
+  gap: 14px;
+  align-content: start;
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 22px;
   background: var(--surface);
-  padding: 18px 18px 18px 26px;
+  padding: 20px 20px 20px 28px;
+  transition:
+    border-color 300ms var(--ease-out),
+    background-color 300ms var(--ease-out);
+  animation: rise 600ms var(--ease-out) backwards;
+  animation-delay: var(--delay, 0ms);
 }
 
+/* Vertical rail that fills as the phase is completed. */
 .phase::before {
   position: absolute;
-  top: 18px;
-  bottom: 18px;
-  left: 12px;
+  top: 20px;
+  bottom: 20px;
+  left: 13px;
   width: 3px;
   border-radius: 999px;
-  background: var(--accent-soft);
+  background: rgb(233 247 239 / 10%);
   content: "";
 }
 
+.phase::after {
+  position: absolute;
+  top: 20px;
+  left: 13px;
+  width: 3px;
+  height: calc((100% - 40px) * var(--phase-progress, 0));
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--accent-bright), var(--accent-deep));
+  content: "";
+  transition: height 620ms var(--ease-out);
+}
+
 .phaseActive {
-  border-color: var(--accent);
+  border-color: var(--accent-line);
+  background: var(--surface-raised);
 }
 
-.phaseActive::before {
-  background: var(--accent);
-}
-
-.phaseDone::before {
-  background: #9cc7b4;
+.phaseDone::after {
+  background: linear-gradient(180deg, var(--accent), var(--accent-deep));
 }
 
 .phaseHeader {
   display: grid;
-  gap: 6px;
+  gap: 7px;
 }
 
 .phaseMeta {
@@ -49,28 +69,28 @@
 }
 
 .period {
+  border: 1px solid var(--accent-line);
   border-radius: 999px;
   background: var(--accent-soft);
-  color: var(--accent-dark);
-  font-size: 0.7rem;
+  color: var(--accent-bright);
+  font-size: 0.68rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
-  padding: 6px 10px;
+  letter-spacing: 0.1em;
+  padding: 6px 11px;
   text-transform: uppercase;
 }
 
 .phaseCount {
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 700;
 }
 
 .phaseTitle {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.3rem, 4.5vw, 1.7rem);
-  font-weight: 500;
-  letter-spacing: -0.03em;
+  font-size: clamp(1.3rem, 4.2vw, 1.6rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
   line-height: 1.1;
 }
 
@@ -78,7 +98,7 @@
   margin: 0;
   color: var(--muted);
   font-size: 0.88rem;
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
 .steps {
@@ -94,30 +114,35 @@
 }
 
 .stepLabel {
+  position: relative;
   display: grid;
   grid-template-columns: 24px 1fr;
-  gap: 10px;
+  gap: 11px;
   align-items: start;
-  min-height: 44px;
+  min-height: 46px;
   border: 1px solid var(--line);
-  border-radius: 14px;
-  background: rgb(243 241 233 / 45%);
+  border-radius: 15px;
+  background: var(--surface-raised);
   cursor: pointer;
-  padding: 12px;
-  transition: border-color 140ms ease;
+  padding: 13px;
+  transition:
+    border-color 240ms var(--ease-out),
+    background-color 240ms var(--ease-out),
+    transform 300ms var(--ease-spring);
 }
 
 .stepLabel:hover {
-  border-color: rgb(13 107 77 / 40%);
+  border-color: var(--accent-line);
+  transform: translateX(3px);
 }
 
 .stepLabel:has(input:focus-visible) {
-  outline: 3px solid #f0a96b;
+  outline: 2px solid var(--warn);
   outline-offset: 2px;
 }
 
 .stepLabel:has(input:checked) {
-  border-color: rgb(13 107 77 / 30%);
+  border-color: transparent;
   background: var(--accent-soft);
 }
 
@@ -131,41 +156,48 @@
 
 .stepBody {
   display: grid;
-  gap: 3px;
+  gap: 4px;
+  min-width: 0;
 }
 
 .stepTitle {
   font-size: 0.93rem;
   font-weight: 650;
-  line-height: 1.35;
+  line-height: 1.4;
+  transition: color 240ms var(--ease-out);
 }
 
 .stepLabel:has(input:checked) .stepTitle {
-  color: var(--accent-dark);
+  color: var(--muted);
   text-decoration: line-through;
 }
 
 .stepDetail {
   color: var(--muted);
   font-size: 0.82rem;
-  line-height: 1.5;
+  line-height: 1.55;
+}
+
+.stepLabel:has(input:checked) .stepDetail {
+  opacity: 0.6;
 }
 
 .nextMark {
   display: inline-block;
   margin-left: 8px;
   border-radius: 999px;
-  background: #f0a96b;
-  color: #40220a;
-  font-size: 0.66rem;
+  background: var(--warn);
+  color: #33210a;
+  font-size: 0.62rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   padding: 3px 8px;
   text-transform: uppercase;
   vertical-align: middle;
+  animation: pulse-dot 2.6s ease-out infinite;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 980px) {
   .timeline {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: start;
@@ -173,7 +205,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stepLabel {
-    transition: none;
+  .stepLabel:hover {
+    transform: none;
   }
 }

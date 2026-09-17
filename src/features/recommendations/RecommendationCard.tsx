@@ -1,8 +1,10 @@
 "use client";
 
+import { ActionButton } from "@/components/ActionButton";
 import { DEMO_DATA_BADGE } from "@/data/programs";
 import { formatTuition, type ProgramMatch } from "@/domain/matching";
 import { classNames } from "@/lib/classNames";
+import { useCountUp } from "@/lib/useCountUp";
 
 import styles from "./RecommendationCard.module.css";
 
@@ -11,6 +13,8 @@ interface RecommendationCardProps {
   isSelectedForComparison: boolean;
   canSelectForComparison: boolean;
   onToggleComparison: (programId: string) => void;
+  /** Stagger for the entrance animation, in milliseconds. */
+  revealDelay?: number;
 }
 
 export function RecommendationCard({
@@ -18,13 +22,22 @@ export function RecommendationCard({
   isSelectedForComparison,
   canSelectForComparison,
   onToggleComparison,
+  revealDelay = 0,
 }: RecommendationCardProps) {
   const { program } = match;
   const compareDisabled = !isSelectedForComparison && !canSelectForComparison;
+  const animatedScore = useCountUp(match.score);
+  const strongestFactor = Math.max(...match.factors.map((factor) => factor.delta));
 
   return (
     <article
       className={classNames(styles.card, isSelectedForComparison && styles.cardSelected)}
+      style={
+        {
+          "--delay": `${revealDelay}ms`,
+          "--score": animatedScore,
+        } as React.CSSProperties
+      }
     >
       <header className={styles.header}>
         <div className={styles.headings}>
@@ -35,8 +48,10 @@ export function RecommendationCard({
           </span>
         </div>
         <p className={styles.score}>
-          <span className={styles.scoreValue}>{match.score}</span>
-          <span className={styles.scoreLabel}>совпадение</span>
+          <span className={styles.scoreInner}>
+            <span className={styles.scoreValue}>{animatedScore}</span>
+            <span className={styles.scoreLabel}>совпад.</span>
+          </span>
         </p>
       </header>
 
@@ -96,6 +111,12 @@ export function RecommendationCard({
                 <li className={styles.factor} key={factor.label}>
                   <span className={styles.factorLabel}>{factor.label}</span>
                   <span className={styles.factorDelta}>+{factor.delta}</span>
+                  <span aria-hidden="true" className={styles.factorTrack}>
+                    <span
+                      className={styles.factorFill}
+                      style={{ width: `${(factor.delta / strongestFactor) * 100}%` }}
+                    />
+                  </span>
                 </li>
               ))}
             </ul>
@@ -119,19 +140,20 @@ export function RecommendationCard({
       </dl>
 
       <div className={styles.actions}>
-        <button
+        <ActionButton
           aria-pressed={isSelectedForComparison}
-          className={classNames(styles.compare, isSelectedForComparison && styles.compareActive)}
+          block
+          compact
           disabled={compareDisabled}
           onClick={() => onToggleComparison(program.id)}
-          type="button"
+          variant={isSelectedForComparison ? "primary" : "ghost"}
         >
           {isSelectedForComparison
             ? "Убрать из сравнения"
             : compareDisabled
-              ? "Уже выбрано две программы"
+              ? "Уже выбрано две"
               : "Сравнить"}
-        </button>
+        </ActionButton>
       </div>
     </article>
   );

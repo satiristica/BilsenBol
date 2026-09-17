@@ -1,10 +1,14 @@
 .bar {
+  position: relative;
   display: grid;
-  gap: 14px;
-  border: 1px solid rgb(13 107 77 / 22%);
-  border-radius: 20px;
-  background: rgb(220 235 227 / 55%);
-  padding: 16px;
+  gap: 16px;
+  overflow: hidden;
+  border: 1px solid var(--accent-line);
+  border-radius: 22px;
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgb(62 224 138 / 10%), transparent 60%),
+    var(--surface);
+  padding: 18px;
 }
 
 .header {
@@ -16,33 +20,46 @@
 }
 
 .title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.title::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  content: "";
+  animation: pulse-dot 2.6s ease-out infinite;
 }
 
 .hint {
   margin: 0;
-  color: var(--accent-dark);
+  color: var(--muted);
   font-size: 0.8rem;
   line-height: 1.5;
 }
 
 .rows {
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 .row {
   display: grid;
-  gap: 6px;
+  gap: 7px;
 }
 
 .rowLabel {
   color: var(--muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -53,31 +70,40 @@
 }
 
 .chip {
-  min-height: 40px;
+  position: relative;
+  min-height: 42px;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: var(--surface);
-  color: var(--ink);
+  background: var(--surface-raised);
+  color: var(--ink-dim);
   cursor: pointer;
   font-family: inherit;
   font-size: 0.82rem;
   font-weight: 650;
-  padding: 9px 14px;
-  transition: border-color 140ms ease;
+  padding: 10px 15px;
+  transition:
+    border-color 240ms var(--ease-out),
+    background-color 240ms var(--ease-out),
+    color 240ms var(--ease-out),
+    transform 300ms var(--ease-spring);
 }
 
 .chip:hover {
-  border-color: rgb(13 107 77 / 45%);
+  border-color: var(--accent-line);
+  color: var(--ink);
+  transform: translateY(-2px);
 }
 
 .chip[aria-pressed="true"] {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: white;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--accent-bright), var(--accent-deep));
+  color: var(--bg-deep);
+  font-weight: 750;
 }
 
 .chip:focus-visible {
-  outline: 3px solid #f0a96b;
+  outline: 2px solid var(--warn);
   outline-offset: 2px;
 }
 
@@ -89,38 +115,49 @@
 
 .stepper {
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   place-items: center;
   border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface);
+  border-radius: 13px;
+  background: var(--surface-raised);
   color: var(--ink);
   cursor: pointer;
   font-family: inherit;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 700;
+  transition:
+    border-color 220ms var(--ease-out),
+    transform 280ms var(--ease-spring);
 }
 
 .stepper:hover:not(:disabled) {
-  border-color: rgb(13 107 77 / 45%);
+  border-color: var(--accent);
+  transform: scale(1.08);
+}
+
+.stepper:active:not(:disabled) {
+  transform: scale(0.94);
 }
 
 .stepper:disabled {
-  color: #a8b5ae;
+  color: var(--muted);
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .stepper:focus-visible {
-  outline: 3px solid #f0a96b;
+  outline: 2px solid var(--warn);
   outline-offset: 2px;
 }
 
 .gpaValue {
-  min-width: 56px;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.5rem;
-  font-weight: 500;
+  min-width: 62px;
+  background: linear-gradient(120deg, var(--accent-bright), var(--accent));
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 1.6rem;
+  font-weight: 800;
   letter-spacing: -0.03em;
   text-align: center;
 }
@@ -129,27 +166,39 @@
   justify-self: start;
   border: 0;
   background: none;
-  color: var(--accent-dark);
+  color: var(--accent);
   cursor: pointer;
   font-family: inherit;
   font-size: 0.85rem;
   font-weight: 700;
   padding: 8px 0;
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-underline-offset: 4px;
+  transition: color 200ms var(--ease-out);
+}
+
+.editLink:hover {
+  color: var(--accent-bright);
 }
 
 .editLink:focus-visible {
-  outline: 3px solid #f0a96b;
+  outline: 2px solid var(--warn);
   outline-offset: 2px;
 }
 
 @media (min-width: 900px) {
   .bar {
-    padding: 20px;
+    padding: 22px;
   }
 
   .rows {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chip:hover,
+  .stepper:hover:not(:disabled) {
+    transform: none;
   }
 }

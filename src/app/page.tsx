@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+import { ActionLink } from "@/components/ActionButton";
+import { Reveal } from "@/components/Reveal";
+import { DEMO_PROGRAMS } from "@/data/programs";
 import { PROFILE_PRESETS } from "@/domain/profile";
 
 const journeySteps = [
@@ -23,42 +26,77 @@ const journeySteps = [
   },
 ] as const;
 
+const heroStats = [
+  { value: `${DEMO_PROGRAMS.length}`, label: "программ в каталоге" },
+  { value: "4", label: "шага до плана" },
+  { value: "0", label: "выдуманных вероятностей" },
+] as const;
+
 export default function HomePage() {
   return (
     <main>
+      <div aria-hidden="true" className="aurora">
+        <span />
+        <span />
+        <span />
+      </div>
+
       <header className="site-header">
-        <a className="brand" href="#top" aria-label="Главная BilsenBol">
+        <Link className="brand" href="/" aria-label="Главная BilsenBol">
           <span className="brand-mark" aria-hidden="true">
             B
           </span>
           <span>BilsenBol</span>
-        </a>
+        </Link>
         <span className="status-pill">Первая версия</span>
       </header>
 
       <section className="hero" id="top">
         <div className="hero-copy">
-          <p className="eyebrow">Понятный путь в университет</p>
-          <h1>Поймите, куда поступать. Знайте, что делать дальше.</h1>
-          <p className="hero-description">
+          <p className="eyebrow rise-in">Понятный путь в университет</p>
+          <h1 className="rise-in" style={{ "--delay": "90ms" } as React.CSSProperties}>
+            Поймите, куда поступать.{" "}
+            <span className="accent-word">Знайте, что дальше.</span>
+          </h1>
+          <p
+            className="hero-description rise-in"
+            style={{ "--delay": "180ms" } as React.CSSProperties}
+          >
             BilsenBol помогает школьникам 9–11 классов и выпускникам из стран СНГ
             превратить свой профиль и цели в понятные рекомендации, сравнение программ
             и персональную дорожную карту поступления.
           </p>
-          <div className="hero-actions">
-            <Link className="primary-action" href="/journey">
+          <div
+            className="hero-actions rise-in"
+            style={{ "--delay": "260ms" } as React.CSSProperties}
+          >
+            <ActionLink href="/journey" withArrow>
               Построить мой маршрут
-              <span aria-hidden="true">→</span>
-            </Link>
-            <a className="secondary-action" href="#journey">
+            </ActionLink>
+            <ActionLink href="#journey" variant="ghost">
               Как это работает
-            </a>
+            </ActionLink>
           </div>
+          <ul
+            className="hero-stats rise-in"
+            style={{ "--delay": "340ms" } as React.CSSProperties}
+          >
+            {heroStats.map((stat) => (
+              <li key={stat.label}>
+                <span className="hero-stat-value">{stat.value}</span>
+                <span className="hero-stat-label">{stat.label}</span>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <aside className="preview-card" aria-labelledby="presets-title">
-          <div className="preview-header">
-            <span id="presets-title">Быстрый старт</span>
+        <aside
+          className="preset-panel rise-in"
+          aria-labelledby="presets-title"
+          style={{ "--delay": "320ms" } as React.CSSProperties}
+        >
+          <div className="preset-header">
+            <strong id="presets-title">Быстрый старт</strong>
             <span>1 клик</span>
           </div>
           <p className="preset-lead">
@@ -87,24 +125,26 @@ export default function HomePage() {
       </section>
 
       <section className="journey" id="journey" aria-labelledby="journey-title">
-        <div className="section-heading">
+        <Reveal className="section-heading">
           <p className="eyebrow">Единый маршрут</p>
           <h2 id="journey-title">От сомнений — к понятному плану</h2>
-        </div>
+        </Reveal>
         <div className="journey-grid">
-          {journeySteps.map((step) => (
-            <article className="journey-card" key={step.number}>
-              <span>{step.number}</span>
-              <h3>{step.title}</h3>
-              <p>{step.description}</p>
-            </article>
+          {journeySteps.map((step, index) => (
+            <Reveal delay={index * 110} key={step.number}>
+              <article className="journey-card">
+                <span className="journey-number">{step.number}</span>
+                <h3>{step.title}</h3>
+                <p>{step.description}</p>
+              </article>
+            </Reveal>
           ))}
         </div>
       </section>
 
-      <footer>
-        <span>BilsenBol</span>
-        <span>Демо-данные каталога программ</span>
+      <footer className="site-footer">
+        <strong>BilsenBol</strong>
+        <span className="footer-note">Демо-данные каталога программ</span>
       </footer>
     </main>
   );

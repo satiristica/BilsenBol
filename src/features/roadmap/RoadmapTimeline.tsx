@@ -20,7 +20,7 @@ export function RoadmapTimeline({
 }: RoadmapTimelineProps) {
   return (
     <ol className={styles.timeline}>
-      {phases.map((phase) => {
+      {phases.map((phase, index) => {
         const doneCount = phase.steps.filter((step) => completedStepIds.has(step.id)).length;
         const isComplete = doneCount === phase.steps.length;
         const holdsNextStep = phase.steps.some((step) => step.id === nextStepId);
@@ -33,6 +33,14 @@ export function RoadmapTimeline({
               isComplete && styles.phaseDone,
             )}
             key={phase.season}
+            style={
+              {
+                "--delay": `${index * 110}ms`,
+                "--phase-progress": phase.steps.length
+                  ? doneCount / phase.steps.length
+                  : 0,
+              } as React.CSSProperties
+            }
           >
             <div className={styles.phaseHeader}>
               <div className={styles.phaseMeta}>

@@ -1,20 +1,55 @@
 .card {
+  position: relative;
   display: grid;
-  gap: 14px;
+  height: 100%;
+  gap: 15px;
   align-content: start;
+  overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 22px;
   background: var(--surface);
-  box-shadow: 0 18px 44px rgb(28 52 43 / 7%);
-  padding: 18px;
+  box-shadow: var(--shadow-card);
+  padding: 20px;
   transition:
-    border-color 160ms ease,
-    transform 160ms ease;
+    border-color 300ms var(--ease-out),
+    background-color 300ms var(--ease-out),
+    box-shadow 300ms var(--ease-out),
+    transform 420ms var(--ease-spring);
+  animation: rise 620ms var(--ease-out) backwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+.card::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  content: "";
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 520ms var(--ease-out);
+}
+
+.card:hover {
+  border-color: var(--accent-line);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-lift);
+  transform: translateY(-4px);
+}
+
+.card:hover::before {
+  transform: scaleX(1);
 }
 
 .cardSelected {
   border-color: var(--accent);
-  box-shadow: 0 18px 44px rgb(13 107 77 / 18%);
+  box-shadow: var(--glow);
+}
+
+.cardSelected::before {
+  transform: scaleX(1);
 }
 
 .header {
@@ -26,55 +61,80 @@
 
 .headings {
   display: grid;
-  gap: 4px;
+  gap: 5px;
+  min-width: 0;
 }
 
 .university {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
   text-transform: uppercase;
 }
 
 .programName {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.3rem, 4.5vw, 1.6rem);
-  font-weight: 500;
-  letter-spacing: -0.03em;
+  font-size: clamp(1.25rem, 4.2vw, 1.5rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
   line-height: 1.15;
 }
 
 .place {
-  color: var(--muted);
+  color: var(--ink-dim);
   font-size: 0.85rem;
 }
 
+/* Score dial: conic ring filled to the match percentage. */
 .score {
+  position: relative;
   display: grid;
-  min-width: 68px;
+  width: 74px;
+  height: 74px;
+  flex: none;
+  place-items: center;
+  margin: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--accent) calc(var(--score) * 1%),
+    rgb(233 247 239 / 9%) 0
+  );
+}
+
+.score::before {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: var(--surface);
+  content: "";
+}
+
+.card:hover .score::before {
+  background: var(--surface-raised);
+}
+
+.scoreInner {
+  position: relative;
+  display: grid;
   justify-items: center;
-  gap: 2px;
-  border-radius: 16px;
-  background: var(--accent-soft);
-  color: var(--accent-dark);
-  padding: 10px 8px;
+  gap: 1px;
 }
 
 .scoreValue {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.5rem;
-  font-weight: 500;
-  letter-spacing: -0.03em;
+  color: var(--accent-bright);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
   line-height: 1;
 }
 
 .scoreLabel {
-  font-size: 0.62rem;
+  color: var(--muted);
+  font-size: 0.54rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  text-align: center;
   text-transform: uppercase;
 }
 
@@ -87,33 +147,34 @@
 .badge {
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgb(243 241 233 / 70%);
-  color: var(--ink);
-  font-size: 0.74rem;
+  background: var(--surface-raised);
+  color: var(--ink-dim);
+  font-size: 0.73rem;
   font-weight: 700;
-  padding: 6px 10px;
+  padding: 6px 11px;
 }
 
 .badgeMatch {
-  border-color: rgb(13 107 77 / 30%);
+  border-color: var(--accent-line);
   background: var(--accent-soft);
-  color: var(--accent-dark);
+  color: var(--accent-bright);
 }
 
 .badgeGrant {
-  border-color: rgb(217 139 74 / 45%);
-  background: #fbeedd;
-  color: #8a4b18;
+  border-color: var(--warn-line);
+  background: var(--warn-soft);
+  color: var(--warn-ink);
 }
 
 .badgeDemo {
   border-style: dashed;
+  background: none;
   color: var(--muted);
 }
 
 .reasons {
   display: grid;
-  gap: 6px;
+  gap: 7px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -121,9 +182,9 @@
 
 .reason {
   display: grid;
-  grid-template-columns: 16px 1fr;
-  gap: 8px;
-  color: var(--muted);
+  grid-template-columns: 18px 1fr;
+  gap: 9px;
+  color: var(--ink-dim);
   font-size: 0.88rem;
   line-height: 1.55;
 }
@@ -136,28 +197,34 @@
 .blocker {
   display: grid;
   grid-template-columns: 18px 1fr;
-  gap: 8px;
-  border-radius: 12px;
-  background: #fbeedd;
-  color: #8a4b18;
+  gap: 9px;
+  margin: 0;
+  border: 1px solid var(--warn-line);
+  border-radius: 13px;
+  background: var(--warn-soft);
+  color: var(--warn-ink);
   font-size: 0.85rem;
   font-weight: 600;
   line-height: 1.5;
-  padding: 10px 12px;
+  padding: 11px 13px;
 }
 
 .details {
   border-top: 1px solid var(--line);
-  padding-top: 12px;
+  padding-top: 13px;
 }
 
 .summary {
-  color: var(--accent-dark);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--accent);
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 700;
   list-style: none;
   padding: 4px 0;
+  transition: color 200ms var(--ease-out);
 }
 
 .summary::-webkit-details-marker {
@@ -165,57 +232,64 @@
 }
 
 .summary::after {
-  content: " ›";
+  content: "▾";
+  font-size: 0.7rem;
+  transition: transform 300ms var(--ease-out);
 }
 
 .details[open] .summary::after {
-  content: " ⌄";
+  transform: rotate(180deg);
+}
+
+.summary:hover {
+  color: var(--accent-bright);
 }
 
 .summary:focus-visible {
-  outline: 3px solid #f0a96b;
+  outline: 2px solid var(--warn);
   outline-offset: 3px;
 }
 
 .detailsBody {
   display: grid;
-  gap: 12px;
-  padding-top: 12px;
+  gap: 14px;
+  padding-top: 14px;
+  animation: rise 380ms var(--ease-out);
 }
 
 .detailBlock {
   display: grid;
-  gap: 4px;
+  gap: 5px;
 }
 
 .detailLabel {
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
 }
 
 .detailText {
   margin: 0;
+  color: var(--ink-dim);
   font-size: 0.88rem;
   line-height: 1.55;
 }
 
 .factors {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .factor {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 0.82rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 10px;
+  font-size: 0.8rem;
 }
 
 .factorLabel {
@@ -223,16 +297,34 @@
 }
 
 .factorDelta {
-  color: var(--accent-dark);
+  color: var(--accent);
   font-weight: 700;
   white-space: nowrap;
 }
 
+/* Proportional bar under each scoring factor. */
+.factorTrack {
+  grid-column: 1 / -1;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(233 247 239 / 8%);
+}
+
+.factorFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 520ms var(--ease-out);
+}
+
 .facts {
   display: grid;
-  gap: 8px;
+  gap: 9px;
+  margin: 0;
   border-top: 1px solid var(--line);
-  padding-top: 14px;
+  padding-top: 15px;
 }
 
 .fact {
@@ -248,6 +340,7 @@
 }
 
 .factValue {
+  margin: 0;
   font-weight: 700;
   text-align: right;
 }
@@ -257,44 +350,6 @@
   gap: 8px;
 }
 
-.compare {
-  min-height: 46px;
-  border: 1px solid var(--accent);
-  border-radius: 12px;
-  background: var(--surface);
-  color: var(--accent-dark);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.92rem;
-  font-weight: 700;
-  padding: 12px 16px;
-  transition: background-color 140ms ease;
-}
-
-.compare:hover:not(:disabled) {
-  background: var(--accent-soft);
-}
-
-.compareActive {
-  background: var(--accent);
-  color: white;
-}
-
-.compareActive:hover:not(:disabled) {
-  background: var(--accent-dark);
-}
-
-.compare:disabled {
-  border-color: var(--line);
-  color: #a8b5ae;
-  cursor: not-allowed;
-}
-
-.compare:focus-visible {
-  outline: 3px solid #f0a96b;
-  outline-offset: 3px;
-}
-
 @media (min-width: 720px) {
   .card {
     padding: 24px;
@@ -302,7 +357,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card {
-    transition: none;
+  .card:hover {
+    transform: none;
   }
 }

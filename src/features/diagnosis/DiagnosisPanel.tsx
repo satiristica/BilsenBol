@@ -26,10 +26,11 @@ export function DiagnosisPanel({ diagnosis }: DiagnosisPanelProps) {
       </article>
 
       <div className={styles.insights}>
-        {diagnosis.insights.map((insight) => (
+        {diagnosis.insights.map((insight, index) => (
           <article
             className={classNames(styles.insight, INSIGHT_STYLES[insight.kind])}
             key={insight.kind}
+            style={{ "--delay": `${index * 90}ms` } as React.CSSProperties}
           >
             <span className={styles.insightLabel}>{insight.label}</span>
             <h3 className={styles.insightTitle}>{insight.title}</h3>

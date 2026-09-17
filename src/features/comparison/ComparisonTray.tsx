@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionButton } from "@/components/ActionButton";
 import type { ProgramMatch } from "@/domain/matching";
 
 import styles from "./ComparisonTray.module.css";
@@ -28,12 +29,12 @@ export function ComparisonTray({ selected, onOpen, onClear }: ComparisonTrayProp
         </p>
       </div>
       <div className={styles.actions}>
-        <button className={styles.open} disabled={!isReady} onClick={onOpen} type="button">
+        <ActionButton compact disabled={!isReady} onClick={onOpen} withArrow>
           Сравнить
-        </button>
-        <button className={styles.clear} onClick={onClear} type="button">
+        </ActionButton>
+        <ActionButton compact onClick={onClear} variant="ghost">
           Сбросить
-        </button>
+        </ActionButton>
       </div>
     </aside>
   );

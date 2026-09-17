@@ -5,30 +5,47 @@
   bottom: 12px;
   left: 12px;
   display: grid;
-  gap: 10px;
-  border: 1px solid rgb(13 107 77 / 30%);
-  border-radius: 18px;
-  background: rgb(255 253 247 / 97%);
-  box-shadow: 0 20px 50px rgb(28 52 43 / 22%);
-  padding: 14px;
+  gap: 12px;
+  border: 1px solid var(--accent-line);
+  border-radius: 20px;
+  background: rgb(12 33 25 / 96%);
+  box-shadow: var(--shadow-lift);
+  padding: 15px;
+  backdrop-filter: blur(14px);
+  animation: rise 420ms var(--ease-spring);
 }
 
 .summary {
   display: grid;
   gap: 4px;
+  min-width: 0;
 }
 
 .title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 700;
+}
+
+.title::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  content: "";
+  animation: pulse-dot 2.4s ease-out infinite;
 }
 
 .names {
   margin: 0;
+  overflow: hidden;
   color: var(--muted);
   font-size: 0.82rem;
   line-height: 1.5;
+  text-overflow: ellipsis;
 }
 
 .actions {
@@ -36,59 +53,24 @@
   gap: 8px;
 }
 
-.open,
-.clear {
-  min-height: 46px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 700;
-  padding: 12px 16px;
-}
-
-.open {
+.actions > * {
   flex: 1;
-  border: 0;
-  background: var(--accent);
-  color: white;
-}
-
-.open:hover:not(:disabled) {
-  background: var(--accent-dark);
-}
-
-.open:disabled {
-  background: #9fb3aa;
-  cursor: not-allowed;
-}
-
-.clear {
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--muted);
-}
-
-.clear:hover {
-  border-color: rgb(13 107 77 / 45%);
-  color: var(--ink);
-}
-
-.open:focus-visible,
-.clear:focus-visible {
-  outline: 3px solid #f0a96b;
-  outline-offset: 3px;
 }
 
 @media (min-width: 720px) {
   .tray {
     right: auto;
+    bottom: 22px;
     left: 50%;
-    width: min(680px, calc(100% - 40px));
+    width: min(700px, calc(100% - 40px));
     grid-template-columns: 1fr auto;
     align-items: center;
-    bottom: 20px;
-    padding: 14px 18px;
+    padding: 15px 20px;
     transform: translateX(-50%);
+    animation: fade 420ms var(--ease-out);
+  }
+
+  .actions > * {
+    flex: 0 0 auto;
   }
 }

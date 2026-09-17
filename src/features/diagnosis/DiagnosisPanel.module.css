@@ -1,16 +1,34 @@
 .panel {
   display: grid;
-  gap: 18px;
+  gap: 16px;
 }
 
 .statusCard {
+  position: relative;
   display: grid;
-  gap: 12px;
-  border: 1px solid rgb(13 107 77 / 24%);
-  border-radius: 22px;
-  background: linear-gradient(140deg, var(--accent-dark), var(--accent));
-  color: white;
-  padding: 22px;
+  gap: 14px;
+  overflow: hidden;
+  border: 1px solid var(--accent-line);
+  border-radius: 24px;
+  background:
+    radial-gradient(130% 160% at 85% 0%, rgb(62 224 138 / 22%), transparent 58%),
+    linear-gradient(150deg, var(--surface-raised), var(--surface));
+  box-shadow: var(--shadow-card);
+  padding: 24px;
+  animation: rise 620ms var(--ease-out) backwards;
+}
+
+/* Slow sweep of light across the status card. */
+.statusCard::after {
+  position: absolute;
+  top: -60%;
+  bottom: -60%;
+  left: 0;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, rgb(124 245 180 / 9%), transparent);
+  content: "";
+  pointer-events: none;
+  animation: sheen 5.5s var(--ease-out) infinite;
 }
 
 .statusMeta {
@@ -18,10 +36,11 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  color: rgb(255 255 255 / 80%);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -29,24 +48,28 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #f0a96b;
+  background: var(--accent);
+  animation: pulse-dot 2.4s ease-out infinite;
 }
 
 .statusLabel {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.75rem, 6vw, 2.6rem);
-  font-weight: 500;
-  letter-spacing: -0.04em;
-  line-height: 1.05;
+  max-width: 18ch;
+  background: linear-gradient(115deg, var(--ink), var(--accent-bright));
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: clamp(1.9rem, 6.5vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
 }
 
 .statusDetail {
   margin: 0;
-  color: rgb(255 255 255 / 88%);
-  font-size: 0.95rem;
-  line-height: 1.6;
   max-width: 62ch;
+  color: var(--ink-dim);
+  font-size: 0.96rem;
+  line-height: 1.65;
 }
 
 .insights {
@@ -55,36 +78,63 @@
 }
 
 .insight {
+  position: relative;
   display: grid;
-  gap: 8px;
+  gap: 9px;
+  overflow: hidden;
   border: 1px solid var(--line);
-  border-left: 4px solid var(--accent);
-  border-radius: 18px;
+  border-radius: 20px;
   background: var(--surface);
-  padding: 18px;
+  padding: 20px;
+  transition:
+    border-color 300ms var(--ease-out),
+    background-color 300ms var(--ease-out),
+    transform 400ms var(--ease-spring);
+  animation: rise 620ms var(--ease-out) backwards;
+  animation-delay: var(--delay, 0ms);
 }
 
-.insightBottleneck {
-  border-left-color: #d98b4a;
+.insight::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: var(--accent);
+  content: "";
 }
 
-.insightRunway {
-  border-left-color: #5b8ea8;
+.insight:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-raised);
+  transform: translateY(-3px);
+}
+
+.insightBottleneck::before {
+  background: var(--warn);
+}
+
+.insightRunway::before {
+  background: #6fb4d8;
 }
 
 .insightLabel {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
+}
+
+.insightBottleneck .insightLabel {
+  color: var(--warn);
 }
 
 .insightTitle {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   line-height: 1.3;
 }
 
@@ -97,10 +147,20 @@
 
 @media (min-width: 760px) {
   .statusCard {
-    padding: 30px;
+    padding: 34px;
   }
 
   .insights {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .insight:hover {
+    transform: none;
+  }
+
+  .statusCard::after {
+    display: none;
   }
 }

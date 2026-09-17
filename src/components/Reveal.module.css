@@ -1,0 +1,25 @@
+/* Scroll-triggered entrance. Hidden state is only applied when JS has armed
+   the observer, so content stays visible if the script never runs. */
+
+.armed {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 760ms var(--ease-out),
+    transform 760ms var(--ease-out);
+  transition-delay: var(--delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .armed {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

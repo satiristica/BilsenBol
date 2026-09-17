@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionButton } from "@/components/ActionButton";
 import { MultiChoice, SingleChoice } from "@/components/ChoiceGroup";
 import {
   BUDGET_OPTIONS,
@@ -124,6 +125,7 @@ export function ProfileForm({ profile, onChange, onSubmit }: ProfileFormProps) {
       <div className={styles.footer}>
         {isIncomplete ? (
           <p className={styles.validation} role="status">
+            <span aria-hidden="true">!</span>
             {missingFields && missingRegions
               ? "Выберите хотя бы одно направление и один регион."
               : missingFields
@@ -131,10 +133,9 @@ export function ProfileForm({ profile, onChange, onSubmit }: ProfileFormProps) {
                 : "Выберите хотя бы один регион."}
           </p>
         ) : null}
-        <button className={styles.submit} disabled={isIncomplete} type="submit">
+        <ActionButton block disabled={isIncomplete} type="submit" withArrow>
           Построить мой маршрут
-          <span aria-hidden="true">→</span>
-        </button>
+        </ActionButton>
       </div>
     </form>
   );

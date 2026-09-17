@@ -1,6 +1,8 @@
 "use client";
 
+import { ActionButton } from "@/components/ActionButton";
 import type { RoadmapProgress } from "@/domain/roadmap";
+import { useCountUp } from "@/lib/useCountUp";
 
 import styles from "./Progress.module.css";
 
@@ -9,11 +11,13 @@ interface ProgressMeterProps {
 }
 
 export function ProgressMeter({ progress }: ProgressMeterProps) {
+  const animatedPercent = useCountUp(progress.percent);
+
   return (
     <section aria-label="Готовность к поступлению" className={styles.meter}>
       <div className={styles.meterHeader}>
         <span className={styles.meterLabel}>Готовность</span>
-        <span className={styles.meterValue}>{progress.percent}%</span>
+        <span className={styles.meterValue}>{animatedPercent}%</span>
       </div>
       <div
         aria-valuemax={100}
@@ -61,9 +65,11 @@ export function NextActionCard({ progress, onComplete }: NextActionCardProps) {
           Этап: {nextPhase.period} — {nextPhase.title}
         </span>
       ) : null}
-      <button className={styles.done} onClick={() => onComplete(nextStep.id)} type="button">
-        Выполнено
-      </button>
+      <div className={styles.nextAction}>
+        <ActionButton onClick={() => onComplete(nextStep.id)} variant="warm">
+          Выполнено
+        </ActionButton>
+      </div>
     </section>
   );
 }

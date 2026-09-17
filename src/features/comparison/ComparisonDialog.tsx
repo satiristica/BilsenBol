@@ -115,7 +115,10 @@ export function ComparisonDialog({ isOpen, pair, onClose }: ComparisonDialogProp
         </div>
 
         <footer className={styles.footer}>
-          <p className={styles.verdict}>{describeVerdict(left, right)}</p>
+          <p className={styles.verdict}>
+            <span aria-hidden="true">✦</span>
+            <span>{describeVerdict(left, right)}</span>
+          </p>
           <p className={styles.demoNote}>{DEMO_DATA_NOTICE}</p>
         </footer>
       </div>

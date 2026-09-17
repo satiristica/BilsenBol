@@ -1,0 +1,161 @@
+/* Shared call-to-action primitive.
+   The pointer-tracking highlight is driven by --mx/--my set in JS. */
+
+.base {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 54px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 15px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  padding: 15px 26px;
+  text-decoration: none;
+  isolation: isolate;
+  transition:
+    transform 320ms var(--ease-spring),
+    box-shadow 320ms var(--ease-out),
+    border-color 260ms var(--ease-out),
+    background-color 260ms var(--ease-out);
+}
+
+/* Highlight that follows the pointer across the button face. */
+.base::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: radial-gradient(
+    150px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(255 255 255 / 26%),
+    transparent 60%
+  );
+  content: "";
+  opacity: 0;
+  transition: opacity 280ms var(--ease-out);
+}
+
+.base:hover::before {
+  opacity: 1;
+}
+
+/* Diagonal sheen that sweeps once per hover. */
+.base::after {
+  position: absolute;
+  z-index: -1;
+  top: -50%;
+  bottom: -50%;
+  left: 0;
+  width: 38%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 30%), transparent);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+}
+
+.base:hover::after {
+  opacity: 1;
+  animation: sheen 780ms var(--ease-out);
+}
+
+.base:active {
+  transform: scale(0.975);
+}
+
+.base:focus-visible {
+  outline: 2px solid var(--warn);
+  outline-offset: 3px;
+}
+
+.base:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+}
+
+.base:disabled::before,
+.base:disabled::after {
+  display: none;
+}
+
+/* Variants ---------------------------------------------------------------- */
+
+.primary {
+  background: linear-gradient(135deg, var(--accent-bright), var(--accent) 45%, var(--accent-deep));
+  box-shadow: 0 12px 30px rgb(62 224 138 / 22%);
+  color: var(--bg-deep);
+}
+
+.primary:hover:not(:disabled) {
+  box-shadow: 0 18px 42px rgb(62 224 138 / 34%);
+  transform: translateY(-2px);
+}
+
+.ghost {
+  border-color: var(--line-strong);
+  background: rgb(18 48 38 / 60%);
+  color: var(--ink);
+}
+
+.ghost:hover:not(:disabled) {
+  border-color: var(--accent-line);
+  background: var(--surface-hover);
+  transform: translateY(-2px);
+}
+
+.warm {
+  background: linear-gradient(135deg, #ffd8a8, var(--warn) 55%, #e0821f);
+  box-shadow: 0 12px 30px rgb(255 180 92 / 22%);
+  color: #33210a;
+}
+
+.warm:hover:not(:disabled) {
+  box-shadow: 0 18px 42px rgb(255 180 92 / 34%);
+  transform: translateY(-2px);
+}
+
+/* Sizes ------------------------------------------------------------------- */
+
+.compact {
+  min-height: 46px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  gap: 10px;
+  padding: 12px 18px;
+}
+
+.block {
+  width: 100%;
+}
+
+/* The arrow slides out, then a second copy slides in behind it. */
+.arrow {
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  place-items: center;
+  overflow: hidden;
+  font-weight: 800;
+}
+
+.arrowGlyph {
+  transition: transform 340ms var(--ease-out);
+}
+
+.base:hover:not(:disabled) .arrowGlyph {
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .base:hover:not(:disabled),
+  .base:active {
+    transform: none;
+  }
+}
