@@ -1,0 +1,409 @@
+.wizard {
+  display: grid;
+  gap: 22px;
+  border: 1px solid var(--line-strong);
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgb(18 48 38 / 62%), rgb(12 33 25 / 90%));
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+}
+
+/* Header ------------------------------------------------------------------ */
+
+.head {
+  display: grid;
+  gap: 12px;
+}
+
+.headTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 650;
+  padding: 8px 10px 8px 0;
+  transition: color 200ms var(--ease-out);
+}
+
+.back:hover:not(:disabled) {
+  color: var(--ink);
+}
+
+.back:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.back:focus-visible {
+  outline: 2px solid var(--warn);
+  outline-offset: 2px;
+}
+
+.counter {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.counter b {
+  color: var(--accent);
+  font-size: 0.95rem;
+}
+
+.track {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(233 247 239 / 9%);
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright));
+  transition: width 560ms var(--ease-out);
+}
+
+/* Question ---------------------------------------------------------------- */
+
+.question {
+  display: grid;
+  gap: 20px;
+  border: 0;
+  margin: 0;
+  min-height: 330px;
+  align-content: start;
+  padding: 0;
+  animation: rise 440ms var(--ease-out);
+}
+
+.legend {
+  display: block;
+  padding: 0;
+}
+
+.title {
+  margin: 0 0 8px;
+  max-width: 20ch;
+  font-size: clamp(1.75rem, 5.6vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.06;
+}
+
+.hint {
+  margin: 0;
+  max-width: 54ch;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.options {
+  display: grid;
+  gap: 10px;
+}
+
+.option {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px 1fr 26px;
+  gap: 14px;
+  align-items: center;
+  min-height: 68px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  cursor: pointer;
+  padding: 15px 18px;
+  transition:
+    border-color 240ms var(--ease-out),
+    background-color 240ms var(--ease-out),
+    transform 320ms var(--ease-spring);
+}
+
+.option:hover {
+  border-color: var(--accent-line);
+  background: var(--surface-hover);
+  transform: translateY(-2px);
+}
+
+.option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.option:has(input:focus-visible) {
+  outline: 2px solid var(--warn);
+  outline-offset: 2px;
+}
+
+.option:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* Keyboard hint, doubles as the option's index. */
+.key {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  transition:
+    border-color 240ms var(--ease-out),
+    color 240ms var(--ease-out);
+}
+
+.option:has(input:checked) .key {
+  border-color: var(--accent);
+  color: var(--accent-bright);
+}
+
+.optionBody {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.optionLabel {
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.optionHint {
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.option:has(input:checked) .optionHint {
+  color: var(--ink-dim);
+}
+
+/* Check indicator: a ring that fills when the option is chosen. */
+.tick {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 2px solid var(--line-strong);
+  border-radius: 50%;
+  color: transparent;
+  font-size: 0.72rem;
+  font-weight: 800;
+  transition:
+    border-color 220ms var(--ease-out),
+    background-color 220ms var(--ease-out),
+    color 220ms var(--ease-out),
+    transform 320ms var(--ease-spring);
+}
+
+.tickSquare {
+  border-radius: 9px;
+}
+
+.option:has(input:checked) .tick {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--bg-deep);
+  transform: scale(1.08);
+}
+
+/* Scale question ---------------------------------------------------------- */
+
+.scale {
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  padding: 26px 20px;
+}
+
+.scaleValue {
+  background: linear-gradient(120deg, var(--accent-bright), var(--accent));
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: clamp(3.4rem, 15vw, 5rem);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  line-height: 0.9;
+}
+
+.slider {
+  width: 100%;
+  height: 32px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.slider:focus-visible {
+  outline: 2px solid var(--warn);
+  outline-offset: 4px;
+}
+
+.scaleMarks {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.scaleNote {
+  margin: 0;
+  color: var(--accent-bright);
+  font-size: 0.86rem;
+  font-weight: 650;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.scaleNoteLow {
+  color: var(--warn-ink);
+}
+
+/* Footer ------------------------------------------------------------------ */
+
+.footer {
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+}
+
+.footerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.selectionNote {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.selectionNoteEmpty {
+  color: var(--warn-ink);
+}
+
+/* Summary rail ------------------------------------------------------------ */
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.summaryChip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  max-width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-dim);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  padding: 8px 14px;
+  transition:
+    border-color 220ms var(--ease-out),
+    background-color 220ms var(--ease-out),
+    transform 300ms var(--ease-spring);
+}
+
+.summaryChip:hover {
+  border-color: var(--accent-line);
+  background: var(--surface-hover);
+  transform: translateY(-2px);
+}
+
+.summaryChip:focus-visible {
+  outline: 2px solid var(--warn);
+  outline-offset: 2px;
+}
+
+.summaryChipCurrent {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.summaryKey {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.summaryValue {
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summaryValueEmpty {
+  color: var(--warn);
+}
+
+@media (min-width: 720px) {
+  .wizard {
+    padding: 30px;
+  }
+
+  .options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* An odd last option stretches rather than leaving a gap. */
+  .options > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option:hover,
+  .summaryChip:hover,
+  .option:has(input:checked) .tick {
+    transform: none;
+  }
+}

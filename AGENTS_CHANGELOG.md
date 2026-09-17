@@ -1308,3 +1308,80 @@ LIMITATIONS:
 FOLLOW_UP:
 - View the running app and adjust motion intensity; the entrance timings are deliberately conservative and can be pushed further.
 - Consider a light-theme token set behind `prefers-color-scheme` if a judge views the demo in a bright room.
+
+## TASK TASK-CLAUDE-20260918-profile-wizard
+
+AGENT: CLAUDE
+STATUS: DONE
+BASE_COMMIT: c7d6e0d5ba01a0799db836f60b634009101b5c9f
+SCOPE: Replace the single long profile form with a one-question-at-a-time wizard so the applicant never faces a wall of buttons.
+
+FILES:
+- `src/features/profile/**`
+- `src/features/journey/JourneyExperience.tsx`
+- `src/components/ChoiceGroup.*`
+- `AGENTS_CHANGELOG.md`
+
+DEPENDENCIES:
+- `TASK-CLAUDE-20260917-dark-visual-system`
+
+ASSUMPTIONS:
+- Single-choice questions may auto-advance; slider and multi-select questions need an explicit continue, because the user is not finished choosing.
+- The domain profile shape stays unchanged; this is a presentation change only.
+
+ACCEPTANCE:
+- At most one question is visible at a time, with at most five options on screen.
+- Progress through the six questions is visible, and any answered question can be reopened from a summary rail.
+- Keyboard: digits select an option, arrows move within a group, Enter continues.
+- `npm run typecheck`, `npm run lint`, `npm run build` exit 0.
+
+### COMPLETE TASK-CLAUDE-20260918-profile-wizard
+
+AGENT: CLAUDE
+STATUS: DONE
+
+SUMMARY:
+- The profile step is now a six-question wizard instead of one long form. The first screen shows three options where the old form showed roughly twenty controls at once.
+- Single-choice questions apply the answer and open the next question after 260 ms; the GPA scale and the two multi-select questions wait for an explicit continue, because the user has not finished answering when the first control changes.
+- Each question owns the screen: large title, one-line rationale, and option cards with a numbered key hint, a label, a supporting line and a fill-in check indicator.
+- A summary rail under the question shows all six answers as chips; clicking any chip reopens that question, so nothing is buried.
+- Keyboard: digits 1-9 pick an option, arrow keys move within the native radio group, Enter continues. The handler steps aside when the slider or a button has focus.
+- Removed `ProfileForm` and the `ChoiceGroup` primitive it was the only consumer of.
+
+COMMITS:
+- UNCOMMITTED
+
+FILES:
+- `src/features/profile/{ProfileWizard.tsx,ProfileWizard.module.css,profileQuestions.ts}` (new)
+- `src/features/profile/{ProfileForm.tsx,ProfileForm.module.css}` (deleted)
+- `src/components/{ChoiceGroup.tsx,ChoiceGroup.module.css}` (deleted)
+- `src/features/journey/JourneyExperience.tsx`
+
+BEHAVIORAL CHANGES:
+- The outer section heading is suppressed on the profile step: the wizard carries its own title and progress, and showing both read as two competing headers.
+- Profile validation moved from a blocking message under the submit button to a per-question rule: continue is disabled only on the question that is actually unanswered.
+
+ARCHITECTURE / DECISIONS:
+- Question order, copy and chip labels live in `profileQuestions.ts` as data, so adding a question is a data change rather than a JSX change.
+- No domain change: the wizard writes the same `ApplicantProfile` shape the form did, so diagnosis, ranking and roadmap rules are untouched and remain covered by the earlier verification.
+
+VERIFICATION:
+- `npm run typecheck` → exit 0.
+- `npm run lint` → exit 0.
+- `npm run build` → exit 0.
+- `git diff --check` → exit 0.
+- Type-check and lint both pass after deleting `ProfileForm` and `ChoiceGroup`, which confirms nothing else referenced them.
+- Orphaned-CSS-reference script → no `styles.X` reference without a matching class.
+- Server-rendered `/journey`: the first screen emits exactly three radio options and no checkboxes, the progress control reports "Вопрос 1 из 6", six summary chips render, and each option carries its numbered key hint. No other question's text appears in the markup, so only one question is on screen.
+- Dev server log clean.
+
+NOT VERIFIED:
+- The Chrome extension is still not connected, so auto-advance timing, the keyboard shortcuts, chip navigation and the entrance animation between questions were not exercised by interacting with the page.
+- Mobile layout reviewed through the stylesheet (single-column options, 68px option targets) rather than measured.
+
+LIMITATIONS:
+- Changing an already-answered single-choice question from the summary rail auto-advances to the following question rather than returning to where the user came from.
+- Question order is fixed; there is no conditional branching.
+
+FOLLOW_UP:
+- Consider a final review screen before the diagnosis so the applicant confirms all six answers at once.

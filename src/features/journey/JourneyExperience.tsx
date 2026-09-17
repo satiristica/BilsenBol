@@ -12,7 +12,7 @@ import { buildRoadmap, calculateProgress } from "@/domain/roadmap";
 import { ComparisonDialog } from "@/features/comparison/ComparisonDialog";
 import { ComparisonTray } from "@/features/comparison/ComparisonTray";
 import { DiagnosisPanel } from "@/features/diagnosis/DiagnosisPanel";
-import { ProfileForm } from "@/features/profile/ProfileForm";
+import { ProfileWizard } from "@/features/profile/ProfileWizard";
 import { QuickAdjustBar } from "@/features/profile/QuickAdjustBar";
 import {
   MAX_COMPARED_PROGRAMS,
@@ -172,16 +172,18 @@ export function JourneyExperience({
         </ol>
       </nav>
 
-      <div className={styles.sectionHead}>
-        <h1 className={styles.sectionTitle}>{sectionCopy[step].title}</h1>
-        <p aria-live="polite" className={styles.sectionLead}>
-          {sectionCopy[step].lead}
-        </p>
-      </div>
+      {step === "profile" ? null : (
+        <div className={styles.sectionHead}>
+          <h1 className={styles.sectionTitle}>{sectionCopy[step].title}</h1>
+          <p aria-live="polite" className={styles.sectionLead}>
+            {sectionCopy[step].lead}
+          </p>
+        </div>
+      )}
 
       <main className={styles.content} key={step}>
         {step === "profile" ? (
-          <ProfileForm
+          <ProfileWizard
             onChange={setProfile}
             onSubmit={() => setStep("diagnosis")}
             profile={profile}
