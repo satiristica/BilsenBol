@@ -1,0 +1,198 @@
+/* Layered ambient background for the landing page.
+   Everything animates transform/opacity only, and the whole stack is inert:
+   it never receives pointer events and is hidden from assistive tech. */
+
+@keyframes morph {
+  0%,
+  100% {
+    border-radius: 58% 42% 46% 54% / 52% 48% 52% 48%;
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+
+  33% {
+    border-radius: 42% 58% 62% 38% / 44% 62% 38% 56%;
+    transform: translate3d(5%, -7%, 0) scale(1.1) rotate(38deg);
+  }
+
+  66% {
+    border-radius: 52% 48% 38% 62% / 62% 38% 56% 44%;
+    transform: translate3d(-6%, 5%, 0) scale(0.93) rotate(-26deg);
+  }
+}
+
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 14vh, 0) scale(0.6);
+  }
+
+  12% {
+    opacity: var(--peak, 0.5);
+  }
+
+  85% {
+    opacity: var(--peak, 0.5);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--sway, 3vw), -104vh, 0) scale(1);
+  }
+}
+
+.root {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg);
+  pointer-events: none;
+}
+
+/* Layer 1 — morphing aurora ------------------------------------------------ */
+
+.blob {
+  position: absolute;
+  filter: blur(90px);
+  opacity: 0.55;
+  will-change: transform;
+}
+
+.blobOne {
+  top: -18%;
+  right: -8%;
+  width: 48vw;
+  height: 48vw;
+  min-width: 340px;
+  min-height: 340px;
+  background: radial-gradient(circle, rgb(62 224 138 / 52%), transparent 70%);
+  animation: morph 26s ease-in-out infinite;
+}
+
+.blobTwo {
+  top: 26%;
+  left: -14%;
+  width: 44vw;
+  height: 44vw;
+  min-width: 300px;
+  min-height: 300px;
+  background: radial-gradient(circle, rgb(23 168 101 / 46%), transparent 72%);
+  animation: morph 34s ease-in-out infinite reverse;
+}
+
+.blobThree {
+  right: 16%;
+  bottom: -16%;
+  width: 38vw;
+  height: 38vw;
+  min-width: 260px;
+  min-height: 260px;
+  background: radial-gradient(circle, rgb(255 180 92 / 20%), transparent 72%);
+  animation: morph 42s ease-in-out infinite;
+}
+
+.blobFour {
+  top: 52%;
+  left: 38%;
+  width: 30vw;
+  height: 30vw;
+  min-width: 220px;
+  min-height: 220px;
+  background: radial-gradient(circle, rgb(124 245 180 / 26%), transparent 74%);
+  animation: morph 30s ease-in-out infinite reverse;
+}
+
+/* Layer 2 — dot grid revealed around the pointer --------------------------- */
+
+.grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgb(124 245 180 / 34%) 1px, transparent 1px);
+  background-position: center;
+  background-size: 30px 30px;
+  /* Only the area near the pointer shows through. */
+  -webkit-mask-image: radial-gradient(
+    380px circle at var(--px, 50%) var(--py, 34%),
+    #000 0%,
+    rgb(0 0 0 / 45%) 42%,
+    transparent 72%
+  );
+  mask-image: radial-gradient(
+    380px circle at var(--px, 50%) var(--py, 34%),
+    #000 0%,
+    rgb(0 0 0 / 45%) 42%,
+    transparent 72%
+  );
+  opacity: 0.75;
+  transition: opacity 600ms var(--ease-out);
+}
+
+/* Layer 3 — slow motes ----------------------------------------------------- */
+
+.motes {
+  position: absolute;
+  inset: 0;
+}
+
+.mote {
+  position: absolute;
+  bottom: -6vh;
+  border-radius: 50%;
+  background: var(--accent-bright);
+  box-shadow: 0 0 12px rgb(124 245 180 / 60%);
+  opacity: 0;
+  animation: float-up var(--duration, 26s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+/* Layer 4 — fine grain to kill gradient banding ---------------------------- */
+
+.grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: 0.16;
+}
+
+/* Fades the whole stack into the page background at the fold. */
+.veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 38%, rgb(4 17 13 / 72%) 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob {
+    animation: none;
+  }
+
+  .motes {
+    display: none;
+  }
+
+  .grid {
+    -webkit-mask-image: radial-gradient(420px circle at 50% 30%, #000 0%, transparent 72%);
+    mask-image: radial-gradient(420px circle at 50% 30%, #000 0%, transparent 72%);
+  }
+}
+
+/* Phones get a lighter stack: blurring four large layers is the costly part. */
+@media (max-width: 720px) {
+  .blob {
+    filter: blur(66px);
+  }
+
+  .blobThree,
+  .blobFour {
+    display: none;
+  }
+
+  .mote:nth-child(2n) {
+    display: none;
+  }
+
+  .grain {
+    display: none;
+  }
+}

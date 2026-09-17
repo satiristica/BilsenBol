@@ -1385,3 +1385,66 @@ LIMITATIONS:
 
 FOLLOW_UP:
 - Consider a final review screen before the diagnosis so the applicant confirms all six answers at once.
+
+## TASK TASK-CLAUDE-20260918-living-background
+
+AGENT: CLAUDE
+STATUS: DONE
+BASE_COMMIT: c7b5e2a-successor (working tree on top of the profile wizard task)
+SCOPE: Replace the static landing aurora with an ambient animated background in the existing palette.
+
+FILES:
+- `src/components/{LivingBackground.tsx,LivingBackground.module.css}` (new)
+- `src/app/page.tsx`
+- `src/app/globals.css`
+
+DEPENDENCIES:
+- `TASK-CLAUDE-20260917-dark-visual-system`
+
+ASSUMPTIONS:
+- Ambient decoration must stay inert: no pointer events, hidden from assistive tech, and never a reason for the page to re-render.
+
+### COMPLETE TASK-CLAUDE-20260918-living-background
+
+AGENT: CLAUDE
+STATUS: DONE
+
+SUMMARY:
+- The landing background is now four layers in the existing green palette: four aurora blobs that morph their shape as they drift, a dot grid that lights up only around the pointer, eighteen motes drifting upward on staggered loops, and a fine grain that kills gradient banding, closed by a vertical veil that fades the stack into the page.
+- The background is `position: fixed`, so it stays alive while the page scrolls instead of scrolling away.
+- Pointer position is written directly to CSS custom properties and coalesced into one write per animation frame, so moving the mouse never triggers a React render.
+
+COMMITS:
+- UNCOMMITTED
+
+FILES:
+- `src/components/{LivingBackground.tsx,LivingBackground.module.css}` (new)
+- `src/app/page.tsx` (rewritten wrapper; background now a sibling of `main`)
+- `src/app/globals.css` (removed the `.aurora` block, the `drift` keyframes and `overflow: clip` on `main`)
+
+ARCHITECTURE / DECISIONS:
+- CSS animations plus one pointer listener instead of a canvas or an animation dependency: the effect is ambient, so per-frame JavaScript painting would cost battery for no visual gain.
+- Mote geometry is derived from the element index rather than `Math.random()`, because server and client markup must match or hydration breaks.
+- The background renders as a sibling of `main` rather than a child, so a fixed layer is never at the mercy of a containing block created on an ancestor.
+
+DEPENDENCIES / CONFIG:
+- No package change.
+
+VERIFICATION:
+- `npm run typecheck` → exit 0.
+- `npm run lint` → exit 0.
+- `npm run build` → exit 0.
+- `git diff --check` → exit 0.
+- Server-rendered `/`: four blob layers, eighteen motes carrying their `--duration` custom property, the grid, grain and veil layers all present; no `class="aurora"` remains; hero content and the primary call to action still render. Dev server log clean.
+- Grep confirms `.aurora` and the `drift` keyframes are gone from `globals.css`, so no dead rule was left behind.
+
+NOT VERIFIED:
+- The Chrome extension is still not connected, so the motion itself, the pointer-tracked grid reveal and the frame cost were never observed in a browser. Performance was addressed by construction, not by measurement.
+
+LIMITATIONS:
+- Four large blurred layers are the expensive part of this effect. Phones drop to two blobs at a smaller blur radius, half the motes and no grain, but this was reasoned about rather than profiled on a device.
+- The pointer-tracked grid reveal is a desktop affordance; on touch it simply keeps its default centre.
+- `prefers-reduced-motion` freezes the blobs, hides the motes and pins the grid highlight, but that path was not exercised with the media feature enabled.
+
+FOLLOW_UP:
+- Profile the landing on a mid-range phone and cut the blur radius further if frames drop.

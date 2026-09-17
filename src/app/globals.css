@@ -95,21 +95,6 @@ a {
   }
 }
 
-@keyframes drift {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-
-  33% {
-    transform: translate3d(4%, -6%, 0) scale(1.08);
-  }
-
-  66% {
-    transform: translate3d(-5%, 4%, 0) scale(0.96);
-  }
-}
-
 @keyframes pulse-dot {
   0%,
   100% {
@@ -143,57 +128,8 @@ a {
 
 main {
   position: relative;
+  z-index: 1;
   min-height: 100vh;
-  overflow: clip;
-}
-
-/* Slow drifting aurora behind the landing content. */
-.aurora {
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.aurora span {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.5;
-}
-
-.aurora span:nth-child(1) {
-  top: -14%;
-  right: -6%;
-  width: 46vw;
-  height: 46vw;
-  min-width: 320px;
-  min-height: 320px;
-  background: radial-gradient(circle, rgb(62 224 138 / 55%), transparent 68%);
-  animation: drift 22s ease-in-out infinite;
-}
-
-.aurora span:nth-child(2) {
-  top: 34%;
-  left: -12%;
-  width: 40vw;
-  height: 40vw;
-  min-width: 280px;
-  min-height: 280px;
-  background: radial-gradient(circle, rgb(23 168 101 / 45%), transparent 70%);
-  animation: drift 28s ease-in-out infinite reverse;
-}
-
-.aurora span:nth-child(3) {
-  right: 12%;
-  bottom: -10%;
-  width: 34vw;
-  height: 34vw;
-  min-width: 240px;
-  min-height: 240px;
-  background: radial-gradient(circle, rgb(255 180 92 / 22%), transparent 70%);
-  animation: drift 34s ease-in-out infinite;
 }
 
 .site-header,
