@@ -1,0 +1,179 @@
+.timeline {
+  display: grid;
+  gap: 14px;
+}
+
+.phase {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  padding: 18px 18px 18px 26px;
+}
+
+.phase::before {
+  position: absolute;
+  top: 18px;
+  bottom: 18px;
+  left: 12px;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  content: "";
+}
+
+.phaseActive {
+  border-color: var(--accent);
+}
+
+.phaseActive::before {
+  background: var(--accent);
+}
+
+.phaseDone::before {
+  background: #9cc7b4;
+}
+
+.phaseHeader {
+  display: grid;
+  gap: 6px;
+}
+
+.phaseMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.period {
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 6px 10px;
+  text-transform: uppercase;
+}
+
+.phaseCount {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.phaseTitle {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.3rem, 4.5vw, 1.7rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.phaseSummary {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.steps {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: block;
+}
+
+.stepLabel {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 10px;
+  align-items: start;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgb(243 241 233 / 45%);
+  cursor: pointer;
+  padding: 12px;
+  transition: border-color 140ms ease;
+}
+
+.stepLabel:hover {
+  border-color: rgb(13 107 77 / 40%);
+}
+
+.stepLabel:has(input:focus-visible) {
+  outline: 3px solid #f0a96b;
+  outline-offset: 2px;
+}
+
+.stepLabel:has(input:checked) {
+  border-color: rgb(13 107 77 / 30%);
+  background: var(--accent-soft);
+}
+
+.checkbox {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.stepBody {
+  display: grid;
+  gap: 3px;
+}
+
+.stepTitle {
+  font-size: 0.93rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.stepLabel:has(input:checked) .stepTitle {
+  color: var(--accent-dark);
+  text-decoration: line-through;
+}
+
+.stepDetail {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.nextMark {
+  display: inline-block;
+  margin-left: 8px;
+  border-radius: 999px;
+  background: #f0a96b;
+  color: #40220a;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+@media (min-width: 900px) {
+  .timeline {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stepLabel {
+    transition: none;
+  }
+}

@@ -1,21 +1,25 @@
+import Link from "next/link";
+
+import { PROFILE_PRESETS } from "@/domain/profile";
+
 const journeySteps = [
   {
     number: "01",
     title: "Заполните профиль",
     description:
-      "Укажите свои цели, сильные стороны, бюджет и важные ограничения.",
+      "Класс, средний балл, английский, бюджет и направление — шесть простых ответов.",
   },
   {
     number: "02",
-    title: "Найдите подходящие варианты",
+    title: "Получите разбор и подборку",
     description:
-      "Получите понятные рекомендации и сравните программы по важным для вас критериям.",
+      "Честная диагностика профиля и программы, которые проходят ваши обязательные условия.",
   },
   {
     number: "03",
     title: "Следуйте дорожной карте",
     description:
-      "Превратите свой выбор в конкретные этапы, следующие действия и видимый прогресс.",
+      "План по сезонам, одно ближайшее действие и растущая шкала готовности.",
   },
 ] as const;
 
@@ -37,36 +41,48 @@ export default function HomePage() {
           <p className="eyebrow">Понятный путь в университет</p>
           <h1>Поймите, куда поступать. Знайте, что делать дальше.</h1>
           <p className="hero-description">
-            BilsenBol поможет абитуриентам и студентам из стран СНГ превратить
-            свой профиль и цели в понятные рекомендации, удобное сравнение
-            программ и персональную дорожную карту поступления.
+            BilsenBol помогает школьникам 9–11 классов и выпускникам из стран СНГ
+            превратить свой профиль и цели в понятные рекомендации, сравнение программ
+            и персональную дорожную карту поступления.
           </p>
-          <a className="primary-action" href="#journey">
-            Посмотреть, как это работает
-            <span aria-hidden="true">→</span>
-          </a>
+          <div className="hero-actions">
+            <Link className="primary-action" href="/journey">
+              Построить мой маршрут
+              <span aria-hidden="true">→</span>
+            </Link>
+            <a className="secondary-action" href="#journey">
+              Как это работает
+            </a>
+          </div>
         </div>
 
-        <aside className="preview-card" aria-label="Пример пути поступления">
+        <aside className="preview-card" aria-labelledby="presets-title">
           <div className="preview-header">
-            <span>Ваш путь</span>
-            <span>0% выполнено</span>
+            <span id="presets-title">Быстрый старт</span>
+            <span>1 клик</span>
           </div>
-          <div className="progress-track" aria-hidden="true">
-            <span />
-          </div>
-          <div className="preview-content">
-            <span className="preview-step">Первый шаг</span>
-            <h2>Расскажите, на каком этапе вы сейчас</h2>
-            <p>
-              Ваш профиль станет основой для каждой рекомендации и всех
-              обновлений дорожной карты.
-            </p>
-            <div className="preview-meta">
-              <span>Профиль</span>
-              <span>Следующий этап</span>
-            </div>
-          </div>
+          <p className="preset-lead">
+            Выберите ситуацию, похожую на вашу, — профиль заполнится сам, и сразу
+            откроется результат.
+          </p>
+          <ul className="preset-list">
+            {PROFILE_PRESETS.map((preset) => (
+              <li key={preset.id}>
+                <Link className="preset-card" href={`/journey?preset=${preset.id}`}>
+                  <span aria-hidden="true" className="preset-emoji">
+                    {preset.emoji}
+                  </span>
+                  <span className="preset-body">
+                    <span className="preset-title">{preset.title}</span>
+                    <span className="preset-description">{preset.description}</span>
+                  </span>
+                  <span aria-hidden="true" className="preset-arrow">
+                    →
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </aside>
       </section>
 
@@ -88,7 +104,7 @@ export default function HomePage() {
 
       <footer>
         <span>BilsenBol</span>
-        <span>Первая версия продукта</span>
+        <span>Демо-данные каталога программ</span>
       </footer>
     </main>
   );

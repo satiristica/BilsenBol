@@ -1,0 +1,98 @@
+.group {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.legend {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  padding: 0;
+}
+
+.help {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 44px;
+  flex: 1 1 140px;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  padding: 10px 14px;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    transform 140ms ease;
+}
+
+.option:hover {
+  border-color: rgb(13 107 77 / 45%);
+  transform: translateY(-1px);
+}
+
+.option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.optionLabel {
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.optionHint {
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+
+.option:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.option:has(input:checked) .optionHint {
+  color: var(--accent-dark);
+}
+
+.option:has(input:focus-visible) {
+  outline: 3px solid #f0a96b;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option {
+    transition: none;
+  }
+
+  .option:hover {
+    transform: none;
+  }
+}

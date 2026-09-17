@@ -1,0 +1,144 @@
+.meter {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  padding: 16px;
+}
+
+.meterHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.meterLabel {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.meterValue {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.8rem, 6vw, 2.4rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--accent-soft);
+}
+
+.fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 260ms ease;
+}
+
+.meterCaption {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.nextCard {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgb(240 169 107 / 55%);
+  border-radius: 20px;
+  background: #fdf3e6;
+  padding: 18px;
+}
+
+.nextLabel {
+  color: #8a4b18;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nextTitle {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.4rem, 5vw, 1.9rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.nextDetail {
+  margin: 0;
+  color: #6b4a2c;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.nextMeta {
+  color: #8a4b18;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.done {
+  min-height: 50px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.98rem;
+  font-weight: 700;
+  padding: 14px 18px;
+}
+
+.done:hover {
+  background: var(--accent-dark);
+}
+
+.done:focus-visible {
+  outline: 3px solid #8a4b18;
+  outline-offset: 3px;
+}
+
+.finished {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgb(13 107 77 / 30%);
+  border-radius: 20px;
+  background: var(--accent-soft);
+  padding: 18px;
+}
+
+.finishedTitle {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.4rem, 5vw, 1.9rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.finishedText {
+  margin: 0;
+  color: var(--accent-dark);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill {
+    transition: none;
+  }
+}

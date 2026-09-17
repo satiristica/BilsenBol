@@ -1104,3 +1104,116 @@ LIMITATIONS:
 
 FOLLOW_UP:
 - Implement the profile step using the same Russian terminology and tone.
+
+## TASK TASK-CLAUDE-20260917-journey-frontend
+
+AGENT: CLAUDE
+STATUS: DONE
+BASE_COMMIT: c7d99401e2c4502fcb7197f35334f4f8a0c108fe
+SCOPE: Implement the clickable end-to-end admission journey frontend for CIS school students, from profile input to interactive roadmap, comparison, and progress.
+
+FILES:
+- `src/app/page.tsx`
+- `src/app/globals.css`
+- `src/app/journey/**`
+- `src/components/**`
+- `src/domain/**`
+- `src/data/**`
+- `src/lib/**`
+- `src/features/{profile,diagnosis,recommendations,comparison,roadmap,progress,journey}/**`
+- `AGENTS_CHANGELOG.md`
+
+DEPENDENCIES:
+- `TASK-CODEX-20260917-russian-localization`
+
+ASSUMPTIONS:
+- The program catalogue is demo data; institutions are intentionally fictional and every surface carries a visible `Демо-данные` label, per AGENTS.md section 4.
+- GPA is captured on a 3.0-5.0 five-point scale (the requested 4.5-5.0 band is highlighted as the grant-competitive zone) so weaker applicants can still be represented honestly.
+- Journey state lives in memory plus a URL preset parameter; no persistence layer is introduced in this task.
+- No new runtime dependency is added: styling uses CSS Modules on the existing design tokens instead of a UI kit.
+
+ACCEPTANCE:
+- Landing page offers three one-click presets that prefill the profile and open the computed result.
+- Profile step captures grade, GPA, English level, budget, fields, and regions.
+- Diagnosis shows a readiness status plus strength, bottleneck, and time-runway insights.
+- At least three recommendation cards render with program and match badges, and two programs can be compared face to face.
+- Roadmap renders three seasonal phases with a highlighted next action and checkboxes that recompute a readiness percentage.
+- Changing a profile input from the result screen recomputes recommendations, roadmap, and diagnosis immediately.
+- `npm run typecheck`, `npm run lint`, and `npm run build` exit 0; mobile layout holds at 360px width.
+
+### COMPLETE TASK-CLAUDE-20260917-journey-frontend
+
+AGENT: CLAUDE
+STATUS: DONE
+
+SUMMARY:
+- The full admission journey is clickable end to end: landing presets, profile, diagnosis, recommendations, comparison, roadmap and progress.
+- Landing offers three one-click presets that prefill a profile and open the computed result at `/journey?preset=<id>`.
+- The profile step captures grade, GPA, English level, family budget, fields and regions; recommendations, diagnosis and roadmap are always derived from it.
+- Recommendations separate hard constraints from soft fit: a programme that violates budget, GPA, region or language eligibility is never shown, and every card explains its score, trade-off, blocker and improvement action.
+- Two programmes can be sent to a floating tray and compared face to face in a modal across ten criteria with a per-row winner.
+- The roadmap renders three seasonal phases, a highlighted next action and checkboxes that recompute a readiness percentage; completed step ids survive profile edits because step ids are semantic.
+- A quick-adjust bar on the result screens changes budget, English level or GPA and recomputes everything immediately.
+
+COMMITS:
+- UNCOMMITTED
+
+FILES:
+- `src/app/page.tsx`
+- `src/app/globals.css`
+- `src/app/journey/page.tsx`
+- `src/components/ChoiceGroup.tsx`, `src/components/ChoiceGroup.module.css`
+- `src/data/programs.ts`
+- `src/domain/{profile,matching,diagnosis,roadmap,comparison}.ts`
+- `src/lib/classNames.ts`
+- `src/features/journey/{JourneyExperience.tsx,JourneyExperience.module.css,steps.ts}`
+- `src/features/profile/{ProfileForm,QuickAdjustBar}.{tsx,module.css}`
+- `src/features/diagnosis/DiagnosisPanel.{tsx,module.css}`
+- `src/features/recommendations/{RecommendationCard,RecommendationList}.{tsx,module.css}`
+- `src/features/comparison/{ComparisonTray,ComparisonDialog}.{tsx,module.css}`
+- `src/features/roadmap/RoadmapTimeline.{tsx,module.css}`
+- `src/features/progress/{ProgressPanel.tsx,Progress.module.css}`
+- `README.md`
+- Deleted `.gitkeep` placeholders in the ten directories that now hold real files.
+
+ARCHITECTURE / DECISIONS:
+- Domain rules are pure and UI-free: `rankPrograms`, `buildDiagnosis`, `buildRoadmap` and `buildComparisonRows` take a profile and return data, so the client layer only renders.
+- `JourneyStep` and its type guard live in `src/features/journey/steps.ts` rather than the `"use client"` module, because the server route reads the step from the URL; calling a client export from the server throws at request time.
+- No runtime dependency was added. Styling uses CSS Modules on the existing design tokens in `globals.css`; no UI kit, no Tailwind, no state library.
+- Journey state is in-memory React state plus two URL parameters (`preset`, `step`), matching the "narrowest tool that works" rule.
+
+DATA / SCHEMA / STATE:
+- `src/data/programs.ts` adds a fourteen-programme demo catalogue of deliberately fictional institutions, exported alongside `DEMO_DATA_NOTICE` and `DEMO_DATA_BADGE`.
+- Per AGENTS.md section 4 no unsourced admission fact is attributed to a real university, every card and the comparison modal carry the `Демо-данные` label, and the product publishes no admission probability.
+
+DEPENDENCIES / CONFIG:
+- No package change.
+- `next dev` appended its own `nextjs-agent-rules` block to `AGENTS.md` and rewrote generated `next-env.d.ts`; both are tool-generated and were left in place.
+
+ASSUMPTIONS:
+- GPA is captured on a 3.0-5.0 scale so applicants below the grant-competitive band can still be represented; 4.5 is surfaced in the UI as the grant threshold rather than as the floor of the input.
+- A four-value readiness status is used instead of three: `strengthen-academics` was added so an applicant with a certificate but a low average is not told they are grant-ready.
+
+VERIFICATION:
+- `npm run typecheck` → exit 0.
+- `npm run lint` → exit 0.
+- `npm run build` → exit 0; `/` and `/_not-found` static, `/journey` dynamic.
+- `git diff --check` → exit 0.
+- Server-rendered journey checked with curl for all three presets: readiness statuses resolve to `Готов к подаче на гранты`, `В запасе ещё год`, `Требуется подтянуть язык` respectively; the recommendations step renders 4, 6 and 4 programme cards with the expected grant, budget and Foundation badges and a `Демо-данные` label on each.
+- Roadmap step renders three seasonal phases, ten checkboxes, `aria-valuenow="0"` on the readiness meter and exactly one highlighted next action; the language step differs correctly between a profile with and without a certificate.
+- Domain rules executed directly through a compiled harness in the session scratchpad, 24 assertions, all passing: every preset and the default profile return at least three programmes; no shown match violates a budget, GPA, region or language constraint; ordering is descending by score; an impossible profile returns zero matches with every one of the fourteen programmes accounted for in the exclusion summary; raising the budget widens the set 4 → 11 and lowering it narrows 6 → 5; changing the English level changes scores, badges, the diagnosis status and the roadmap steps; progress maths gives 0 / 50 / 100 percent with the next action selected in phase order; nine of ten roadmap steps keep their ids across a profile edit; comparison returns ten criteria with decided winners.
+
+NOT VERIFIED:
+- Client-side interaction was not exercised in a real browser: the Chrome extension was not connected in this session, so checkbox toggling, the comparison tray and modal, and the quick-adjust recompute were verified through their pure domain rules and server-rendered markup, not by clicking.
+- Mobile rendering was reviewed through the stylesheets (single-column base layouts, 44px minimum touch targets, horizontally scrollable stepper, `min()`-bounded containers) rather than measured at 360px in a browser.
+
+LIMITATIONS:
+- Journey state is not persisted: a reload restarts at the profile step and clears marked progress.
+- No automated test suite exists in the repository; the domain harness used here lived in the scratchpad and was not committed.
+- The comparison modal compares exactly two programmes.
+- The catalogue is demo data, so recommendations demonstrate the rules rather than real admission routes.
+
+FOLLOW_UP:
+- Add Vitest and port the scratchpad domain assertions into committed unit tests, then a Playwright run of the critical path.
+- Persist profile and progress to localStorage so a reload keeps the journey.
+- Replace the demo catalogue with source-backed programme data carrying a source URL per fact.

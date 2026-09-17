@@ -6,10 +6,30 @@ comparison, and an actionable roadmap.
 
 ## Current state
 
-The repository contains the initial application shell and the feature
-boundaries for the product journey. The landing page is runnable; the profile,
-diagnosis, recommendation, comparison, roadmap, and progress features are
-placeholders for future implementation.
+The clickable admission journey is implemented end to end for CIS school
+students: landing with one-click presets, profile capture, readiness diagnosis,
+explainable programme recommendations, a face-to-face comparison of two
+programmes, a seasonal roadmap, and progress tracking. Every screen recomputes
+from the profile, so changing budget, English level, or GPA immediately updates
+the recommendations, the diagnosis, and the plan.
+
+Routes:
+
+- `/` landing page with the three quick-start presets
+- `/journey` the journey itself; `?preset=<id>` prefills a profile and
+  `?step=<profile|diagnosis|recommendations|roadmap>` deep-links a step
+
+### Data honesty
+
+The programme catalogue in `src/data/programs.ts` is demo data describing
+deliberately fictional institutions, and it is labelled `Демо-данные` wherever
+it is rendered. No unsourced admission facts are attributed to real
+universities, and the product does not produce admission probabilities.
+
+### Not implemented yet
+
+Journey state lives in memory only, so a page reload restarts the journey, and
+there is no automated test suite in the repository yet.
 
 ## Run locally
 

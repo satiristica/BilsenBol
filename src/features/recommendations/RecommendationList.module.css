@@ -1,0 +1,113 @@
+.wrapper {
+  display: grid;
+  gap: 16px;
+}
+
+.notice {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 10px;
+  border: 1px dashed rgb(21 36 31 / 25%);
+  border-radius: 14px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  padding: 12px 14px;
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+}
+
+.empty {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  padding: 22px;
+}
+
+.emptyTitle {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.4rem, 5vw, 1.9rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.emptyText {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.reasons {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reasonItem {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.86rem;
+  padding-bottom: 6px;
+}
+
+.reasonCount {
+  color: var(--accent-dark);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.emptyActions {
+  display: grid;
+  gap: 8px;
+}
+
+.emptyAction {
+  min-height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 13px 18px;
+}
+
+.emptyAction:hover {
+  background: var(--accent-dark);
+}
+
+.emptySecondary {
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  color: var(--accent-dark);
+}
+
+.emptySecondary:hover {
+  background: var(--accent-soft);
+}
+
+.emptyAction:focus-visible {
+  outline: 3px solid #f0a96b;
+  outline-offset: 3px;
+}
+
+@media (min-width: 860px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
