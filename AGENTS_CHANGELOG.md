@@ -970,3 +970,137 @@ If an important item is false, resolve it before claiming completion.
 > Append task claims, commit records, decisions, blockers, handoffs, corrections, and completion records below this line.
 >
 > Do not place transient operational entries above this marker.
+
+## TASK TASK-CODEX-20260917-initial-scaffold
+
+AGENT: CODEX
+STATUS: DONE
+BASE_COMMIT: df01d4b1e0d8886ad9e780deb7ded6e8222b552f
+SCOPE: Create the minimum documented application architecture and a runnable BilsenBol website shell.
+
+FILES:
+- `package.json`
+- `package-lock.json`
+- `next.config.ts`
+- `tsconfig.json`
+- `next-env.d.ts`
+- `eslint.config.mjs`
+- `src/**`
+- `public/**`
+- `README.md`
+- `AGENTS_CHANGELOG.md`
+
+DEPENDENCIES:
+- NONE
+
+ASSUMPTIONS:
+- The documentation-only repository should adopt the default Next.js App Router stack specified in `AGENTS.md`.
+- Empty architecture directories may use `.gitkeep` files until their product slices are implemented.
+
+ACCEPTANCE:
+- The repository has a small modular architecture matching the documented product journey.
+- The application installs, type-checks, lints, builds, and can serve an initial responsive page.
+
+### COMPLETE TASK-CODEX-20260917-initial-scaffold
+
+AGENT: CODEX
+STATUS: DONE
+
+SUMMARY:
+- Added a minimal Next.js App Router application with strict TypeScript and ESLint configuration.
+- Added a responsive, accessible BilsenBol landing page that honestly identifies itself as a foundation preview.
+- Created empty feature boundaries for profile, diagnosis, recommendations, comparison, roadmap, and progress, plus shared component, domain, data, library, server, and test directories.
+- Documented local setup, quality commands, current limitations, and the initial architecture.
+
+COMMITS:
+- UNCOMMITTED
+
+FILES:
+- `package.json`
+- `package-lock.json`
+- `next.config.ts`
+- `tsconfig.json`
+- `next-env.d.ts`
+- `eslint.config.mjs`
+- `README.md`
+- `src/app/layout.tsx`
+- `src/app/page.tsx`
+- `src/app/globals.css`
+- `src/components/.gitkeep`
+- `src/features/*/.gitkeep`
+- `src/domain/.gitkeep`
+- `src/data/.gitkeep`
+- `src/lib/.gitkeep`
+- `src/server/.gitkeep`
+- `src/test/.gitkeep`
+- `public/.gitkeep`
+- `AGENTS_CHANGELOG.md`
+
+VERIFICATION:
+- `npm install` with Node.js 22.23.2 → 362 packages audited with 0 vulnerabilities; generated `package-lock.json`.
+- `npm run lint` → exit 0.
+- `npm run typecheck` → exit 0.
+- `npm run build` → exit 0; Next.js generated static `/` and `/_not-found` routes.
+- Production `npm run start -- --hostname 127.0.0.1 --port 3100` plus `curl http://127.0.0.1:3100/` → HTTP 200 with the BilsenBol title and landing-page content.
+- `jq empty package.json package-lock.json tsconfig.json` → exit 0; all JSON files are syntactically valid.
+- `git diff --check` and trailing-whitespace scan → exit 0.
+
+LIMITATIONS:
+- The product journey features remain placeholders; only the initial application shell is implemented.
+- ESLint 9 is pinned because `eslint-config-next` 16.3.5's bundled React lint plugin fails under ESLint 10; npm warns that ESLint 9 is out of support, so this should be revisited when the Next.js lint bundle becomes compatible.
+
+FOLLOW_UP:
+- Implement the profile step as the first real product feature, keeping profile state as the source for later recommendation and roadmap recomputation.
+
+## TASK TASK-CODEX-20260917-russian-localization
+
+AGENT: CODEX
+STATUS: DONE
+BASE_COMMIT: df01d4b1e0d8886ad9e780deb7ded6e8222b552f
+SCOPE: Localize the current BilsenBol landing page for Russian-speaking students from CIS countries.
+
+FILES:
+- `src/app/layout.tsx`
+- `src/app/page.tsx`
+- `AGENTS_CHANGELOG.md`
+
+DEPENDENCIES:
+- `TASK-CODEX-20260917-initial-scaffold`
+
+ASSUMPTIONS:
+- Russian is the initial interface language; multi-language switching is outside the current minimal scope.
+
+ACCEPTANCE:
+- All user-visible landing-page copy, metadata, and accessibility labels are in Russian.
+- The HTML language is set to Russian and the application still lints, type-checks, and builds.
+
+### COMPLETE TASK-CODEX-20260917-russian-localization
+
+AGENT: CODEX
+STATUS: DONE
+
+SUMMARY:
+- Localized all landing-page copy, metadata, document language, CTA text, progress labels, and accessibility labels into Russian.
+- Adapted the hero message to explicitly address applicants and students from CIS countries while preserving the honest foundation-preview state.
+- Kept the BilsenBol brand name and the existing architecture and visual design unchanged.
+
+COMMITS:
+- UNCOMMITTED
+
+FILES:
+- `src/app/layout.tsx`
+- `src/app/page.tsx`
+- `AGENTS_CHANGELOG.md`
+
+VERIFICATION:
+- English user-visible text scan in `src/app` → only the BilsenBol brand name remains in Latin characters.
+- `npm run lint` → exit 0.
+- `npm run typecheck` → exit 0.
+- `npm run build` → exit 0; static `/` and `/_not-found` routes generated.
+- `git diff --check` → exit 0.
+
+LIMITATIONS:
+- Russian is currently the only interface language; no locale switcher or translation framework has been added.
+
+FOLLOW_UP:
+- Implement the profile step using the same Russian terminology and tone.
