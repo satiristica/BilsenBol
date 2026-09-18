@@ -1,6 +1,8 @@
 "use client";
 
-import { PartyPopper, Target } from "lucide-react";
+import { PartyPopper, Sparkles, Target } from "lucide-react";
+
+import { ActionLink } from "@/components/ActionButton";
 
 import { ActionButton } from "@/components/ActionButton";
 import type { RoadmapProgress } from "@/domain/roadmap";
@@ -45,6 +47,9 @@ interface NextActionCardProps {
   onComplete: (stepId: string) => void;
 }
 
+/** Path of the AI plan page, unlocked once every roadmap step is done. */
+export const AI_PLAN_PATH = "/journey/ai";
+
 export function NextActionCard({ progress, onComplete }: NextActionCardProps) {
   const { nextStep, nextPhase } = progress;
 
@@ -53,6 +58,15 @@ export function NextActionCard({ progress, onComplete }: NextActionCardProps) {
       <section aria-live="polite" className={styles.finished}>
         <PartyPopper aria-hidden="true" className={styles.finishedIcon} size={30} strokeWidth={2} />
         <h3 className={styles.finishedTitle}>Все шаги закрыты</h3>
+        <p className={styles.finishedText}>
+          Открыт ИИ-план: разбор вашего маршрута и что можно сделать дальше.
+        </p>
+        <div className={styles.finishedAction}>
+          <ActionLink href={AI_PLAN_PATH} withArrow>
+            <Sparkles aria-hidden="true" size={17} strokeWidth={2.3} />
+            Открыть ИИ-план
+          </ActionLink>
+        </div>
       </section>
     );
   }

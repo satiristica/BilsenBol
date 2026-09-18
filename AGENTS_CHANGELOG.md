@@ -1900,3 +1900,200 @@ NOT VERIFIED:
 
 LIMITATIONS:
 - Two placeholders are marked "⚠ ЗАПОЛНИТЬ" and must be filled by the team: the deployed demo URL and the team roster with roles.
+
+## TASK TASK-CLAUDE-20260918-gemini-roadmap
+
+AGENT: CLAUDE
+STATUS: DONE
+BASE_COMMIT: bb03b97a2b1e4ecbef2d2315175c3951c41eb4b6
+BRANCH: feat/ai-roadmap (master stays a valid submission until this passes verification)
+SCOPE: Personalise the roadmap with Gemini on top of the rule-based skeleton, with strict validation and a fallback to the rules.
+
+FILES:
+- `src/server/ai/**` (new)
+- `src/app/api/roadmap/route.ts` (new)
+- `src/features/roadmap/**`, `src/features/progress/**`, `src/features/journey/**`
+- `package.json`, `package-lock.json` (zod)
+- `.env.example`, `README.md`, `AGENTS_CHANGELOG.md`
+
+ASSUMPTIONS:
+- The rules keep producing the roadmap skeleton and the progress backbone; the model only adds per-step advice, a strategy summary and optional extra suggestions. Progress never depends on model availability.
+- Model text must not introduce numbers, dates, prices, scores, real institutions or chances (the case PDF forbids unconfirmed deadlines and invented precision). This is enforced in code, not only in the prompt.
+- Free-tier quotas can run out; every failure degrades to the rule-based plan.
+- The API key lives only in server environment variables.
+
+ACCEPTANCE:
+- With a key, the roadmap shows Gemini's personal advice; without a key, or on an error or timeout, it shows the rule plan with a quiet notice.
+- Malformed, oversized or number-containing model output is rejected field by field.
+- `npm run typecheck`, `npm run lint`, `npm run build` exit 0.
+
+### UPDATE TASK-CLAUDE-20260918-gemini-roadmap
+
+AGENT: CLAUDE
+STATUS: READY_FOR_REVIEW
+BRANCH: feat/ai-roadmap (not merged; master is untouched)
+
+SUMMARY:
+- Gemini personalises the roadmap on top of the rule skeleton. It returns a strategy summary, advice for every rule step (the next step's advice appears in the "Следующий шаг" card), and up to three extra suggestions per season in a "План от ИИ" card. Progress and the skeleton never depend on the model.
+- Built on `generateContent` over plain `fetch`, not the newer Interactions API, which stores requests by default. `gemini-3.8-flash` and every field name were confirmed in the current official docs, not from memory; the docs had changed since my training data.
+- Guardrails in code:
+  - the model sees the profile in words, never numbers;
+  - allowed step ids are an `enum` in the response schema;
+  - every text field is validated separately (length, no URLs, no digits at all), so invented dates, prices, scores and chances cannot reach the screen;
+  - the server rebuilds the skeleton from the validated profile and trusts nothing the client says about it;
+  - the key is read only from server env;
+  - logs carry the failure reason, never the profile.
+- Resilience: 20 s model timeout and `maxDuration = 30`; any failure (no key, HTTP error, 429, block, truncation, bad JSON, nothing valid) degrades to the rule plan with one quiet line. One profile means one call, cached per instance on the server and in `localStorage` on the client. Edits are debounced 700 ms. The model is called only on the roadmap step. At most 20 upstream calls per minute per instance.
+
+FILES:
+- `src/features/roadmap/{roadmapAdvice.ts,useRoadmapAdvice.ts,AiRoadmapCard.tsx,AiRoadmapCard.module.css}` (new)
+- `src/server/ai/{gemini.ts,roadmapPrompt.ts}` (new)
+- `src/app/api/roadmap/route.ts` (new)
+- `src/features/progress/{ProgressPanel.tsx,Progress.module.css}`
+- `src/features/journey/JourneyExperience.tsx`
+- `.env.example` (new), `README.md`, `package.json`, `package-lock.json` (zod 4.6.5, no dependencies, 0 vulnerabilities)
+
+VERIFICATION:
+- `npm run typecheck` → exit 0.
+- `npm run lint` → exit 0.
+- `npm run build` → exit 0; `/api/roadmap` builds as a dynamic route.
+- `git diff --check` → exit 0.
+- Sanitizer and prompt, 24/24:
+  - a valid reply passes;
+  - dates, scores, prices, non-ASCII digits and links are removed field by field;
+  - unknown and duplicate step ids are dropped, and so are over-length texts;
+  - extras are capped at three, and an unknown season drops only that one item;
+  - markdown is stripped;
+  - malformed shapes and non-objects return null;
+  - for each preset, the model payload contains no digits, the schema's id enum equals the rule steps, and at most three programmes are sent.
+- Adapter with a mocked `fetch`, 15/15: no key (no request made); success; key sent in the `x-goog-api-key` header and never in the URL; endpoint and body shape; thought parts ignored; 429; timeout; network error; prompt blocked; MAX_TOKENS; SAFETY; non-JSON text; broken body; `GEMINI_MODEL` override.
+- Route against the dev server: broken JSON → 400, invalid profile → 400, empty interests → 400, GET → 405. A valid profile returns `unavailable`, because the placeholder key is rejected by Google (HTTP 400). The log says only `[roadmap-ai] unavailable: http 400`, with zero profile fields.
+- Browser, 16/16, with `/api/roadmap` intercepted over CDP:
+  - the loading skeleton shows while the rule plan is already visible;
+  - the AI card, strategy and next-step advice render;
+  - the planted date and planted price are removed client-side;
+  - exactly one request is made;
+  - a reload is served from cache with zero requests;
+  - two quick budget edits produce one request;
+  - the unavailable state is quiet, and the previous profile's advice is not shown;
+  - returning to an earlier profile is served from cache;
+  - the diagnosis step never calls the model;
+  - zero console errors.
+- Regressions: tap suite 11/11, persistence suite passes, change-banner suite passes, no horizontal overflow at 360/390 px.
+- Mobile screenshots of the AI card reviewed; a duplicated disclaimer sentence was removed.
+
+NOT VERIFIED:
+- **No live Gemini call has run.** `.env.local` holds a three-character placeholder instead of a key, which Google rejects. Model availability on the free tier, real latency, the quality of real output, and how much of it survives the no-digits filter are all unmeasured.
+
+NEXT:
+- With a real key: run each preset through the route live and record latency and how many fields the filter kept. If too much advice is dropped for digits, tune the prompt rather than loosen the filter.
+- Then merge into master and redeploy with `GEMINI_API_KEY` set on Vercel.
+
+### COMPLETE TASK-CLAUDE-20260918-gemini-roadmap
+
+AGENT: CLAUDE
+STATUS: DONE (on branch `feat/ai-roadmap`; merging into master is the user's call)
+
+SUMMARY:
+- The live verification that was missing is done, and it changed the model choice.
+
+DEBUG TRAIL:
+- First live run on `gemini-3.8-flash` (the model the docs recommend): two presets timed out at 30 s and one returned 503. The fallback to rules behaved correctly.
+- Probing separated the causes. A one-word prompt to `gemini-3.8-flash` still timed out at 45 s, so the problem was free-tier overload, not our prompt or thinking settings. `gemini-3.5-flash` answered 503 "high demand". `gemini-2.5-flash` rejected our schema: "too many states" from the step-id enum. `gemini-2.5-flash-lite` is listed by the models endpoint but returns 404 for new users. `gemini-2.5-flash`, `gemini-3.5-flash-lite` and `gemini-3.1-flash-lite` answered a one-word prompt in 0.8–6.4 s.
+- Docs confirmed that thinking tokens count toward `maxOutputTokens`, so the limit was raised from 4096 to 8192 to avoid truncated answers. `thinkingConfig.thinkingLevel` is the accepted field; `minimal` is rejected by `gemini-3.8-flash`.
+
+CHANGES:
+- Default models are now `gemini-3.5-flash-lite` with fallback `gemini-3.1-flash-lite`. The adapter moves to the next model on timeout or HTTP errors (overload, quota, schema rejection), but not on blocked or malformed answers, because the same prompt is no safer on another model. `GEMINI_MODEL` accepts a comma-separated list.
+- The per-attempt timeout is 12 s, so two attempts fit inside `maxDuration = 30`.
+- README and `.env.example` updated with the models, the reasons for choosing them, and the live results.
+
+VERIFICATION:
+- Live `gemini-3.5-flash-lite`, called directly with the production prompt: 3.6–3.8 s per preset. The filter kept every strategy, 12/12, 12/12 and 11/11 step advice, and 3/3 extras; the model introduced zero digits.
+- Live through `/api/roadmap` on the dev server: 3.3–4.0 s per preset, all `ready`; a repeated profile is served from the server cache in 9 ms; no failure lines in the log.
+- Live in the browser at 390 px with no interception: "План от ИИ" and "Совет ИИ для вас" render, zero digits in AI text, zero console errors. The screenshot was reviewed: the advice refers to the preset's interests (business, international relations), its constraint (Foundation) and its budget.
+- Adapter unit checks 19/19, including the chain: 503 on the primary returns the fallback's answer; a block does not call the fallback; both failing return the last reason after two attempts; list override.
+- Mocked browser suite 16/16 still passes. `npm run typecheck`, `npm run lint`, `npm run build`, `git diff --check` → exit 0.
+
+LIMITATIONS:
+- Live output quality is good but not perfect. Seen in samples: one misspelling ("стидиальных") and one case slip ("в Европе и Азию"). The filter checks form, not grammar or meaning, which is why the card says these are advice, not university requirements.
+- Free-tier availability changes over time; the model chain and the rule fallback cover it, but a busy period may show the plan without AI.
+
+NEXT:
+- User: commit the branch, merge into master, set `GEMINI_API_KEY` in the Vercel project settings, deploy.
+
+## TASK TASK-CLAUDE-20260918-ai-plan-page
+
+AGENT: CLAUDE
+STATUS: DONE
+BRANCH: feat/ai-roadmap (on top of the uncommitted Gemini work)
+SCOPE: Move the AI layer off the roadmap step onto its own page, reached by a button on step 4 once roadmap progress is 100%.
+
+FILES:
+- `src/app/journey/ai/page.tsx` (new)
+- `src/features/roadmap/**`, `src/features/progress/**`, `src/features/journey/**`
+- `src/lib/useIsClient.ts` (new)
+- `README.md`, `AGENTS_CHANGELOG.md`
+
+ASSUMPTIONS:
+- "Отдельный эндпоинт" means a separate page the user navigates to; the `/api/roadmap` server endpoint is already separate and stays as is.
+- The page is gated in the same way as the button: opening it directly with progress below 100% shows a locked state and makes no model call, otherwise the gate would be cosmetic.
+- Concern raised with the user: behind a 100% gate the jury may never see the AI, and step advice arrives after the steps are done. The user asked for this explicitly, so it is built as asked and the advice is framed as a review of the finished plan.
+
+ACCEPTANCE:
+- The roadmap step makes no AI call and shows no AI card.
+- The "Открыть ИИ-план" button appears on step 4 only at 100% progress.
+- `/journey/ai` shows loading, ready (strategy, per-step advice by season, extras), unavailable, locked (below 100%) and empty (no saved journey) states.
+- `npm run typecheck`, `npm run lint`, `npm run build` exit 0.
+
+### COMPLETE TASK-CLAUDE-20260918-ai-plan-page
+
+AGENT: CLAUDE
+STATUS: DONE (branch `feat/ai-roadmap`, uncommitted together with the Gemini work)
+
+SUMMARY:
+- The AI no longer appears on the roadmap step: no card, no advice in "Следующий шаг", no model call.
+- At 100% roadmap progress, the "Все шаги закрыты" card on step 4 shows "Открыть ИИ-план", which leads to `/journey/ai`.
+- `/journey/ai` reads the saved journey on the client. It has five states:
+  - empty: no saved journey → "Сначала постройте маршрут";
+  - locked: below 100% → remaining steps with plural agreement, no model call;
+  - loading;
+  - ready: hero with the profile summary, a strategy card with extras, and "Разбор по шагам" grouped by season;
+  - unavailable: "ИИ сейчас недоступен — попробуйте открыть страницу чуть позже".
+- Supporting changes:
+  - `useIsClient` extracted from `JourneyEntry` into `src/lib`, now shared by both entries;
+  - `AiRoadmapCard` takes a `title` and an `unavailableText`, because "показан базовый план" would be false on a page that shows no plan;
+  - `NextActionCard` lost its `aiAdvice` prop and its CSS, now dead code.
+- Real bug found by the new test and fixed: the first client-side route transition (roadmap → AI page) triggered a Next 16 console warning about `scroll-behavior: smooth`. Per `node_modules/next/dist/docs/01-app/02-guides/upgrading/version-16.md`, Next no longer overrides smooth scrolling during navigation, so transitions would animate. Added `data-scroll-behavior="smooth"` on `<html>`: instant route transitions, smooth in-page anchors.
+
+FILES:
+- `src/app/journey/ai/page.tsx` (new)
+- `src/features/roadmap/{AiPlanPage.tsx,AiPlanPage.module.css}` (new), `src/features/roadmap/{AiRoadmapCard.tsx,useRoadmapAdvice.ts}`
+- `src/lib/useIsClient.ts` (new), `src/features/journey/{JourneyEntry.tsx,JourneyExperience.tsx}`
+- `src/features/progress/{ProgressPanel.tsx,Progress.module.css}`
+- `src/app/layout.tsx`, `README.md`
+
+VERIFICATION:
+- `npm run typecheck` → exit 0.
+- `npm run lint` → exit 0.
+- `npm run build` → exit 0; `/journey/ai` is static.
+- `git diff --check` → exit 0.
+- No orphaned CSS classes; 0 top-level :hover rules outside `@media (hover: hover)`.
+- Mocked browser suite (`/api/roadmap` intercepted), 22/22:
+  - the roadmap step shows no AI and makes zero requests;
+  - there is no button at 0%;
+  - a direct visit at 0% shows the lock with "осталось 12 шагов" and no request;
+  - with no journey saved, the empty state shows;
+  - 12 × "Выполнено" gives 100%, the button appears, still zero requests;
+  - the button navigates to `/journey/ai` and shows loading, then strategy, per-step advice and extras;
+  - the planted date is stripped;
+  - exactly one request; a reload is served from cache;
+  - "К плану" returns to step 4 with the button;
+  - the unavailable copy is honest;
+  - zero console messages after the scroll fix.
+- Live Gemini through the real flow: 5.4 s from the button tap to rendered advice, including the navigation and the 0.7 s debounce. All 12 steps got advice. Measured directly: 0 digits in the AI strategy card (1090 characters) and 0 in the step advice (1414 characters). The 9 digits an earlier broad selector counted come from the rule-written profile summary "9–10 класс · балл 4.6 · До $8 000", not from AI.
+- No horizontal overflow on `/journey/ai` at 360 or 390 px (empty and ready states). Screenshots reviewed.
+- Regressions: tap suite 11/11, persistence suite passes, change-banner suite passes.
+- The earlier mocked suite that asserted AI on the roadmap step is obsolete by design and replaced by the page suite.
+
+LIMITATIONS:
+- As raised with the user: behind the 100% gate, the jury only sees the AI after completing 11–12 steps. The step advice is shown after the steps are done, so it is framed as "Разбор по шагам". A visible locked button before 100% would improve discoverability and is a one-line change if wanted.

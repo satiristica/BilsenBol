@@ -15,7 +15,9 @@ type RootLayoutProps = Readonly<{
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="ru">
+    // globals.css sets smooth scrolling for in-page anchors; this attribute tells
+    // Next 16 to switch it off during route transitions so they jump instantly.
+    <html data-scroll-behavior="smooth" lang="ru">
       <body>{children}</body>
     </html>
   );

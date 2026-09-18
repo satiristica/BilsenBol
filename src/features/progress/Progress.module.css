@@ -148,6 +148,19 @@
   color: var(--accent-bright);
 }
 
+.finishedText {
+  margin: 0;
+  max-width: 52ch;
+  color: var(--ink-dim);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.finishedAction {
+  justify-self: start;
+  margin-top: 4px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fill::after {
     display: none;

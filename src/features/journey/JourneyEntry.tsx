@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 
 import type { ApplicantProfile } from "@/domain/profile";
+import { useIsClient } from "@/lib/useIsClient";
 
 import { JourneyExperience } from "./JourneyExperience";
 import { loadJourney, resolveInitialJourney } from "./journeyPersistence";
@@ -14,8 +15,6 @@ interface JourneyEntryProps {
   requestedStep: JourneyStep | null;
 }
 
-const neverChanges = () => () => {};
-
 /**
  * The saved journey lives in localStorage, which the server cannot see.
  * `isClient` is false during the server render and during hydration, so both
@@ -24,11 +23,7 @@ const neverChanges = () => () => {};
  * state update.
  */
 export function JourneyEntry({ presetProfile, requestedStep }: JourneyEntryProps) {
-  const isClient = useSyncExternalStore(
-    neverChanges,
-    () => true,
-    () => false,
-  );
+  const isClient = useIsClient();
 
   if (!isClient) {
     return <JourneySkeleton />;
