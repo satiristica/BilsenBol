@@ -2509,3 +2509,34 @@ VERIFICATION:
 - The overflow suite shows 0 px horizontal scroll on every screen at 360/390/1280 px.
 - Screenshots reviewed: desktop diagnosis, recommendations and roadmap; mobile recommendations and roadmap.
 - `tsc`, `eslint`, `build` → exit 0.
+
+## TASK TASK-CLAUDE-20260919-mobile-header
+
+AGENT: CLAUDE
+STATUS: DONE (uncommitted)
+SCOPE: User report «мобильный интерфейс сломался». On phones the journey header had wrapped into three rows (brand / bell + «Начать заново» / date badge) once the bell was added, pushing the content down.
+
+CHANGES:
+- `.topBar` no longer wraps. `ResetControl` becomes an icon-only 40 px button below 640 px; its label is clipped, not removed, so it stays the accessible name and the tests still find it by text.
+- The «Проверено 19.09.2026» badge shows only from 640 px. On phones the same date is in the notice above the programme list («…проверены 19.09.2026 · сверяйтесь перед подачей»).
+
+VERIFICATION:
+- Mobile screenshots (390 px) of recommendations and roadmap: the header is one row (brand, bell, reset icon).
+- Overflow suite: 0 px at 360/390/1280 px.
+- tap, persist (which uses «Начать заново») and bell all pass on a temporary `next dev -p 3100`, stopped afterwards.
+- `tsc`, `eslint`, `build` → exit 0.
+
+### Follow-up: wizard overflow on narrow phones (user screenshot, ~330 px viewport)
+- Symptom: at about 330 CSS px the wizard card shrank, but its content (progress row, options, footer chips) kept its min-content width of 313 px and spilled past the card's right edge.
+- Root cause: the wizard grids had no column track and fell back to `auto`. The `fieldset.question` kept the browser default `min-inline-size: min-content`. The summary chips (flex items, `min-width: auto`) could not use their ellipsis.
+- Fix in `ProfileWizard.module.css`:
+  - `.wizard` and `.footer` get `grid-template-columns: minmax(0, 1fr)`;
+  - `.question` gets `min-inline-size: 0`;
+  - `.summary > li` gets `min-width: 0; max-width: 100%`;
+  - `.summaryValue` gets `min-width: 0`.
+- Verification:
+  - a probe at 320 and 330 px reports 0 px of extra width and no element wider than its parent on the wizard, the diagnosis, recommendations for two presets, the roadmap and the landing;
+  - the 330 px wizard screenshot was reviewed;
+  - the overflow suite now also runs at 330 px and passes;
+  - tap and persist pass;
+  - `tsc`, `eslint`, `build` → exit 0.

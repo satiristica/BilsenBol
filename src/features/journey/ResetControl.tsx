@@ -27,7 +27,7 @@ export function ResetControl({ onReset }: ResetControlProps) {
     return (
       <button className={styles.trigger} onClick={() => setConfirming(true)} type="button">
         <RotateCcw aria-hidden="true" size={14} strokeWidth={2.4} />
-        Начать заново
+        <span className={styles.triggerLabel}>Начать заново</span>
       </button>
     );
   }

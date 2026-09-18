@@ -1,5 +1,7 @@
 .wizard {
   display: grid;
+  /* minmax(0, …) so the card's rows shrink with narrow phones (~330 px). */
+  grid-template-columns: minmax(0, 1fr);
   gap: 22px;
   border: 1px solid var(--line-strong);
   border-radius: 26px;
@@ -87,6 +89,8 @@
 .question {
   display: grid;
   gap: 20px;
+  /* A fieldset defaults to min-inline-size: min-content and would not shrink. */
+  min-inline-size: 0;
   border: 0;
   margin: 0;
   min-height: 290px;
@@ -294,6 +298,7 @@
 
 .footer {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   border-top: 1px solid var(--line);
   padding-top: 20px;
@@ -325,6 +330,11 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.summary > li {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .summaryChip {
@@ -375,6 +385,8 @@
 }
 
 .summaryValue {
+  /* Flex items default to min-width: auto, which would defeat the ellipsis. */
+  min-width: 0;
   overflow: hidden;
   font-weight: 700;
   text-overflow: ellipsis;

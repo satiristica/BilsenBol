@@ -27,7 +27,7 @@
 
 .topBar {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -60,6 +60,7 @@
 }
 
 .sourceTag {
+  display: none;
   border: 1px dashed var(--line-strong);
   border-radius: 999px;
   color: var(--muted);
@@ -68,6 +69,14 @@
   letter-spacing: 0.08em;
   padding: 6px 11px;
   text-transform: uppercase;
+}
+
+/* The date badge fits next to the actions only from tablet width; on phones
+   the same date is in the notice above the programme list. */
+@media (min-width: 640px) {
+  .sourceTag {
+    display: inline-block;
+  }
 }
 
 /* Four equal columns at every width, so all steps stay visible on a phone. */
