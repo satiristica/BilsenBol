@@ -1543,3 +1543,36 @@ LIMITATIONS:
 
 FOLLOW_UP:
 - Add photographer credits once the names are confirmed on each Unsplash photo page.
+
+## TASK TASK-CLAUDE-20260918-wizard-manual-advance
+
+AGENT: CLAUDE
+STATUS: DONE
+BASE_COMMIT: 2ccf6ee58f045b8c525755550ae3875b2748c376
+SCOPE: Stop the profile wizard from advancing on its own after a single-choice answer.
+
+### COMPLETE TASK-CLAUDE-20260918-wizard-manual-advance
+
+AGENT: CLAUDE
+STATUS: DONE
+
+SUMMARY:
+- User report: picking an option on a single-choice question (grade, English, budget) jumped to the next question without pressing "Далее". The user wants to confirm each answer themselves.
+- Selecting an option now only records the answer. The only ways to move are "Далее", Enter, "Назад" and the summary chips.
+
+FILES:
+- `src/features/profile/ProfileWizard.tsx` (removed the 260 ms advance timer, its ref, its cleanup effect and the three call sites that cleared it)
+- `src/features/profile/profileQuestions.ts` (comment no longer claims single-choice questions advance)
+
+VERIFICATION:
+- `npm run typecheck` → exit 0.
+- `npm run lint` → exit 0.
+- `npm run build` → exit 0.
+- `git diff --check` → exit 0.
+- Grep for `setTimeout`, `AUTO_ADVANCE`, `advanceTimer`, `clearTimer` in the wizard → no matches.
+
+NOT VERIFIED:
+- Not clicked through in a browser; the Chrome extension is not connected.
+
+LIMITATIONS:
+- NONE

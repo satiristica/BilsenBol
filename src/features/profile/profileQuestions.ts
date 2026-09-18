@@ -13,8 +13,7 @@ export type QuestionId = "grade" | "gpa" | "english" | "budget" | "fields" | "re
 
 /**
  * A question either picks one value, picks several, or moves a scale.
- * Only `single` questions may advance on their own: on the other two the user
- * has not finished answering when the first control changes.
+ * No kind advances on its own; the user always moves on with "Далее".
  */
 export type QuestionKind = "single" | "multi" | "scale";
 

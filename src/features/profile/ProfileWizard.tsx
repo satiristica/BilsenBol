@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, Check, type LucideIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ActionButton } from "@/components/ActionButton";
 import {
@@ -34,9 +34,6 @@ import {
   type ProfileQuestion,
 } from "./profileQuestions";
 import styles from "./ProfileWizard.module.css";
-
-/** How long the chosen option stays visible before the next question opens. */
-const AUTO_ADVANCE_MS = 260;
 
 interface ProfileWizardProps {
   profile: ApplicantProfile;
@@ -91,7 +88,6 @@ function selectedValues(profile: ApplicantProfile, id: ProfileQuestion["id"]): s
 
 export function ProfileWizard({ profile, onChange, onSubmit }: ProfileWizardProps) {
   const [index, setIndex] = useState(0);
-  const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const question = PROFILE_QUESTIONS[index];
   const isLast = index === PROFILE_QUESTIONS.length - 1;
   const options = optionsFor(question.id);
@@ -109,25 +105,9 @@ export function ProfileWizard({ profile, onChange, onSubmit }: ProfileWizardProp
     setIndex((current) => Math.min(current + 1, PROFILE_QUESTIONS.length - 1));
   };
 
-  const clearTimer = () => {
-    if (advanceTimer.current) {
-      clearTimeout(advanceTimer.current);
-      advanceTimer.current = null;
-    }
-  };
-
-  useEffect(() => clearTimer, []);
-
+  // Picking an answer never advances on its own: the user moves on with "Далее".
   const applySingle = (value: string) => {
-    clearTimer();
     onChange({ ...profile, [question.id]: value } as ApplicantProfile);
-    if (isLast) {
-      return;
-    }
-    // A single-choice answer is complete the moment it is picked.
-    advanceTimer.current = setTimeout(() => {
-      setIndex((current) => Math.min(current + 1, PROFILE_QUESTIONS.length - 1));
-    }, AUTO_ADVANCE_MS);
   };
 
   const toggleMulti = (value: string) => {
@@ -189,10 +169,7 @@ export function ProfileWizard({ profile, onChange, onSubmit }: ProfileWizardProp
           <button
             className={styles.back}
             disabled={index === 0}
-            onClick={() => {
-              clearTimer();
-              setIndex((current) => Math.max(current - 1, 0));
-            }}
+            onClick={() => setIndex((current) => Math.max(current - 1, 0))}
             type="button"
           >
             <ArrowLeft aria-hidden="true" size={16} strokeWidth={2.4} /> Назад
@@ -316,10 +293,7 @@ export function ProfileWizard({ profile, onChange, onSubmit }: ProfileWizardProp
                     styles.summaryChip,
                     itemIndex === index && styles.summaryChipCurrent,
                   )}
-                  onClick={() => {
-                    clearTimer();
-                    setIndex(itemIndex);
-                  }}
+                  onClick={() => setIndex(itemIndex)}
                   type="button"
                 >
                   <span className={styles.summaryKey}>{item.chipLabel}</span>
