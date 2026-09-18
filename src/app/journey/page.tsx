@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { DEFAULT_PROFILE, findPreset } from "@/domain/profile";
-import { JourneyExperience } from "@/features/journey/JourneyExperience";
+import { findPreset } from "@/domain/profile";
+import { JourneyEntry } from "@/features/journey/JourneyEntry";
 import { isJourneyStep } from "@/features/journey/steps";
 
 export const metadata: Metadata = {
@@ -16,23 +16,12 @@ interface JourneyPageProps {
 
 export default async function JourneyPage({ searchParams }: JourneyPageProps) {
   const params = await searchParams;
-  const requestedPreset = params.preset;
-  const preset = findPreset(
-    typeof requestedPreset === "string" ? requestedPreset : undefined,
-  );
-
-  // A preset already answers the profile questions, so it opens on the result.
-  const requestedStep = params.step;
-  const initialStep = isJourneyStep(requestedStep)
-    ? requestedStep
-    : preset
-      ? "diagnosis"
-      : "profile";
+  const preset = findPreset(typeof params.preset === "string" ? params.preset : undefined);
 
   return (
-    <JourneyExperience
-      initialProfile={preset?.profile ?? DEFAULT_PROFILE}
-      initialStep={initialStep}
+    <JourneyEntry
+      presetProfile={preset?.profile ?? null}
+      requestedStep={isJourneyStep(params.step) ? params.step : null}
     />
   );
 }

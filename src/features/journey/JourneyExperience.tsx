@@ -2,7 +2,7 @@
 
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ActionButton } from "@/components/ActionButton";
 import { DEMO_DATA_BADGE } from "@/data/programs";
@@ -23,26 +23,41 @@ import { NextActionCard, ProgressMeter } from "@/features/progress/ProgressPanel
 import { RoadmapTimeline } from "@/features/roadmap/RoadmapTimeline";
 import { classNames } from "@/lib/classNames";
 
+import { clearJourney, saveJourney, type JourneySnapshot } from "./journeyPersistence";
+import { ResetControl } from "./ResetControl";
 import { STEP_NAMES, STEP_ORDER, type JourneyStep } from "./steps";
 
 import styles from "./JourneyExperience.module.css";
 
 interface JourneyExperienceProps {
-  initialProfile?: ApplicantProfile;
-  initialStep?: JourneyStep;
+  initial: JourneySnapshot;
 }
 
-export function JourneyExperience({
-  initialProfile = DEFAULT_PROFILE,
-  initialStep = "profile",
-}: JourneyExperienceProps) {
-  const [profile, setProfile] = useState<ApplicantProfile>(initialProfile);
-  const [step, setStep] = useState<JourneyStep>(initialStep);
+export function JourneyExperience({ initial }: JourneyExperienceProps) {
+  const [profile, setProfile] = useState<ApplicantProfile>(initial.profile);
+  const [step, setStep] = useState<JourneyStep>(initial.step);
   const [completedStepIds, setCompletedStepIds] = useState<ReadonlySet<string>>(
-    () => new Set<string>(),
+    () => new Set(initial.completedStepIds),
   );
   const [comparedProgramIds, setComparedProgramIds] = useState<string[]>([]);
   const [isComparisonOpen, setComparisonOpen] = useState(false);
+  // Bumped on reset so the wizard remounts at its first question.
+  const [resetCount, setResetCount] = useState(0);
+
+  // Every change is written through to storage, so a reload resumes here.
+  useEffect(() => {
+    saveJourney({ profile, step, completedStepIds: [...completedStepIds] });
+  }, [profile, step, completedStepIds]);
+
+  const resetJourney = () => {
+    clearJourney();
+    setProfile(DEFAULT_PROFILE);
+    setStep("profile");
+    setCompletedStepIds(new Set<string>());
+    setComparedProgramIds([]);
+    setComparisonOpen(false);
+    setResetCount((count) => count + 1);
+  };
 
   // Everything downstream is derived from the profile, so any profile edit
   // recomputes the diagnosis, the catalogue ranking and the roadmap at once.
@@ -137,7 +152,10 @@ export function JourneyExperience({
           </span>
           <span>BilsenBol</span>
         </Link>
-        <span className={styles.demoTag}>{DEMO_DATA_BADGE}</span>
+        <div className={styles.topActions}>
+          <ResetControl onReset={resetJourney} />
+          <span className={styles.demoTag}>{DEMO_DATA_BADGE}</span>
+        </div>
       </header>
 
       <nav aria-label="Этапы маршрута">
@@ -174,7 +192,7 @@ export function JourneyExperience({
         </div>
       )}
 
-      <main className={styles.content} key={step}>
+      <main className={styles.content} key={`${step}-${resetCount}`}>
         {step === "profile" ? (
           <ProfileWizard
             onChange={setProfile}

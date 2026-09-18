@@ -66,6 +66,13 @@
   outline-offset: 4px;
 }
 
+.topActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
 .demoTag {
   border: 1px dashed var(--line-strong);
   border-radius: 999px;

@@ -1,0 +1,50 @@
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.shell {
+  display: grid;
+  gap: 22px;
+  width: min(1180px, calc(100% - 32px));
+  margin-inline: auto;
+  padding-block: 18px 140px;
+}
+
+.bar,
+.stepper,
+.card {
+  border-radius: 18px;
+  background: var(--surface);
+  animation: breathe 1.6s ease-in-out infinite;
+}
+
+.bar {
+  height: 62px;
+}
+
+.stepper {
+  height: 58px;
+  animation-delay: 0.15s;
+}
+
+.card {
+  height: min(560px, 70vh);
+  border-radius: 26px;
+  animation-delay: 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar,
+  .stepper,
+  .card {
+    animation: none;
+    opacity: 0.6;
+  }
+}

@@ -1,0 +1,58 @@
+.trigger,
+.yes,
+.no {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 7px 13px;
+  transition:
+    border-color 220ms var(--ease-out),
+    color 220ms var(--ease-out);
+}
+
+.trigger:focus-visible,
+.yes:focus-visible,
+.no:focus-visible {
+  outline: 2px solid var(--warn);
+  outline-offset: 2px;
+}
+
+.confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  animation: fade 220ms var(--ease-out);
+}
+
+.question {
+  color: var(--warn-ink);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.yes {
+  border-color: var(--warn-line);
+  background: var(--warn-soft);
+  color: var(--warn-ink);
+}
+
+@media (hover: hover) {
+  .trigger:hover,
+  .no:hover {
+    border-color: var(--accent-line);
+    color: var(--ink);
+  }
+
+  .yes:hover {
+    border-color: var(--warn);
+  }
+}

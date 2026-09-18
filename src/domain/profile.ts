@@ -154,3 +154,51 @@ export function findPreset(presetId: string | undefined): ProfilePreset | undefi
   }
   return PROFILE_PRESETS.find((preset) => preset.id === presetId);
 }
+
+function isOneOf<T extends string>(
+  options: readonly LabelledOption<T>[],
+  value: unknown,
+): value is T {
+  return typeof value === "string" && options.some((option) => option.value === value);
+}
+
+function parseOptionList<T extends string>(
+  options: readonly LabelledOption<T>[],
+  value: unknown,
+): T[] | null {
+  if (!Array.isArray(value) || !value.every((item) => isOneOf(options, item))) {
+    return null;
+  }
+  return [...new Set(value as T[])];
+}
+
+/**
+ * Validates a profile that came from outside the app (saved state, URL).
+ * Returns null unless every field is valid; a half-valid profile is never
+ * repaired, because guessing a field would silently change recommendations.
+ */
+export function parseApplicantProfile(value: unknown): ApplicantProfile | null {
+  if (typeof value !== "object" || value === null) {
+    return null;
+  }
+  const candidate = value as Record<string, unknown>;
+  const { grade, gpa, english, budget } = candidate;
+  const fields = parseOptionList(FIELD_OPTIONS, candidate.fields);
+  const regions = parseOptionList(REGION_OPTIONS, candidate.regions);
+
+  if (
+    !isOneOf(GRADE_OPTIONS, grade) ||
+    !isOneOf(ENGLISH_OPTIONS, english) ||
+    !isOneOf(BUDGET_OPTIONS, budget) ||
+    typeof gpa !== "number" ||
+    !Number.isFinite(gpa) ||
+    gpa < GPA_MIN ||
+    gpa > GPA_MAX ||
+    fields === null ||
+    regions === null
+  ) {
+    return null;
+  }
+
+  return { grade, gpa, english, budget, fields, regions };
+}

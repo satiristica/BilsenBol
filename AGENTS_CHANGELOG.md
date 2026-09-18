@@ -1650,3 +1650,91 @@ FILES:
 
 SECURITY NOTE:
 - This relaxes a dev-server safety default for the private `192.168.0.0/16` range only, and only in development. It does not affect production builds.
+
+## TASK TASK-CLAUDE-20260918-journey-persistence
+
+AGENT: CLAUDE
+STATUS: DONE
+BASE_COMMIT: d660e106020913b2c790b9d9b6a1651607ce6990
+SCOPE: Persist the journey (profile, current step, completed roadmap steps) across reloads, with a way to start over.
+
+FILES:
+- `src/app/journey/page.tsx`
+- `src/domain/profile.ts` (stored-profile validation)
+- `src/lib/**`
+- `src/features/journey/**`
+- `AGENTS_CHANGELOG.md`
+
+DEPENDENCIES:
+- NONE
+
+ASSUMPTIONS:
+- localStorage is the persistence layer (AGENTS.md section 6 allows it for demo persistence); no backend.
+- Stored data is untrusted input and is validated on read; anything invalid or from another schema version is discarded, never partially trusted.
+- A preset in the URL is an explicit request to start from that example: it wins over stored state and starts with a clean roadmap. URL parameters are consumed once and then removed, so a reload restores the saved session instead of re-applying the preset.
+- The comparison selection and the wizard's current question are transient and are not persisted.
+
+ACCEPTANCE:
+- Reloading any journey step keeps the profile, the step and the marked roadmap progress.
+- Corrupt, foreign or unavailable storage never breaks the page; the journey falls back to defaults or in-memory state.
+- A visible control resets the journey and clears the saved state.
+- No hydration mismatch.
+- `npm run typecheck`, `npm run lint`, `npm run build` exit 0.
+
+### COMPLETE TASK-CLAUDE-20260918-journey-persistence
+
+AGENT: CLAUDE
+STATUS: DONE
+
+SUMMARY:
+- The journey survives reloads: the profile, the current step and the marked roadmap steps are written to localStorage on every change and restored on the next visit.
+- A preset link is an explicit fresh start: it wins over saved state and begins with an empty roadmap. `?preset` and `?step` are consumed once and then removed from the address with `history.replaceState`, so reloading after a preset restores the session instead of re-applying the preset.
+- "Начать заново" in the top bar resets the journey after an inline confirmation; the safe "Нет" receives focus.
+- A skeleton covers the moment between server render and the client reading storage.
+
+COMMITS:
+- UNCOMMITTED
+
+FILES:
+- `src/domain/profile.ts` (added `parseApplicantProfile`)
+- `src/lib/browserStorage.ts` (new)
+- `src/features/journey/{journeyPersistence.ts,JourneyEntry.tsx,JourneySkeleton.tsx,JourneySkeleton.module.css,ResetControl.tsx,ResetControl.module.css}` (new)
+- `src/features/journey/{JourneyExperience.tsx,JourneyExperience.module.css}`
+- `src/app/journey/page.tsx`
+
+CONTRACTS / INTERFACES:
+- `JourneyExperience` now takes a single `initial: JourneySnapshot` prop instead of `initialProfile` / `initialStep`; `JourneyEntry` is the only caller.
+- Storage key `bilsenbol.journey`, payload `{ version: 1, profile, step, completedStepIds }`. Changing that shape requires bumping `STORAGE_VERSION`, which discards older payloads rather than misreading them.
+
+ARCHITECTURE / DECISIONS:
+- Hydration: the server cannot see localStorage. `JourneyEntry` uses `useSyncExternalStore` with a server snapshot of `false`, so the server render and the hydration pass both output the skeleton, and the client mounts the real journey only after hydration. That rules out a mismatch without an effect that sets state (which `react-hooks/set-state-in-effect` rejects) and without `next/dynamic`.
+- Stored data is untrusted. `parseApplicantProfile` and `parseStoredJourney` validate every field against the domain option lists and reject the whole payload on any invalid field, never repairing it: a guessed field would silently change the recommendations. The one normalisation is de-duplicating list entries.
+- A hand-written validator instead of Zod: the shape has six enumerable fields, so adding a dependency would not pay for itself (AGENTS.md section 11).
+- Every storage access goes through `browserStorage.ts`, which never throws, because storage can be absent, blocked by privacy settings, or full.
+- The comparison selection and the wizard's current question are deliberately not persisted.
+
+VERIFICATION:
+- `npm run typecheck` → exit 0.
+- `npm run lint` → exit 0.
+- `npm run build` → exit 0.
+- `git diff --check` → exit 0.
+- Pure-function checks (compiled into the scratchpad), 20/20: valid profile accepted; unknown grade, out-of-range, string or NaN GPA, unknown field, and non-object inputs rejected; duplicate fields collapsed; payloads with the wrong or a missing version, an unknown step, non-string ids, more than 100 ids, or one invalid nested field rejected whole; the resolution rules give defaults when nothing is stored, restore the saved session, let a preset win and clear progress, let `?step` override the saved step, and keep an incomplete profile on the profile step.
+- Headless Chrome with touch at 390x844 against the dev server, 20/20 scenarios:
+  - A: a preset link loses its query string after use; "Выполнено" gives 9%; a budget chip switches; after a reload the step, the 9% and the budget are all intact.
+  - B: with saved progress, a preset link opens diagnosis and the roadmap restarts at 0%.
+  - C: non-JSON, foreign-version, and invalid-enum payloads each fall back to the first wizard question, and the page stays alive.
+  - D: with `window.localStorage` made to throw on access, the page renders and the buttons work.
+  - E: the reset asks for confirmation with focus on "Нет"; "Да" returns to the first question; the reset survives a reload; the stored payload is the default profile with empty progress.
+  - Zero console errors or warnings across the whole run, and no hydration message.
+- The 10-control tap suite still passes 10/10.
+
+NOT VERIFIED:
+- Not exercised on a physical phone.
+- The skeleton's appearance was not visually reviewed.
+
+LIMITATIONS:
+- Progress is per browser: no account or sync, as expected for localStorage.
+- The landing page still labels its call to action "Начать" even when a saved session exists; it now resumes that session rather than starting fresh.
+
+FOLLOW_UP:
+- Consider showing "Продолжить" on the landing page when a saved session exists.
