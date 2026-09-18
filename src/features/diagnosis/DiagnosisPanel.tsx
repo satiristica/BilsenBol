@@ -1,4 +1,11 @@
-import { Hourglass, type LucideIcon, TrendingUp, TriangleAlert } from "lucide-react";
+import {
+  Hourglass,
+  type LucideIcon,
+  Target,
+  TrendingUp,
+  TriangleAlert,
+  UserRound,
+} from "lucide-react";
 
 import type { Diagnosis, InsightKind } from "@/domain/diagnosis";
 import { classNames } from "@/lib/classNames";
@@ -24,6 +31,23 @@ const INSIGHT_ICONS: Record<InsightKind, LucideIcon> = {
 export function DiagnosisPanel({ diagnosis }: DiagnosisPanelProps) {
   return (
     <div className={styles.panel}>
+      <dl className={styles.summary}>
+        <div className={styles.summaryRow}>
+          <dt className={styles.summaryKey}>
+            <UserRound aria-hidden="true" size={16} strokeWidth={2.3} />
+            Профиль
+          </dt>
+          <dd className={styles.summaryValue}>{diagnosis.profileSummary}</dd>
+        </div>
+        <div className={styles.summaryRow}>
+          <dt className={styles.summaryKey}>
+            <Target aria-hidden="true" size={16} strokeWidth={2.3} />
+            Цель
+          </dt>
+          <dd className={styles.summaryValue}>{diagnosis.goal}</dd>
+        </div>
+      </dl>
+
       <article className={styles.statusCard}>
         <p className={styles.statusMeta}>
           <span aria-hidden="true" className={styles.statusDot} />

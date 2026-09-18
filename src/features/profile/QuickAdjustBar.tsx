@@ -6,12 +6,15 @@ import { useId, useState } from "react";
 import {
   BUDGET_OPTIONS,
   ENGLISH_OPTIONS,
+  FIELD_OPTIONS,
   GPA_MAX,
   GPA_MIN,
   GPA_STEP,
+  REGION_OPTIONS,
   formatGpa,
   labelOf,
   type ApplicantProfile,
+  type LabelledOption,
 } from "@/domain/profile";
 
 import styles from "./QuickAdjustBar.module.css";
@@ -22,12 +25,69 @@ interface QuickAdjustBarProps {
   onEditFullProfile: () => void;
 }
 
+interface MultiToggleRowProps<T extends string> {
+  id: string;
+  label: string;
+  options: readonly LabelledOption<T>[];
+  selected: readonly T[];
+  onChange: (next: T[]) => void;
+}
+
+/**
+ * Several-of-many chips. The last selected chip cannot be switched off: a
+ * profile without an interest or a region cannot be matched, and the result
+ * screens would lose their data.
+ */
+function MultiToggleRow<T extends string>({
+  id,
+  label,
+  options,
+  selected,
+  onChange,
+}: MultiToggleRowProps<T>) {
+  return (
+    <div className={styles.row}>
+      <span className={styles.rowLabel} id={id}>
+        {label}
+      </span>
+      <div aria-labelledby={id} className={styles.chips} role="group">
+        {options.map((option) => {
+          const isOn = selected.includes(option.value);
+          const isLastOn = isOn && selected.length === 1;
+          return (
+            <button
+              aria-disabled={isLastOn || undefined}
+              aria-pressed={isOn}
+              className={styles.chip}
+              key={option.value}
+              onClick={() => {
+                if (isLastOn) {
+                  return;
+                }
+                onChange(
+                  isOn
+                    ? selected.filter((value) => value !== option.value)
+                    : [...selected, option.value],
+                );
+              }}
+              type="button"
+            >
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function roundGpa(value: number): number {
   return Math.round(value * 10) / 10;
 }
 
 /**
- * Lets the applicant flip the inputs that move results the most and see the
+ * Lets the applicant flip the inputs the jury scenario names (budget,
+ * interests, countries, exam) plus GPA, and see the
  * recommendations, diagnosis and roadmap recompute without leaving the result.
  * Collapsed to a one-line summary by default so the results, not the
  * controls, fill the first screen on a phone.
@@ -105,6 +165,22 @@ export function QuickAdjustBar({
             ))}
           </div>
         </div>
+
+        <MultiToggleRow
+          id="quick-fields"
+          label="Интересы · хотя бы один"
+          onChange={(fields) => onChange({ ...profile, fields })}
+          options={FIELD_OPTIONS}
+          selected={profile.fields}
+        />
+
+        <MultiToggleRow
+          id="quick-regions"
+          label="Регионы · хотя бы один"
+          onChange={(regions) => onChange({ ...profile, regions })}
+          options={REGION_OPTIONS}
+          selected={profile.regions}
+        />
 
         <div className={styles.row}>
           <span className={styles.rowLabel} id="quick-gpa">

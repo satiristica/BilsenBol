@@ -1,4 +1,8 @@
-import { hasEnglishCertificate, type ApplicantProfile } from "@/domain/profile";
+import {
+  hasEnglishCertificate,
+  type ApplicantProfile,
+  type StudyField,
+} from "@/domain/profile";
 import type { RecommendationResult } from "@/domain/matching";
 
 export type RoadmapSeason = "autumn" | "winter" | "spring";
@@ -30,6 +34,34 @@ export interface RoadmapProgress {
 }
 
 const SEASON_ORDER: readonly RoadmapSeason[] = ["autumn", "winter", "spring"];
+
+/**
+ * Extracurricular activity suggestions per field: generic guidance, not
+ * requirements of any institution, so no source is needed beyond the
+ * roadmap-wide notice that steps are orientation only.
+ */
+const ACTIVITY_BY_FIELD: Record<StudyField, { title: string; detail: string }> = {
+  it: {
+    title: "Сделать IT-проект или поучаствовать в хакатоне",
+    detail: "Небольшое приложение или бот на GitHub показывает интерес к направлению лучше любых слов.",
+  },
+  business: {
+    title: "Поучаствовать в олимпиаде по экономике или бизнес-кейсе",
+    detail: "Разбор реального кейса или школьный проект с цифрами добавит веса мотивационному письму.",
+  },
+  engineering: {
+    title: "Собрать инженерный проект или пойти в кружок робототехники",
+    detail: "Фото и описание собранного своими руками — сильный аргумент для инженерных программ.",
+  },
+  medicine: {
+    title: "Найти волонтёрство в медицине или олимпиаду по биологии",
+    detail: "Опыт рядом с медициной показывает, что выбор направления осознанный.",
+  },
+  humanities: {
+    title: "Выступить на дебатах, модели ООН или в конкурсе эссе",
+    detail: "Публичные выступления и тексты — главное портфолио гуманитария.",
+  },
+};
 
 export function buildRoadmap(
   profile: ApplicantProfile,
@@ -69,6 +101,17 @@ export function buildRoadmap(
       detail: "Аттестат или табель, паспорт, переводы и заверенные копии готовят заранее.",
     },
   ];
+
+  // The id carries the field, so changing the main interest swaps this step
+  // for another one instead of silently rewording it.
+  const mainField = profile.fields[0];
+  if (mainField) {
+    autumn.push({
+      id: `autumn-activities-${mainField}`,
+      season: "autumn",
+      ...ACTIVITY_BY_FIELD[mainField],
+    });
+  }
 
   if (grantFocused || profile.gpa < 4.7) {
     autumn.push({
@@ -116,7 +159,7 @@ export function buildRoadmap(
       id: "spring-compare-offers",
       season: "spring",
       title: "Сравнить полученные офферы",
-      detail: "Сравнивайте не только стоимость: срок обучения, язык и шанс на стипендию важнее.",
+      detail: "Сравнивайте не только стоимость: срок обучения, язык и условия стипендии важнее.",
     },
     {
       id: "spring-confirm",

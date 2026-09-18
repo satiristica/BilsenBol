@@ -1,6 +1,13 @@
 import {
+  BUDGET_OPTIONS,
+  ENGLISH_OPTIONS,
+  FIELD_OPTIONS,
+  GRADE_OPTIONS,
   GRANT_COMPETITIVE_GPA,
+  REGION_OPTIONS,
+  formatGpa,
   hasEnglishCertificate,
+  labelOf,
   type ApplicantProfile,
 } from "@/domain/profile";
 import type { RecommendationResult } from "@/domain/matching";
@@ -22,6 +29,10 @@ export interface DiagnosisInsight {
 }
 
 export interface Diagnosis {
+  /** One line restating who the applicant is, so the diagnosis is checkable. */
+  profileSummary: string;
+  /** The educational goal the recommendations are built for. */
+  goal: string;
   status: ReadinessStatus;
   statusLabel: string;
   statusDetail: string;
@@ -187,6 +198,16 @@ export function buildDiagnosis(
 ): Diagnosis {
   const status = resolveStatus(profile);
   return {
+    profileSummary: [
+      labelOf(GRADE_OPTIONS, profile.grade),
+      `балл ${formatGpa(profile.gpa)}`,
+      // Exam names (IELTS, Duolingo) keep their casing; only the plain phrase is lowered.
+      `английский: ${profile.english === "school" ? "только школьный" : labelOf(ENGLISH_OPTIONS, profile.english)}`,
+      labelOf(BUDGET_OPTIONS, profile.budget),
+    ].join(" · "),
+    goal: `Бакалавриат: ${profile.fields
+      .map((field) => labelOf(FIELD_OPTIONS, field))
+      .join(", ")} — ${profile.regions.map((region) => labelOf(REGION_OPTIONS, region)).join(", ")}`,
     status,
     statusLabel: STATUS_LABELS[status],
     statusDetail: describeStatus(status, profile, result),

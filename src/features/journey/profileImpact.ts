@@ -7,11 +7,13 @@ import { buildRoadmap, listSteps } from "@/domain/roadmap";
 export interface JourneyFacts {
   matchCount: number;
   leader: string | null;
+  /** Matches in ranked order; soft preferences can reorder without changing the count. */
+  ranking: { id: string; name: string; score: number }[];
   statusLabel: string;
   planSteps: { id: string; title: string }[];
 }
 
-export type ImpactKind = "matches" | "status" | "leader" | "plan" | "none";
+export type ImpactKind = "matches" | "status" | "leader" | "ranking" | "plan" | "none";
 
 export interface ImpactItem {
   kind: ImpactKind;
@@ -25,6 +27,11 @@ export function collectFacts(profile: ApplicantProfile): JourneyFacts {
   return {
     matchCount: result.matches.length,
     leader: result.matches[0]?.program.programName ?? null,
+    ranking: result.matches.map((match) => ({
+      id: match.program.id,
+      name: match.program.programName,
+      score: match.score,
+    })),
     statusLabel: buildDiagnosis(profile, result).statusLabel,
     planSteps: listSteps(buildRoadmap(profile, result)).map(({ id, title }) => ({ id, title })),
   };
@@ -51,6 +58,27 @@ export function describeProfileImpact(before: JourneyFacts, after: JourneyFacts)
   if (before.leader !== after.leader && after.leader !== null) {
     items.push({ kind: "leader", text: `Лидер подборки: «${after.leader}»` });
   }
+  // Adding a second interest keeps the count and the leader but moves
+  // programmes up the list; reporting "nothing changed" there would be false.
+  const oldRank = new Map(before.ranking.map((entry, index) => [entry.id, index + 1]));
+  const climbers = after.ranking
+    .map((entry, index) => ({ ...entry, from: oldRank.get(entry.id), to: index + 1 }))
+    .filter((entry) => entry.from !== undefined && entry.to < entry.from && entry.name !== after.leader)
+    .sort((a, b) => (b.from ?? 0) - b.to - ((a.from ?? 0) - a.to));
+  if (climbers.length > 0) {
+    const top = climbers[0];
+    items.push({
+      kind: "ranking",
+      text: `«${top.name}» поднялась: ${top.from} → ${top.to} место`,
+      direction: "up",
+    });
+  } else if (
+    before.ranking.map((entry) => `${entry.id}:${entry.score}`).join() !==
+    after.ranking.map((entry) => `${entry.id}:${entry.score}`).join()
+  ) {
+    items.push({ kind: "ranking", text: "Оценки совпадения пересчитаны" });
+  }
+
   // Compare the steps themselves: swapping one step for another keeps the
   // count but is exactly the route change the applicant needs to notice.
   const beforeIds = new Set(before.planSteps.map((step) => step.id));

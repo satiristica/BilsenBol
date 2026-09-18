@@ -1810,3 +1810,63 @@ NOT VERIFIED:
 LIMITATIONS:
 - The collapsed conditions line truncates with an ellipsis on narrow phones (for example "До $8 000 в год · Duoling…"); the full values are one tap away.
 - The impact banner reports only edits made from result screens; edits in the wizard are not diffed, because nothing has been shown to the user yet.
+
+## TASK TASK-CLAUDE-20260918-case-pdf-gaps
+
+AGENT: CLAUDE
+STATUS: DONE
+BASE_COMMIT: ba5e121e17a830ba5eed693a622905bd46a94f7d
+SCOPE: Close the product gaps found against the official case PDF (LOCUS Hackathon 2026, case 02).
+
+FILES:
+- `src/domain/{matching,roadmap,diagnosis}.ts`
+- `src/features/{recommendations,profile,diagnosis,journey}/**`
+- `AGENTS_CHANGELOG.md`
+
+ACCEPTANCE:
+- No badge implies an admission or scholarship chance (the PDF forbids invented precision and guarantees).
+- Interests and regions can be changed from the result screens, and the change banner reports their effect (the jury scenario says "change budget, interest, country or exam").
+- The roadmap contains an activities step, as the PDF's roadmap stage requires.
+- The diagnosis states a profile summary and the educational goal, as the PDF's diagnosis stage requires.
+- `npm run typecheck`, `npm run lint`, `npm run build` exit 0.
+
+### COMPLETE TASK-CLAUDE-20260918-case-pdf-gaps
+
+AGENT: CLAUDE
+STATUS: DONE
+
+SUMMARY:
+- Removed the "Высокий шанс на стипендию" badge. It was set only because a programme has a grant track, which says nothing about this applicant's chance, and the case PDF forbids invented precision and guarantees. The card never showed it anyway (the "100% грант" badge suppressed it), so it was also dead output. Two phrases using "шанс" were reworded; the word no longer appears anywhere in the UI.
+- The collapsed "Ваши условия" panel now changes interests and regions as well as budget, English and GPA, because the PDF's jury scenario is "change budget, interest, country or exam". The last selected interest or region cannot be switched off (`aria-disabled`); the row label says so.
+- The roadmap gained a field-specific extracurricular step (IT project or hackathon, economics olympiad, robotics, medical volunteering, debates), because the PDF's roadmap stage lists activities. Its id carries the field, so changing the main interest swaps the step and the change banner names it.
+- The diagnosis now opens with a profile summary and the educational goal, as the PDF's diagnosis stage requires.
+- Bug found by the new browser checks and fixed: adding a second interest reorders programmes without changing their count, leader or plan, and the change banner wrongly said "nothing changed". The banner now compares the ranking too: it names the biggest climber ("«Медицина» поднялась: 6 → 2 место"), or reports that scores were recalculated. The no-change message now appears only when ids, scores, status and plan are all identical.
+
+FILES:
+- `src/domain/{matching,roadmap,diagnosis}.ts`
+- `src/features/recommendations/RecommendationCard.tsx`
+- `src/features/profile/{QuickAdjustBar.tsx,QuickAdjustBar.module.css}`
+- `src/features/diagnosis/{DiagnosisPanel.tsx,DiagnosisPanel.module.css}`
+- `src/features/journey/{profileImpact.ts,ProfileImpact.tsx}`
+
+VERIFICATION:
+- `npm run typecheck` → exit 0.
+- `npm run lint` → exit 0.
+- `npm run build` → exit 0.
+- `git diff --check` → exit 0.
+- 0 top-level :hover rules outside `@media (hover: hover)`.
+- Domain harness recompiled with `lib/plural`: all original assertions still pass. Twelve new ones pass: for every preset, no badge mentions "шанс", the roadmap has an activities step, and the diagnosis has a summary and a goal; changing the interest swaps the activities step and changes the ranking; changing the region changes the match count (6 → 2).
+- Browser change-banner suite, all pass:
+  - budget $8k → $3k: "Программ: 6 → 5" plus the climber;
+  - Duolingo → TOEFL: exactly the no-change message (asserted strictly);
+  - school → IELTS: new status and the swapped plan step;
+  - adding Медицина: "«Медицина» поднялась: 6 → 2 место";
+  - removing IT: the new leader and the swapped activities step;
+  - removing Азия: "Программ: 6 → 4";
+  - the last interest cannot be removed.
+- Tap suite 11/11; persistence suite passes with 0 console messages; horizontal overflow 0 px at 360 and 390 px on diagnosis, recommendations with the panel open, and roadmap.
+- Screenshots reviewed for the diagnosis summary block and the expanded conditions panel.
+
+LIMITATIONS:
+- A programme can be reported as "поднялась" because programmes above it dropped out, not because its own score rose. That is positionally true, but it is not always the most informative line.
+- The profile still asks only about English among exams; national exams (ЕНТ, ЕГЭ, SAT) are not modelled.

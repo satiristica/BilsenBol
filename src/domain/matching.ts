@@ -15,7 +15,6 @@ export type HardConstraint = "budget" | "gpa" | "language" | "region";
 
 export type MatchBadgeKind =
   | "budget-fit"
-  | "scholarship-chance"
   | "field-fit"
   | "language-ready"
   | "foundation-available";
@@ -125,7 +124,6 @@ function scoreProgram(profile: ApplicantProfile, program: Program) {
 
   if (profile.budget === "grant-only" && program.hasFullGrant) {
     factors.push({ label: "Полностью покрывается грантом", delta: 18 });
-    matchBadges.push({ kind: "scholarship-chance", label: "Высокий шанс на стипендию" });
     whyItFits.push("Программа существует в грантовом формате — платить за обучение не нужно.");
   } else {
     const ceiling = BUDGET_CEILING_USD[profile.budget];
@@ -135,8 +133,9 @@ function scoreProgram(profile: ApplicantProfile, program: Program) {
     const budgetDelta = Math.round(6 + Math.max(headroom, 0) * 12);
     factors.push({ label: "Стоимость укладывается в бюджет", delta: budgetDelta });
     matchBadges.push({ kind: "budget-fit", label: "Подходит по бюджету" });
+    // No "chance" badge: the catalogue says a grant track exists, not that this
+    // applicant will win it. The programme badge "100% грант" states the fact.
     if (program.hasFullGrant) {
-      matchBadges.push({ kind: "scholarship-chance", label: "Высокий шанс на стипендию" });
       whyItFits.push("У программы есть грантовый трек — расходы можно свести к нулю.");
     } else {
       whyItFits.push("Стоимость обучения помещается в указанный семейный бюджет.");

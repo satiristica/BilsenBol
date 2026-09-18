@@ -36,9 +36,7 @@ export function RecommendationCard({
   const hiddenReasons = match.whyItFits.slice(MAX_VISIBLE_REASONS);
   const visibleBadges = [
     ...(program.hasFullGrant ? [{ label: "100% грант", isGrant: true }] : []),
-    ...match.matchBadges
-      .filter((badge) => badge.kind !== "scholarship-chance" || !program.hasFullGrant)
-      .map((badge) => ({ label: badge.label, isGrant: false })),
+    ...match.matchBadges.map((badge) => ({ label: badge.label, isGrant: false })),
   ].slice(0, MAX_VISIBLE_BADGES);
 
   return (
@@ -123,7 +121,7 @@ export function RecommendationCard({
             <p className={styles.detailText}>{match.tradeOff}</p>
           </div>
           <div className={styles.detailBlock}>
-            <span className={styles.detailLabel}>Что улучшит ваши шансы</span>
+            <span className={styles.detailLabel}>Как усилить заявку</span>
             <p className={styles.detailText}>{match.improvementAction}</p>
           </div>
           <div className={styles.detailBlock}>

@@ -2,6 +2,7 @@
 
 import {
   ArrowDownRight,
+  ArrowUpDown,
   ArrowUpRight,
   Equal,
   ListChecks,
@@ -21,6 +22,7 @@ const KIND_ICONS: Record<ImpactKind, LucideIcon> = {
   matches: ArrowUpRight,
   status: UserRoundCheck,
   leader: Trophy,
+  ranking: ArrowUpDown,
   plan: ListChecks,
   none: Equal,
 };
