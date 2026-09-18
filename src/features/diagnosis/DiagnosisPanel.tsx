@@ -1,13 +1,16 @@
 import {
+  GraduationCap,
   Hourglass,
+  Languages,
   type LucideIcon,
   Target,
   TrendingUp,
   TriangleAlert,
   UserRound,
+  Wallet,
 } from "lucide-react";
 
-import type { Diagnosis, InsightKind } from "@/domain/diagnosis";
+import type { Diagnosis, InsightKind, ReadinessMeter } from "@/domain/diagnosis";
 import { classNames } from "@/lib/classNames";
 
 import styles from "./DiagnosisPanel.module.css";
@@ -26,6 +29,13 @@ const INSIGHT_ICONS: Record<InsightKind, LucideIcon> = {
   strength: TrendingUp,
   bottleneck: TriangleAlert,
   runway: Hourglass,
+};
+
+const METER_ICONS: Record<ReadinessMeter["id"], LucideIcon> = {
+  gpa: TrendingUp,
+  language: Languages,
+  budget: Wallet,
+  catalogue: GraduationCap,
 };
 
 export function DiagnosisPanel({ diagnosis }: DiagnosisPanelProps) {
@@ -57,27 +67,53 @@ export function DiagnosisPanel({ diagnosis }: DiagnosisPanelProps) {
         <p className={styles.statusDetail}>{diagnosis.statusDetail}</p>
       </article>
 
-      <div className={styles.insights}>
+      <ul aria-label="Готовность" className={styles.meters}>
+        {diagnosis.meters.map((meter, index) => {
+          const Icon = METER_ICONS[meter.id];
+          return (
+            <li
+              className={classNames(styles.meter, meter.tone === "warn" && styles.meterWarn)}
+              key={meter.id}
+              style={{ "--delay": `${index * 90}ms`, "--fill": meter.fraction } as React.CSSProperties}
+            >
+              <span className={styles.meterHead}>
+                <Icon aria-hidden="true" size={16} strokeWidth={2.4} />
+                {meter.label}
+              </span>
+              <span className={styles.meterValue}>{meter.value}</span>
+              <span aria-hidden="true" className={styles.meterTrack}>
+                <span className={styles.meterFill} />
+                {meter.marker ? (
+                  <span className={styles.meterMarker} style={{ left: `${meter.marker.at * 100}%` }}>
+                    <span className={styles.meterMarkerLabel}>{meter.marker.label}</span>
+                  </span>
+                ) : null}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+
+      <ul className={styles.insights}>
         {diagnosis.insights.map((insight, index) => {
           const Icon = INSIGHT_ICONS[insight.kind];
           return (
-            <article
+            <li
               className={classNames(styles.insight, INSIGHT_STYLES[insight.kind])}
               key={insight.kind}
-              style={{ "--delay": `${index * 90}ms` } as React.CSSProperties}
+              style={{ "--delay": `${360 + index * 90}ms` } as React.CSSProperties}
             >
-              <span className={styles.insightHead}>
-                <span aria-hidden="true" className={styles.insightIcon}>
-                  <Icon size={18} strokeWidth={2.3} />
-                </span>
-                <span className={styles.insightLabel}>{insight.label}</span>
+              <span aria-hidden="true" className={styles.insightIcon}>
+                <Icon size={16} strokeWidth={2.3} />
               </span>
-              <h3 className={styles.insightTitle}>{insight.title}</h3>
-              <p className={styles.insightDetail}>{insight.detail}</p>
-            </article>
+              <span className={styles.insightText}>
+                <span className={styles.insightLabel}>{insight.label}</span>
+                <span className={styles.insightTitle}>{insight.title}</span>
+              </span>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </div>
   );
 }

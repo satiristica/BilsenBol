@@ -268,14 +268,11 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
 
         {step === "roadmap" ? (
           <>
-            <ProgressMeter progress={progress} />
+            <ProgressMeter completedStepIds={completedStepIds} phases={phases} progress={progress} />
             <NextActionCard onComplete={completeRoadmapStep} progress={progress} />
             <p className={styles.notice}>
               <Info aria-hidden="true" size={16} strokeWidth={2.2} />
-              <span>
-                Шаги — общие ориентиры, а не требования конкретного вуза. Сроки и документы
-                проверяйте на сайте программы.
-              </span>
+              <span>Шаги — ориентиры. Сроки сверяйте на сайте вуза.</span>
             </p>
             <RoadmapTimeline
               completedStepIds={completedStepIds}

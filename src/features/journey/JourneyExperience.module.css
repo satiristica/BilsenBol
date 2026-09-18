@@ -221,6 +221,8 @@
 /* Re-runs its entrance animation on every step change via a changing key. */
 .content {
   display: grid;
+  /* minmax(0, …) lets wide children (the wizard at 360 px) shrink instead of overflowing. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   animation: rise 520ms var(--ease-out);
 }

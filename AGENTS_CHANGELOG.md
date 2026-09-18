@@ -2477,3 +2477,35 @@ VERIFICATION:
 - tap, persist, impact, ai-page and bell all pass on a temporary `next dev -p 3100`. A stale headless Chrome left by a crashed run was killed first; the server was stopped afterwards.
 - Mobile and desktop screenshots reviewed. On phones the panel was first covering the bell; fixed by anchoring it to the bell's position.
 - `tsc`, `eslint`, `build` → exit 0.
+
+## TASK TASK-CLAUDE-20260919-journey-visual
+
+AGENT: CLAUDE
+STATUS: DONE (uncommitted)
+SCOPE: User feedback on /journey: «слишком много текста, надо больше визуализации».
+
+CHANGES:
+- Diagnosis:
+  - `buildReadinessMeters` in `diagnosis.ts` produces four gauges, counted only from the profile and its matches (no invented numbers):
+    - the average on a 3–5 scale, with a marker at the 4.5 grant heuristic;
+    - «Язык без подготовки»: direct-entry programmes out of those the language rule considered;
+    - «По карману без стипендии»;
+    - «Подходит программ» out of the catalogue.
+  - `DiagnosisPanel` renders them as animated bars (amber below half). The three insight cards became one-line chips (label and title); their long details are dropped from screen and stay in the data for the AI prompt.
+- Recommendation card:
+  - the face keeps header, badges, three icon tiles (tuition, `englishShortText`, nearest dated deadline or «Даты — на сайте»), the blocker, one «Официальный источник» link and Compare;
+  - reasons, full English requirement, application window, all sources, trade-off, improvement and the factor breakdown moved into «Подробнее».
+- Roadmap:
+  - `ProgressMeter` is now a conic ring (animated %) plus one segment per step for each season (three columns from 760 px);
+  - `NextActionCard` shows the step's icon;
+  - timeline steps have icons that fill in once done;
+  - shorter notice.
+- Shared `features/roadmap/stepVisuals.ts` (season and step icons, short captions) is used by the tree, the timeline and the next-action card.
+- `nextDeadline` added to `reminders.ts` and reused by the card and the reminders.
+- Fix: `JourneyExperience .content` now uses `grid-template-columns: minmax(0, 1fr)`. The wizard overflowed by 12 px at 360 px. This predates the task: it was reproduced on HEAD with the task's changes stashed.
+
+VERIFICATION:
+- Browser suites on a temporary `next dev -p 3100` (stopped afterwards): tap, persist, impact, ai-page and bell all pass. The impact notice expectation was updated to the shorter text.
+- The overflow suite shows 0 px horizontal scroll on every screen at 360/390/1280 px.
+- Screenshots reviewed: desktop diagnosis, recommendations and roadmap; mobile recommendations and roadmap.
+- `tsc`, `eslint`, `build` → exit 0.

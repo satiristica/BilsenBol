@@ -1,21 +1,24 @@
 "use client";
 
+import { useState } from "react";
+
 import { CalendarDays, Check, ExternalLink, Languages, TriangleAlert, Wallet } from "lucide-react";
 
 import { ActionButton } from "@/components/ActionButton";
 import {
   englishRequirementText,
+  englishShortText,
   formatTuition,
   isFreeTuition,
   type ProgramMatch,
 } from "@/domain/matching";
+import { nextDeadline } from "@/domain/reminders";
 import { classNames } from "@/lib/classNames";
 import { useCountUp } from "@/lib/useCountUp";
 
 import styles from "./RecommendationCard.module.css";
 
 const MAX_VISIBLE_BADGES = 3;
-const MAX_VISIBLE_REASONS = 2;
 
 interface RecommendationCardProps {
   match: ProgramMatch;
@@ -24,6 +27,11 @@ interface RecommendationCardProps {
   onToggleComparison: (programId: string) => void;
   /** Stagger for the entrance animation, in milliseconds. */
   revealDelay?: number;
+}
+
+/** "2026-10-22" → "22.10.2026". */
+function formatShortDate(isoDate: string): string {
+  return isoDate.split("-").reverse().join(".");
 }
 
 export function RecommendationCard({
@@ -37,7 +45,8 @@ export function RecommendationCard({
   const compareDisabled = !isSelectedForComparison && !canSelectForComparison;
   const animatedScore = useCountUp(match.score);
   const strongestFactor = Math.max(...match.factors.map((factor) => factor.delta));
-  const hiddenReasons = match.whyItFits.slice(MAX_VISIBLE_REASONS);
+  const [today] = useState(() => new Date());
+  const deadline = nextDeadline(program, today);
   const visibleBadges = [
     ...(isFreeTuition(program) ? [{ label: "Бесплатно", isGrant: true }] : []),
     ...(program.fullFunding ? [{ label: program.fullFunding.name, isGrant: true }] : []),
@@ -81,14 +90,41 @@ export function RecommendationCard({
         ))}
       </div>
 
-      <ul className={styles.reasons}>
-        {match.whyItFits.slice(0, MAX_VISIBLE_REASONS).map((reason) => (
-          <li className={styles.reason} key={reason}>
-            <Check aria-hidden="true" className={styles.reasonMark} size={16} strokeWidth={3} />
-            <span>{reason}</span>
-          </li>
-        ))}
-      </ul>
+      <dl className={styles.facts}>
+        <div className={styles.fact}>
+          <dt className={styles.factLabel}>
+            <Wallet aria-hidden="true" size={15} strokeWidth={2.2} />
+            <span className={styles.srOnly}>Стоимость</span>
+          </dt>
+          <dd className={styles.factValue}>{formatTuition(program)}</dd>
+        </div>
+        <div className={styles.fact}>
+          <dt className={styles.factLabel}>
+            <Languages aria-hidden="true" size={15} strokeWidth={2.2} />
+            <span className={styles.srOnly}>Английский</span>
+          </dt>
+          <dd className={styles.factValue}>{englishShortText(program)}</dd>
+        </div>
+        <div className={styles.fact}>
+          <dt className={styles.factLabel}>
+            <CalendarDays aria-hidden="true" size={15} strokeWidth={2.2} />
+            <span className={styles.srOnly}>Ближайший срок</span>
+          </dt>
+          <dd className={styles.factValue}>
+            {deadline ? `до ${formatShortDate(deadline.date)}` : "Даты — на сайте"}
+          </dd>
+        </div>
+      </dl>
+
+      <a
+        className={styles.sourceLink}
+        href={program.sources[0]?.url}
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        Официальный источник
+        <ExternalLink aria-hidden="true" size={12} strokeWidth={2.4} />
+      </a>
 
       {match.blocker ? (
         <p className={styles.blocker}>
@@ -100,16 +136,17 @@ export function RecommendationCard({
       <details className={styles.details}>
         <summary className={styles.summary}>Подробнее</summary>
         <div className={styles.detailsBody}>
-          {hiddenReasons.length > 0 ? (
-            <div className={styles.detailBlock}>
-              <span className={styles.detailLabel}>Ещё плюсы</span>
-              {hiddenReasons.map((reason) => (
-                <p className={styles.detailText} key={reason}>
-                  {reason}
-                </p>
+          <div className={styles.detailBlock}>
+            <span className={styles.detailLabel}>Почему подходит</span>
+            <ul className={styles.reasons}>
+              {match.whyItFits.map((reason) => (
+                <li className={styles.reason} key={reason}>
+                  <Check aria-hidden="true" className={styles.reasonMark} size={15} strokeWidth={3} />
+                  <span>{reason}</span>
+                </li>
               ))}
-            </div>
-          ) : null}
+            </ul>
+          </div>
           <div className={styles.detailBlock}>
             <span className={styles.detailLabel}>Формат</span>
             <div className={styles.badges}>
@@ -137,6 +174,31 @@ export function RecommendationCard({
             </div>
           ) : null}
           <div className={styles.detailBlock}>
+            <span className={styles.detailLabel}>Английский</span>
+            <p className={styles.detailText}>{englishRequirementText(program)}</p>
+          </div>
+          <div className={styles.detailBlock}>
+            <span className={styles.detailLabel}>Окно подачи</span>
+            <p className={styles.detailText}>{program.applicationWindow}</p>
+          </div>
+          <div className={styles.detailBlock}>
+            <span className={styles.detailLabel}>Источники</span>
+            <p className={styles.sources}>
+              {program.sources.map((source) => (
+                <a
+                  className={styles.sourceLink}
+                  href={source.url}
+                  key={source.url}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  {source.label}
+                  <ExternalLink aria-hidden="true" size={12} strokeWidth={2.4} />
+                </a>
+              ))}
+            </p>
+          </div>
+          <div className={styles.detailBlock}>
             <span className={styles.detailLabel}>Из чего сложилось совпадение</span>
             <ul className={styles.factors}>
               {match.factors.map((factor) => (
@@ -155,46 +217,6 @@ export function RecommendationCard({
           </div>
         </div>
       </details>
-
-      <dl className={styles.facts}>
-        <div className={styles.fact}>
-          <dt className={styles.factLabel}>
-            <Wallet aria-hidden="true" size={15} strokeWidth={2.2} />
-            <span className={styles.srOnly}>Стоимость</span>
-          </dt>
-          <dd className={styles.factValue}>{formatTuition(program)}</dd>
-        </div>
-        <div className={styles.fact}>
-          <dt className={styles.factLabel}>
-            <Languages aria-hidden="true" size={15} strokeWidth={2.2} />
-            <span className={styles.srOnly}>Английский</span>
-          </dt>
-          <dd className={styles.factValue}>{englishRequirementText(program)}</dd>
-        </div>
-        <div className={styles.fact}>
-          <dt className={styles.factLabel}>
-            <CalendarDays aria-hidden="true" size={15} strokeWidth={2.2} />
-            <span className={styles.srOnly}>Окно подачи</span>
-          </dt>
-          <dd className={styles.factValue}>{program.applicationWindow}</dd>
-        </div>
-      </dl>
-
-      <p className={styles.sources}>
-        <span className={styles.sourcesLabel}>Источники:</span>
-        {program.sources.map((source) => (
-          <a
-            className={styles.sourceLink}
-            href={source.url}
-            key={source.url}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            {source.label}
-            <ExternalLink aria-hidden="true" size={12} strokeWidth={2.4} />
-          </a>
-        ))}
-      </p>
 
       <div className={styles.actions}>
         <ActionButton

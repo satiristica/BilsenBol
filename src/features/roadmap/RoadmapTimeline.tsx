@@ -1,17 +1,10 @@
 "use client";
 
-import { Leaf, type LucideIcon, Snowflake, Sprout } from "lucide-react";
-
-import type { RoadmapPhase, RoadmapSeason } from "@/domain/roadmap";
+import type { RoadmapPhase } from "@/domain/roadmap";
 import { classNames } from "@/lib/classNames";
 
 import styles from "./RoadmapTimeline.module.css";
-
-const SEASON_ICONS: Record<RoadmapSeason, LucideIcon> = {
-  autumn: Leaf,
-  winter: Snowflake,
-  spring: Sprout,
-};
+import { SEASON_ICONS, stepVisual } from "./stepVisuals";
 
 interface RoadmapTimelineProps {
   phases: readonly RoadmapPhase[];
@@ -65,29 +58,35 @@ export function RoadmapTimeline({
             </div>
 
             <ul className={styles.steps}>
-              {phase.steps.map((step) => (
-                <li className={styles.step} key={step.id}>
-                  <label className={styles.stepLabel}>
-                    <input
-                      checked={completedStepIds.has(step.id)}
-                      className={styles.checkbox}
-                      onChange={() => onToggleStep(step.id)}
-                      type="checkbox"
-                    />
-                    <span className={styles.stepBody}>
-                      <span className={styles.stepTitle}>
-                        {step.title}
+              {phase.steps.map((step) => {
+                const StepIcon = stepVisual(step).icon;
+                return (
+                  <li className={styles.step} key={step.id}>
+                    <label className={styles.stepLabel}>
+                      <input
+                        checked={completedStepIds.has(step.id)}
+                        className={styles.checkbox}
+                        onChange={() => onToggleStep(step.id)}
+                        type="checkbox"
+                      />
+                      <span aria-hidden="true" className={styles.stepIcon}>
+                        <StepIcon size={16} strokeWidth={2.3} />
+                      </span>
+                      <span className={styles.stepBody}>
+                        <span className={styles.stepTitle}>
+                          {step.title}
+                          {step.id === nextStepId ? (
+                            <span className={styles.nextMark}>сейчас</span>
+                          ) : null}
+                        </span>
                         {step.id === nextStepId ? (
-                          <span className={styles.nextMark}>сейчас</span>
+                          <span className={styles.stepDetail}>{step.detail}</span>
                         ) : null}
                       </span>
-                      {step.id === nextStepId ? (
-                        <span className={styles.stepDetail}>{step.detail}</span>
-                      ) : null}
-                    </span>
-                  </label>
-                </li>
-              ))}
+                    </label>
+                  </li>
+                );
+              })}
             </ul>
           </li>
         );

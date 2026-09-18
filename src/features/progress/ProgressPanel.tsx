@@ -2,10 +2,10 @@
 
 import { PartyPopper, Sparkles, Target } from "lucide-react";
 
-import { ActionLink } from "@/components/ActionButton";
-
-import { ActionButton } from "@/components/ActionButton";
-import type { RoadmapProgress } from "@/domain/roadmap";
+import { ActionButton, ActionLink } from "@/components/ActionButton";
+import type { RoadmapPhase, RoadmapProgress } from "@/domain/roadmap";
+import { SEASON_ICONS, stepVisual } from "@/features/roadmap/stepVisuals";
+import { classNames } from "@/lib/classNames";
 import { useCountUp } from "@/lib/useCountUp";
 import { pluralRu } from "@/lib/plural";
 
@@ -13,31 +13,53 @@ import styles from "./Progress.module.css";
 
 interface ProgressMeterProps {
   progress: RoadmapProgress;
+  phases: readonly RoadmapPhase[];
+  completedStepIds: ReadonlySet<string>;
 }
 
-export function ProgressMeter({ progress }: ProgressMeterProps) {
+/** A ring for the overall share and one dot per step for each season. */
+export function ProgressMeter({ progress, phases, completedStepIds }: ProgressMeterProps) {
   const animatedPercent = useCountUp(progress.percent);
   const stepsGenitive = pluralRu(progress.totalCount, { one: "шага", few: "шагов", many: "шагов" });
 
   return (
     <section aria-label="Готовность к поступлению" className={styles.meter}>
-      <div className={styles.meterHeader}>
-        <span className={styles.meterLabel}>Готовность</span>
-        <span className={styles.meterValue}>{animatedPercent}%</span>
-      </div>
       <div
         aria-valuemax={100}
         aria-valuemin={0}
         aria-valuenow={progress.percent}
         aria-valuetext={`${progress.completedCount} из ${progress.totalCount} ${stepsGenitive} выполнено`}
-        className={styles.track}
+        className={styles.ring}
         role="progressbar"
+        style={{ "--percent": animatedPercent } as React.CSSProperties}
       >
-        <span className={styles.fill} style={{ width: `${progress.percent}%` }} />
+        <span className={styles.ringValue}>{animatedPercent}%</span>
+        <span className={styles.ringCaption}>
+          {progress.completedCount} из {progress.totalCount}
+        </span>
       </div>
-      <p className={styles.meterCaption}>
-        {progress.completedCount} из {progress.totalCount} {stepsGenitive}
-      </p>
+      <ul className={styles.seasons}>
+        {phases.map((phase) => {
+          const SeasonIcon = SEASON_ICONS[phase.season];
+          const done = phase.steps.filter((step) => completedStepIds.has(step.id)).length;
+          return (
+            <li className={styles.season} key={phase.season}>
+              <span className={styles.seasonName}>
+                <SeasonIcon aria-hidden="true" size={14} strokeWidth={2.4} />
+                {phase.period}
+              </span>
+              <span aria-label={`${done} из ${phase.steps.length}`} className={styles.dots} role="img">
+                {phase.steps.map((step) => (
+                  <span
+                    className={classNames(styles.dot, completedStepIds.has(step.id) && styles.dotDone)}
+                    key={step.id}
+                  />
+                ))}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }
@@ -71,8 +93,13 @@ export function NextActionCard({ progress, onComplete }: NextActionCardProps) {
     );
   }
 
+  const NextIcon = stepVisual(nextStep).icon;
+
   return (
     <section aria-live="polite" className={styles.nextCard}>
+      <span aria-hidden="true" className={styles.nextIcon}>
+        <NextIcon size={30} strokeWidth={2} />
+      </span>
       <span className={styles.nextLabel}>
         <Target aria-hidden="true" size={16} strokeWidth={2.4} />
         Следующий шаг{nextPhase ? ` · ${nextPhase.period}` : ""}

@@ -405,6 +405,22 @@ export function formatTuitionWithEstimate(match: ProgramMatch): string {
   return `${published} (≈ ${match.annualTuitionUsd.toLocaleString("ru-RU")} $ в год)`;
 }
 
+/** A few words for a card face; the full requirement stays in `englishRequirementText`. */
+export function englishShortText(program: Program): string {
+  if (!program.english) {
+    return "Без сертификата";
+  }
+  const { accepts } = program.english;
+  if (accepts === "unlisted") {
+    return "Уровень, тесты не указаны";
+  }
+  if (accepts.length === 0) {
+    return program.ownEnglishTest ? "Проверка в вузе" : "Уточняйте";
+  }
+  const tests = accepts.map((test) => ({ ielts: "IELTS", toefl: "TOEFL", duolingo: "Duolingo" })[test]).join(" · ");
+  return program.ownEnglishTest ? `${tests} или экзамен вуза` : tests;
+}
+
 export function englishRequirementText(program: Program): string {
   return program.english?.minimum ?? program.englishNote ?? "Не нужен";
 }

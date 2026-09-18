@@ -37,6 +37,7 @@ export interface Diagnosis {
   statusLabel: string;
   statusDetail: string;
   insights: DiagnosisInsight[];
+  meters: ReadinessMeter[];
 }
 
 const STATUS_LABELS: Record<ReadinessStatus, string> = {
@@ -217,5 +218,62 @@ export function buildDiagnosis(
       buildBottleneck(profile, result),
       buildRunway(profile),
     ],
+    meters: buildReadinessMeters(profile, result),
   };
+}
+
+export type MeterTone = "good" | "warn";
+
+/** A readiness gauge: every number is counted from the profile and its matches. */
+export interface ReadinessMeter {
+  id: "gpa" | "language" | "budget" | "catalogue";
+  label: string;
+  value: string;
+  /** Fill, 0..1. */
+  fraction: number;
+  tone: MeterTone;
+  /** A reference point on the scale, such as the grant-level average. */
+  marker?: { at: number; label: string };
+}
+
+function ratioMeter(
+  id: ReadinessMeter["id"],
+  label: string,
+  part: number,
+  whole: number,
+): ReadinessMeter {
+  const fraction = whole === 0 ? 0 : part / whole;
+  return {
+    id,
+    label,
+    value: whole === 0 ? "—" : `${part} из ${whole}`,
+    fraction,
+    tone: fraction >= 0.5 ? "good" : "warn",
+  };
+}
+
+export function buildReadinessMeters(
+  profile: ApplicantProfile,
+  result: RecommendationResult,
+): ReadinessMeter[] {
+  const { matches, excluded, totalConsidered } = result;
+  const directEntry = matches.filter(
+    (match) => match.englishRoute === "certificate" || match.englishRoute === "not-required",
+  ).length;
+  const withinBudget = matches.filter((match) => !match.needsScholarshipForBudget).length;
+  const gpaScale = (gpa: number) => (gpa - 3) / 2;
+
+  return [
+    {
+      id: "gpa",
+      label: "Средний балл",
+      value: `${formatGpa(profile.gpa)} / 5`,
+      fraction: gpaScale(profile.gpa),
+      tone: profile.gpa >= GRANT_COMPETITIVE_GPA ? "good" : "warn",
+      marker: { at: gpaScale(GRANT_COMPETITIVE_GPA), label: "гранты" },
+    },
+    ratioMeter("language", "Язык без подготовки", directEntry, matches.length + excluded.language),
+    ratioMeter("budget", "По карману без стипендии", withinBudget, matches.length + excluded.budget),
+    ratioMeter("catalogue", "Подходит программ", matches.length, totalConsidered),
+  ];
 }

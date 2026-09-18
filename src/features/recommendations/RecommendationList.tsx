@@ -3,7 +3,6 @@
 import { Info, SearchX } from "lucide-react";
 
 import { ActionButton } from "@/components/ActionButton";
-import { SOURCE_NOTICE } from "@/data/programs";
 import { pluralRu } from "@/lib/plural";
 import type { RecommendationResult } from "@/domain/matching";
 import {
@@ -151,7 +150,7 @@ export function RecommendationList({
     <div className={styles.wrapper}>
       <p className={styles.notice}>
         <Info aria-hidden="true" size={16} strokeWidth={2.2} />
-        <span>{SOURCE_NOTICE}</span>
+        <span>Данные с официальных сайтов вузов · сверяйтесь перед подачей</span>
       </p>
       <div className={styles.grid}>
         {result.matches.slice(0, 6).map((match, index) => (

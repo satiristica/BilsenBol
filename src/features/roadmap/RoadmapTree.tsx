@@ -1,67 +1,16 @@
 "use client";
 
-import {
-  Award,
-  BadgeCheck,
-  Circle,
-  FileText,
-  Flag,
-  FolderOpen,
-  GraduationCap,
-  Languages,
-  Leaf,
-  ListChecks,
-  type LucideIcon,
-  PenLine,
-  Plane,
-  Rocket,
-  Scale,
-  Send,
-  Snowflake,
-  Sparkles,
-  Sprout,
-  TrendingUp,
-  UserRound,
-  Users,
-} from "lucide-react";
+import { Flag, GraduationCap, type LucideIcon, Sparkles, UserRound } from "lucide-react";
 import { useState } from "react";
 
 import { shortUniversityName, type ProgramMatch } from "@/domain/matching";
-import type { RoadmapPhase, RoadmapSeason, RoadmapStep } from "@/domain/roadmap";
+import type { RoadmapPhase } from "@/domain/roadmap";
 import { classNames } from "@/lib/classNames";
 
 import styles from "./RoadmapTree.module.css";
+import { SEASON_ICONS, stepVisual } from "./stepVisuals";
 import { TreeNodeDialog, type TreeNode } from "./TreeNodeDialog";
 import type { RoadmapAdviceState } from "./useRoadmapAdvice";
-
-const SEASON_ICONS: Record<RoadmapSeason, LucideIcon> = {
-  autumn: Leaf,
-  winter: Snowflake,
-  spring: Sprout,
-};
-
-/** Short node captions; the full step title lives in the node's menu and aria-label. */
-const STEP_NODES: Record<string, { icon: LucideIcon; label: string }> = {
-  "autumn-shortlist": { icon: ListChecks, label: "Шорт-лист" },
-  "autumn-language-check": { icon: BadgeCheck, label: "Сертификат" },
-  "autumn-language-exam": { icon: Languages, label: "Экзамен по языку" },
-  "autumn-documents": { icon: FolderOpen, label: "Документы" },
-  "autumn-academics": { icon: TrendingUp, label: "Средний балл" },
-  "winter-motivation-letter": { icon: PenLine, label: "Мотивационное письмо" },
-  "winter-recommendations": { icon: Users, label: "Рекомендации" },
-  "winter-applications": { icon: Send, label: "Подача" },
-  "winter-scholarships": { icon: Award, label: "Гранты" },
-  "spring-compare-offers": { icon: Scale, label: "Офферы" },
-  "spring-confirm": { icon: FileText, label: "Выбор вуза" },
-  "spring-visa": { icon: Plane, label: "Виза" },
-};
-
-function stepNode(step: RoadmapStep): { icon: LucideIcon; label: string } {
-  if (step.id.startsWith("autumn-activities-")) {
-    return { icon: Rocket, label: "Проект" };
-  }
-  return STEP_NODES[step.id] ?? { icon: Circle, label: step.title };
-}
 
 interface RoadmapTreeProps {
   phases: RoadmapPhase[];
@@ -152,7 +101,7 @@ export function RoadmapTree({ phases, goals, profileSummary, adviceState }: Road
               </span>
               <ul className={styles.nodes}>
                 {phase.steps.map((step) => {
-                  const { icon, label } = stepNode(step);
+                  const { icon, label } = stepVisual(step);
                   const stepAdvice = adviceById.get(step.id) ?? null;
                   return (
                     <GraphNode

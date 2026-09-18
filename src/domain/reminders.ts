@@ -1,3 +1,4 @@
+import type { Deadline, Program } from "@/data/programs";
 import { shortUniversityName, type RecommendationResult } from "@/domain/matching";
 import type { ApplicantProfile } from "@/domain/profile";
 import type { RoadmapProgress, RoadmapSeason } from "@/domain/roadmap";
@@ -57,6 +58,11 @@ export function daysUntil(isoDate: string, today: Date): number {
   const target = Date.UTC(year, month - 1, day);
   const start = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
   return Math.round((target - start) / DAY_MS);
+}
+
+/** The nearest deadline that has not passed yet, if the catalogue has one. */
+export function nextDeadline(program: Program, today: Date): Deadline | null {
+  return (program.deadlines ?? []).find((deadline) => daysUntil(deadline.date, today) >= 0) ?? null;
 }
 
 export function formatDateRu(isoDate: string): string {
@@ -144,7 +150,7 @@ export function buildReminders({ profile, result, progress, today }: ReminderInp
   // Programmes whose next dates are not published yet still need watching.
   const undated = watched
     .slice(0, 3)
-    .filter((match) => !(match.program.deadlines ?? []).some((d) => daysUntil(d.date, today) >= 0));
+    .filter((match) => nextDeadline(match.program, today) === null);
   if (undated.length > 0) {
     const names = undated.map((match) => shortUniversityName(match.program));
     reminders.push({

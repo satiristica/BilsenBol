@@ -1,80 +1,105 @@
-@keyframes shimmer {
-  from {
-    transform: translateX(-100%);
-  }
-
-  to {
-    transform: translateX(260%);
-  }
-}
-
 .meter {
   display: grid;
-  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
   border: 1px solid var(--line);
   border-radius: 20px;
   background: var(--surface);
-  padding: 20px;
+  padding: 18px;
 }
 
-.meterHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+/* Conic ring filled to --percent, counted up by useCountUp. */
+.ring {
+  position: relative;
+  display: grid;
+  width: 108px;
+  height: 108px;
+  place-content: center;
+  justify-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side, var(--surface) 78%, transparent 79%),
+    conic-gradient(var(--accent-bright) calc(var(--percent, 0) * 1%), rgb(233 247 239 / 8%) 0);
+  box-shadow: 0 0 34px rgb(62 224 138 / calc(var(--percent, 0) * 0.3%));
 }
 
-.meterLabel {
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.meterValue {
-  background: linear-gradient(120deg, var(--accent-bright), var(--accent));
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-size: clamp(2rem, 7vw, 2.8rem);
+.ringValue {
+  color: var(--ink);
+  font-size: 1.7rem;
   font-weight: 800;
   letter-spacing: -0.05em;
   line-height: 1;
 }
 
-.track {
-  position: relative;
-  height: 12px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgb(233 247 239 / 8%);
-}
-
-.fill {
-  position: relative;
-  display: block;
-  height: 100%;
-  overflow: hidden;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright));
-  transition: width 620ms var(--ease-out);
-}
-
-/* Light travelling along the filled part. */
-.fill::after {
-  position: absolute;
-  inset: 0;
-  width: 40%;
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 45%), transparent);
-  content: "";
-  animation: shimmer 2.6s var(--ease-out) infinite;
-}
-
-.meterCaption {
-  margin: 0;
+.ringCaption {
   color: var(--muted);
-  font-size: 0.84rem;
-  line-height: 1.5;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.seasons {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.season {
+  display: grid;
+  gap: 6px;
+}
+
+.seasonName {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-dim);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.seasonName svg {
+  color: var(--accent);
+}
+
+.dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.dot {
+  flex: 1;
+  max-width: 44px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgb(233 247 239 / 10%);
+  transition:
+    background-color 300ms var(--ease-out),
+    transform 400ms var(--ease-spring);
+}
+
+.dotDone {
+  background: var(--accent);
+  transform: scaleY(1.25);
+}
+
+@media (min-width: 760px) {
+  .meter {
+    gap: 28px;
+    padding: 22px 26px;
+  }
+
+  .seasons {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .dot {
+    height: 10px;
+  }
 }
 
 .nextCard {
@@ -92,6 +117,28 @@
   animation: rise 560ms var(--ease-out);
 }
 
+/* The step's icon, large, in the card's corner. */
+.nextIcon {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border: 1px solid var(--warn-line);
+  border-radius: 50%;
+  background: var(--warn-soft);
+  color: var(--warn);
+  animation: bob 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nextIcon {
+    animation: none;
+  }
+}
+
 .nextLabel {
   display: flex;
   align-items: center;
@@ -101,6 +148,12 @@
   font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
+}
+
+/* Room for the corner icon. */
+.nextLabel,
+.nextTitle {
+  padding-right: 72px;
 }
 
 .nextTitle {
