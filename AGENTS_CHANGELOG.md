@@ -2554,3 +2554,36 @@ CHANGES:
 
 VERIFICATION:
 - Scenario numbers re-checked against the domain code: the IT preset gives 6 programmes, 4 at «До $3 000»; the empty state needs english «Только школьный» + «$0» + «США» (with Duolingo, MIT stays), so the README says so.
+
+## TASK TASK-CLAUDE-20260919-program-driven-roadmap
+
+AGENT: CLAUDE
+STATUS: DONE (uncommitted)
+SCOPE: User asked whether the roadmap is meaningful. Audit: 10 of 12 steps were identical across all presets. It used the matches only for the leader's name, and the language step could be wrong: it said «IELTS или Duolingo» although METU rejects IELTS and KAIST and WUT reject Duolingo. Rebuilt the plan around the applicant's top-3 programmes.
+
+CHANGES:
+- `src/domain/roadmap.ts`: `buildRoadmap(profile, result, today = new Date())` derives steps from the target programmes:
+  - Language: «Проверить срок…» when the certificate is accepted by every target. Otherwise «Сдать {test}», choosing the certificate accepted by the most targets and naming them, plus the universities' own English routes (deduplicated per university).
+  - One «Подготовиться к отбору в X» per distinct entrance requirement.
+  - Dated catalogue deadlines become «Подать заявку в X: …» steps with `dueDate`, placed in the season of the date (e.g. KAIST 22.10.2026 → autumn) and sorted. 9–10 grade skips them.
+  - The generic applications step remains only for targets without a published date and names them.
+  - Scholarship steps are named per programme (Stipendium Hungaricum, Abai, Türkiye Bursları); KAIST's award to everyone admitted is skipped.
+  - Frame steps (documents, letter, recommendations, offers, visa) now name the target programmes where useful.
+- `RoadmapStep` gains `label` (short caption) and `dueDate`. Titles stay digit-free because they go to the AI. The date is shown as a chip in the timeline, the next-step card, the tree dialog and the PDF.
+- `src/domain/dates.ts` now holds `seasonOf`, `daysUntil`, `nextDeadline`, `formatDateRu` and `formatShortDate`, shared by the roadmap, reminders and cards without an import cycle.
+- `stepVisuals` picks icons by id or prefix (`autumn-exam-`, `apply-`, `winter-scholarship`, `autumn-language-`); the caption comes from `step.label`.
+- `ROADMAP_ADVICE_VERSION` 3 → 4, since cached advice was keyed to old step ids.
+- README solution row updated.
+
+VERIFICATION:
+- Printed the plans for all presets on 19.09.2026 and reviewed them:
+  - grant-ace: KAIST SAT/ACT, ELTE exam, KAIST early round in autumn, SH and Abai;
+  - it-mid-budget: «Сдать TOEFL — METU, BME» plus METU EPE, BME maths/physics;
+  - foundation-path: METU and Semmelweis exams, Semmelweis deadline in spring.
+- No step title contains a digit.
+- Domain checks (check.js, extra.js, reminders.js) pass.
+- Browser suites on a temporary `next dev -p 3100` (stopped afterwards):
+  - tap, persist, impact, ai-page and bell all pass;
+  - expectations tied to the old fixed 12-step plan were updated with reasons: persist compares with the share right before the reload, because the budget change rebuilds the plan; impact expects a «План:» change line, since several steps now change at once; ai-page accepts any «осталось N шагов», clicks up to 30 times and targets goal nodes by class.
+- Mobile plan screenshot at 390 px reviewed; 0 px overflow.
+- `tsc`, `eslint`, `build` → exit 0.

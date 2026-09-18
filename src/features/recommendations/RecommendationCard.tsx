@@ -12,7 +12,7 @@ import {
   isFreeTuition,
   type ProgramMatch,
 } from "@/domain/matching";
-import { nextDeadline } from "@/domain/reminders";
+import { formatShortDate, nextDeadline } from "@/domain/dates";
 import { classNames } from "@/lib/classNames";
 import { useCountUp } from "@/lib/useCountUp";
 
@@ -27,11 +27,6 @@ interface RecommendationCardProps {
   onToggleComparison: (programId: string) => void;
   /** Stagger for the entrance animation, in milliseconds. */
   revealDelay?: number;
-}
-
-/** "2026-10-22" → "22.10.2026". */
-function formatShortDate(isoDate: string): string {
-  return isoDate.split("-").reverse().join(".");
 }
 
 export function RecommendationCard({

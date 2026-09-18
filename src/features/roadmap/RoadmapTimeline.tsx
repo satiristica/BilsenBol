@@ -1,5 +1,6 @@
 "use client";
 
+import { formatShortDate } from "@/domain/dates";
 import type { RoadmapPhase } from "@/domain/roadmap";
 import { classNames } from "@/lib/classNames";
 
@@ -75,6 +76,9 @@ export function RoadmapTimeline({
                       <span className={styles.stepBody}>
                         <span className={styles.stepTitle}>
                           {step.title}
+                          {step.dueDate ? (
+                            <span className={styles.dueMark}>до {formatShortDate(step.dueDate)}</span>
+                          ) : null}
                           {step.id === nextStepId ? (
                             <span className={styles.nextMark}>сейчас</span>
                           ) : null}

@@ -2,6 +2,7 @@
 
 import { SOURCE_NOTICE } from "@/data/programs";
 import { englishRequirementText, formatTuition, type ProgramMatch } from "@/domain/matching";
+import { formatShortDate } from "@/domain/dates";
 import type { RoadmapPhase } from "@/domain/roadmap";
 
 import styles from "./PrintableChecklist.module.css";
@@ -86,7 +87,10 @@ export function PrintableChecklist({
                   <li className={styles.item} key={step.id}>
                     <span className={styles.box}>{isDone ? "✓" : ""}</span>
                     <span>
-                      <span className={styles.itemTitle}>{step.title}</span>
+                      <span className={styles.itemTitle}>
+                        {step.title}
+                        {step.dueDate ? ` — до ${formatShortDate(step.dueDate)}` : ""}
+                      </span>
                       <span className={styles.text}>{step.detail}</span>
                       {stepAdvice ? <span className={styles.advice}>Совет ИИ: {stepAdvice}</span> : null}
                     </span>

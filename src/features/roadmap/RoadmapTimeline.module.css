@@ -227,3 +227,17 @@
   background: var(--accent);
   color: var(--bg-deep);
 }
+
+/* A published deadline next to the step it belongs to. */
+.dueMark {
+  display: inline-block;
+  margin-left: 8px;
+  border: 1px solid var(--warn-line);
+  border-radius: 999px;
+  color: var(--warn-ink);
+  font-size: 0.66rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  vertical-align: middle;
+  white-space: nowrap;
+}

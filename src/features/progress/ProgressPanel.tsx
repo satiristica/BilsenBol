@@ -3,6 +3,7 @@
 import { PartyPopper, Sparkles, Target } from "lucide-react";
 
 import { ActionButton, ActionLink } from "@/components/ActionButton";
+import { formatShortDate } from "@/domain/dates";
 import type { RoadmapPhase, RoadmapProgress } from "@/domain/roadmap";
 import { SEASON_ICONS, stepVisual } from "@/features/roadmap/stepVisuals";
 import { classNames } from "@/lib/classNames";
@@ -103,6 +104,7 @@ export function NextActionCard({ progress, onComplete }: NextActionCardProps) {
       <span className={styles.nextLabel}>
         <Target aria-hidden="true" size={16} strokeWidth={2.4} />
         Следующий шаг{nextPhase ? ` · ${nextPhase.period}` : ""}
+        {nextStep.dueDate ? ` · до ${formatShortDate(nextStep.dueDate)}` : ""}
       </span>
       <h3 className={styles.nextTitle}>{nextStep.title}</h3>
       <p className={styles.nextDetail}>{nextStep.detail}</p>

@@ -8,6 +8,7 @@ import {
   formatTuition,
   type ProgramMatch,
 } from "@/domain/matching";
+import { formatShortDate } from "@/domain/dates";
 import type { RoadmapStep } from "@/domain/roadmap";
 
 import type { ExtraStep } from "./roadmapAdvice";
@@ -34,7 +35,7 @@ function factsForStep(step: RoadmapStep, goals: ProgramMatch[]) {
   if (step.id === "winter-applications") {
     return { label: "Окна подачи ваших программ", read: (m: ProgramMatch) => m.program.applicationWindow };
   }
-  if (step.id === "winter-scholarships") {
+  if (step.id.startsWith("winter-scholarship")) {
     return {
       label: "Стипендии ваших программ",
       read: (m: ProgramMatch) =>
@@ -82,6 +83,7 @@ function StepBody({ step, advice, goals, status }: {
         <span className={styles.label}>Что сделать</span>
         <p className={styles.text}>{step.detail}</p>
       </div>
+      {step.dueDate ? <p className={styles.warn}>Срок: до {formatShortDate(step.dueDate)}. Сверьте дату на сайте вуза.</p> : null}
       <AdviceBlock advice={advice} status={status} />
       {facts && goals.length > 0 ? (
         <div className={styles.block}>

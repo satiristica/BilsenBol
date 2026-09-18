@@ -1,7 +1,9 @@
 import {
   Award,
   BadgeCheck,
+  CalendarClock,
   Circle,
+  ClipboardCheck,
   FileText,
   FolderOpen,
   Languages,
@@ -27,25 +29,32 @@ export const SEASON_ICONS: Record<RoadmapSeason, LucideIcon> = {
   spring: Sprout,
 };
 
-/** Icon and a one- or two-word caption per roadmap step; the full title stays available. */
-const STEP_VISUALS: Record<string, { icon: LucideIcon; label: string }> = {
-  "autumn-shortlist": { icon: ListChecks, label: "Шорт-лист" },
-  "autumn-language-check": { icon: BadgeCheck, label: "Сертификат" },
-  "autumn-language-exam": { icon: Languages, label: "Экзамен по языку" },
-  "autumn-documents": { icon: FolderOpen, label: "Документы" },
-  "autumn-academics": { icon: TrendingUp, label: "Средний балл" },
-  "winter-motivation-letter": { icon: PenLine, label: "Мотивационное письмо" },
-  "winter-recommendations": { icon: Users, label: "Рекомендации" },
-  "winter-applications": { icon: Send, label: "Подача" },
-  "winter-scholarships": { icon: Award, label: "Гранты" },
-  "spring-compare-offers": { icon: Scale, label: "Офферы" },
-  "spring-confirm": { icon: FileText, label: "Выбор вуза" },
-  "spring-visa": { icon: Plane, label: "Виза" },
+/** Icon per step id or id prefix; the caption comes from the step itself. */
+const STEP_ICONS: Record<string, LucideIcon> = {
+  "autumn-shortlist": ListChecks,
+  "autumn-language-check": BadgeCheck,
+  "autumn-documents": FolderOpen,
+  "autumn-academics": TrendingUp,
+  "winter-motivation-letter": PenLine,
+  "winter-recommendations": Users,
+  "winter-applications": Send,
+  "spring-compare-offers": Scale,
+  "spring-confirm": FileText,
+  "spring-visa": Plane,
 };
 
+const PREFIX_ICONS: [string, LucideIcon][] = [
+  ["autumn-activities-", Rocket],
+  ["autumn-language-", Languages],
+  ["autumn-exam-", ClipboardCheck],
+  ["apply-", CalendarClock],
+  ["winter-scholarship", Award],
+];
+
 export function stepVisual(step: RoadmapStep): { icon: LucideIcon; label: string } {
-  if (step.id.startsWith("autumn-activities-")) {
-    return { icon: Rocket, label: "Проект" };
-  }
-  return STEP_VISUALS[step.id] ?? { icon: Circle, label: step.title };
+  const icon =
+    STEP_ICONS[step.id] ??
+    PREFIX_ICONS.find(([prefix]) => step.id.startsWith(prefix))?.[1] ??
+    Circle;
+  return { icon, label: step.label ?? step.title };
 }
