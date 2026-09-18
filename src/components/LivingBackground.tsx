@@ -51,6 +51,11 @@ export function LivingBackground() {
     };
 
     const onPointerMove = (event: PointerEvent) => {
+      // A finger dragging the spotlight around is a mid-tap change iOS Safari
+      // can mistake for hover content, and on touch it only follows scrolling.
+      if (event.pointerType !== "mouse") {
+        return;
+      }
       pendingX = event.clientX;
       pendingY = event.clientY;
       // Coalesce moves into one write per frame.

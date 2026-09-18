@@ -77,10 +77,12 @@
     transform 300ms var(--ease-spring);
 }
 
-.chip:hover {
-  border-color: var(--accent-line);
-  color: var(--ink);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .chip:hover {
+    border-color: var(--accent-line);
+    color: var(--ink);
+    transform: translateY(-2px);
+  }
 }
 
 .chip[aria-pressed="true"] {
@@ -119,9 +121,11 @@
     transform 280ms var(--ease-spring);
 }
 
-.stepper:hover:not(:disabled) {
-  border-color: var(--accent);
-  transform: scale(1.08);
+@media (hover: hover) {
+  .stepper:hover:not(:disabled) {
+    border-color: var(--accent);
+    transform: scale(1.08);
+  }
 }
 
 .stepper:active:not(:disabled) {
@@ -168,8 +172,10 @@
   transition: color 200ms var(--ease-out);
 }
 
-.editLink:hover {
-  color: var(--accent-bright);
+@media (hover: hover) {
+  .editLink:hover {
+    color: var(--accent-bright);
+  }
 }
 
 .editLink:focus-visible {

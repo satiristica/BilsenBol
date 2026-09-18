@@ -21,8 +21,15 @@ interface SharedProps {
   className?: string;
 }
 
-/** Feeds the pointer position to CSS so the highlight tracks the cursor. */
+/**
+ * Feeds the pointer position to CSS so the highlight tracks the cursor.
+ * Mouse only: writing styles during a touch is exactly the kind of mid-tap
+ * change that makes iOS Safari hold back the click.
+ */
 function trackPointer(event: ReactPointerEvent<HTMLElement>) {
+  if (event.pointerType !== "mouse") {
+    return;
+  }
   const target = event.currentTarget;
   const bounds = target.getBoundingClientRect();
   target.style.setProperty("--mx", `${event.clientX - bounds.left}px`);

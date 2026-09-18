@@ -41,8 +41,10 @@
   transition: opacity 280ms var(--ease-out);
 }
 
-.base:hover::before {
-  opacity: 1;
+@media (hover: hover) {
+  .base:hover::before {
+    opacity: 1;
+  }
 }
 
 /* Diagonal sheen that sweeps once per hover. */
@@ -59,9 +61,11 @@
   pointer-events: none;
 }
 
-.base:hover::after {
-  opacity: 1;
-  animation: sheen 780ms var(--ease-out);
+@media (hover: hover) {
+  .base:hover::after {
+    opacity: 1;
+    animation: sheen 780ms var(--ease-out);
+  }
 }
 
 .base:active {
@@ -92,9 +96,11 @@
   color: var(--bg-deep);
 }
 
-.primary:hover:not(:disabled) {
-  box-shadow: 0 18px 42px rgb(62 224 138 / 34%);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .primary:hover:not(:disabled) {
+    box-shadow: 0 18px 42px rgb(62 224 138 / 34%);
+    transform: translateY(-2px);
+  }
 }
 
 .ghost {
@@ -103,10 +109,12 @@
   color: var(--ink);
 }
 
-.ghost:hover:not(:disabled) {
-  border-color: var(--accent-line);
-  background: var(--surface-hover);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .ghost:hover:not(:disabled) {
+    border-color: var(--accent-line);
+    background: var(--surface-hover);
+    transform: translateY(-2px);
+  }
 }
 
 .warm {
@@ -115,9 +123,11 @@
   color: #33210a;
 }
 
-.warm:hover:not(:disabled) {
-  box-shadow: 0 18px 42px rgb(255 180 92 / 34%);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .warm:hover:not(:disabled) {
+    box-shadow: 0 18px 42px rgb(255 180 92 / 34%);
+    transform: translateY(-2px);
+  }
 }
 
 /* Sizes ------------------------------------------------------------------- */
@@ -156,8 +166,10 @@
   transition: transform 340ms var(--ease-out);
 }
 
-.base:hover:not(:disabled) .arrowGlyph {
-  transform: translateX(3px);
+@media (hover: hover) {
+  .base:hover:not(:disabled) .arrowGlyph {
+    transform: translateX(3px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

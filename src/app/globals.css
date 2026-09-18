@@ -2,6 +2,11 @@
    BilsenBol visual system — deep green.
    Tokens are defined once here and consumed by every CSS Module, so a theme
    change never requires touching a feature file.
+
+   Every :hover rule in the project lives inside @media (hover: hover). On a
+   touch screen, a hover rule that reveals something makes iOS Safari treat
+   the first tap as a hover and swallow the click, so the button only reacts
+   to a second tap. Touch devices therefore never receive hover styles.
 --------------------------------------------------------------------------- */
 
 :root {
@@ -172,8 +177,10 @@ main {
   transition: transform 400ms var(--ease-spring);
 }
 
-.brand:hover .brand-mark {
-  transform: rotate(-8deg) scale(1.08);
+@media (hover: hover) {
+  .brand:hover .brand-mark {
+    transform: rotate(-8deg) scale(1.08);
+  }
 }
 
 .status-pill {
@@ -307,14 +314,16 @@ main {
   transition: transform 360ms var(--ease-spring);
 }
 
-.preset-chip:hover {
-  border-color: var(--accent);
-  background: var(--surface-hover);
-  transform: translateY(-2px);
-}
+@media (hover: hover) {
+  .preset-chip:hover {
+    border-color: var(--accent);
+    background: var(--surface-hover);
+    transform: translateY(-2px);
+  }
 
-.preset-chip:hover svg {
-  transform: scale(1.15) rotate(-8deg);
+  .preset-chip:hover svg {
+    transform: scale(1.15) rotate(-8deg);
+  }
 }
 
 .preset-chip:focus-visible {
@@ -354,8 +363,10 @@ main {
   transition: transform 1.2s var(--ease-out);
 }
 
-.hero-visual:hover .hero-photo img {
-  transform: scale(1.04);
+@media (hover: hover) {
+  .hero-visual:hover .hero-photo img {
+    transform: scale(1.04);
+  }
 }
 
 /* Tints the stock photo into the brand palette. */
@@ -455,9 +466,11 @@ main {
     transform 400ms var(--ease-spring);
 }
 
-.journey-card:hover {
-  border-color: var(--accent-line);
-  transform: translateY(-5px);
+@media (hover: hover) {
+  .journey-card:hover {
+    border-color: var(--accent-line);
+    transform: translateY(-5px);
+  }
 }
 
 .journey-photo {
@@ -474,9 +487,11 @@ main {
     filter 600ms var(--ease-out);
 }
 
-.journey-card:hover .journey-photo img {
-  filter: saturate(1.05);
-  transform: scale(1.06);
+@media (hover: hover) {
+  .journey-card:hover .journey-photo img {
+    filter: saturate(1.05);
+    transform: scale(1.06);
+  }
 }
 
 .journey-photo::after {

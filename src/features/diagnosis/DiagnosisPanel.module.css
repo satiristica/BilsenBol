@@ -94,10 +94,12 @@
   animation-delay: var(--delay, 0ms);
 }
 
-.insight:hover {
-  border-color: var(--line-strong);
-  background: var(--surface-raised);
-  transform: translateY(-3px);
+@media (hover: hover) {
+  .insight:hover {
+    border-color: var(--line-strong);
+    background: var(--surface-raised);
+    transform: translateY(-3px);
+  }
 }
 
 .insightHead {

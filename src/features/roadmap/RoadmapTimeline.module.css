@@ -127,9 +127,11 @@
     transform 300ms var(--ease-spring);
 }
 
-.stepLabel:hover {
-  border-color: var(--accent-line);
-  transform: translateX(3px);
+@media (hover: hover) {
+  .stepLabel:hover {
+    border-color: var(--accent-line);
+    transform: translateX(3px);
+  }
 }
 
 .stepLabel:has(input:focus-visible) {

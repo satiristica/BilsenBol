@@ -59,9 +59,11 @@
     transform 280ms var(--ease-spring);
 }
 
-.close:hover {
-  border-color: var(--accent);
-  transform: rotate(90deg);
+@media (hover: hover) {
+  .close:hover {
+    border-color: var(--accent);
+    transform: rotate(90deg);
+  }
 }
 
 .close:focus-visible {

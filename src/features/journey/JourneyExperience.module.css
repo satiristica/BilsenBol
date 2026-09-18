@@ -55,8 +55,10 @@
   transition: transform 400ms var(--ease-spring);
 }
 
-.brand:hover .brandMark {
-  transform: rotate(-8deg) scale(1.08);
+@media (hover: hover) {
+  .brand:hover .brandMark {
+    transform: rotate(-8deg) scale(1.08);
+  }
 }
 
 .brand:focus-visible {
@@ -126,9 +128,11 @@
   transition: transform 460ms var(--ease-out);
 }
 
-.stepperButton:hover:not(:disabled) {
-  border-color: var(--accent-line);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .stepperButton:hover:not(:disabled) {
+    border-color: var(--accent-line);
+    transform: translateY(-2px);
+  }
 }
 
 .stepperButton:disabled {

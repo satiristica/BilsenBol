@@ -1576,3 +1576,77 @@ NOT VERIFIED:
 
 LIMITATIONS:
 - NONE
+
+## TASK TASK-CLAUDE-20260918-mobile-tap-fix
+
+AGENT: CLAUDE
+STATUS: DONE
+BASE_COMMIT: 1c2f3c20c8f930359348f914ffff260820c99063
+SCOPE: Make buttons respond to the first tap on mobile.
+
+### COMPLETE TASK-CLAUDE-20260918-mobile-tap-fix
+
+AGENT: CLAUDE
+STATUS: DONE
+
+SUMMARY:
+- User report: on mobile, tapping most buttons shows a highlight but does not trigger the action.
+- Every :hover rule in the project (28 rules across 9 stylesheets) now sits inside `@media (hover: hover)`, so touch devices never receive hover styles.
+- The pointer-tracked highlight on `ActionButton` and the pointer-tracked grid in `LivingBackground` now ignore non-mouse pointers.
+- The convention is documented in the header comment of `globals.css`.
+
+ROOT CAUSE:
+- Most likely iOS Safari: when a hover rule reveals content, Safari spends the first tap on the hover state and dispatches the click only on a second tap. `ActionButton`, the primitive behind most buttons, revealed two pseudo-elements on hover (a pointer-tracked highlight at opacity 0→1 and a sheen animation), and it wrote inline styles on every pointer move, including during a touch. That matches the reported "a frame appears but nothing happens" and "almost all buttons".
+- This mechanism is iOS-only and could not be reproduced here. It is the diagnosis the evidence supports, not a confirmed one.
+
+DEBUG TRAIL:
+- Built a CDP harness that drives headless Chrome 153 at a 390x844 mobile viewport and sends real touch events. The first two runs reported failures that turned out to be harness bugs, not app bugs: (1) the project sets `scroll-behavior: smooth`, so coordinates were read before scrolling finished; (2) page-space `getBoundingClientRect` coordinates do not match the space `Input.dispatchTouchEvent` uses under mobile emulation. An event trace showed the taps landing on neighbouring elements. Switching to `DOM.getContentQuads`, which is what Puppeteer uses, fixed the harness.
+- With correct coordinates, all ten tested controls worked on the first tap in Chrome **before** the fix. So the defect does not reproduce in Chromium, which points to a WebKit-specific cause.
+
+FILES:
+- `src/app/globals.css`, `src/components/ActionButton.module.css`, `src/features/comparison/ComparisonDialog.module.css`, `src/features/diagnosis/DiagnosisPanel.module.css`, `src/features/journey/JourneyExperience.module.css`, `src/features/profile/ProfileWizard.module.css`, `src/features/profile/QuickAdjustBar.module.css`, `src/features/recommendations/RecommendationCard.module.css`, `src/features/roadmap/RoadmapTimeline.module.css` (hover rules wrapped in place; source order preserved so the later reduced-motion overrides still win)
+- `src/components/ActionButton.tsx`, `src/components/LivingBackground.tsx` (mouse-only pointer tracking)
+
+VERIFICATION:
+- `npm run typecheck` → exit 0.
+- `npm run lint` → exit 0.
+- `npm run build` → exit 0.
+- `git diff --check` → exit 0.
+- Inventory script: 28 top-level :hover rules before, 0 after outside `@media (hover: hover)`; the 9 remaining nested hover selectors are all inside `prefers-reduced-motion` blocks and only cancel motion. The grep count of 43 hover selector lines agrees.
+- Phone (headless Chrome, `hover: none`, touch): tapping "Далее" advances the wizard, and the button's `::before` highlight stays at opacity 0 after the tap.
+- Desktop (Chrome with a fine hover-capable pointer, via `--blink-settings`): `(hover: hover)` matches, the `::before` highlight reaches opacity 1 under the cursor, and the pointer tracking writes `--mx`. Desktop effects are intact.
+- Full touch suite after the fix, 10 of 10 pass: wizard option, "Далее", "Назад", summary chip, landing "Начать", a preset chip, "Сравнить", a quick-adjust budget chip, the stepper, "Выполнено".
+
+NOT VERIFIED:
+- Not verified on an actual iPhone or in WebKit. The iOS click-suppression behaviour cannot be reproduced in Chromium, so the fix removes the known trigger without a direct before/after on the affected browser. The user should confirm on their device.
+
+LIMITATIONS:
+- If the reporting device was not iOS Safari, this diagnosis may not be the cause.
+
+### CORRECTION TASK-CLAUDE-20260918-mobile-tap-fix
+
+AGENT: CLAUDE
+CORRECTS: the ROOT CAUSE section of `COMPLETE TASK-CLAUDE-20260918-mobile-tap-fix`
+
+OLD:
+- The dead buttons were most likely iOS Safari spending the first tap on hover-revealed content, and gating :hover behind `@media (hover: hover)` was the fix.
+
+NEW:
+- The actual cause was the Next.js dev server blocking cross-origin access to its dev assets. The phone opened the dev server by its LAN address (`http://192.168.1.49:3000`). The dev server only trusts `localhost` and the hostname it was started with, so it blocked those requests. The HTML and CSS still arrived, which is why a tap drew a highlight, but React never hydrated, so every `onClick` button was dead. Plain `<a>` links and native radio inputs kept working, which explains "almost all buttons".
+- Fix: `allowedDevOrigins: ["192.168.*.*"]` in `next.config.ts`. It affects the dev server only; `next build` / `next start` and deployments never had this problem.
+- The hover gating from the original entry did not fix this bug. It stays as a separate improvement (no sticky hover on touch screens, and it removes the known iOS double-tap trigger), but it was not the cause.
+
+EVIDENCE:
+- The dev server log contained `Blocked cross-origin request to Next.js dev resource /_next/hmr from "192.168.1.49"`.
+- Same CDP touch harness, same headless Chrome, 390x844 viewport:
+  - via `http://localhost:3000`: 10/10 controls work, both before and after the hover change;
+  - via `http://192.168.1.49:3000` **with the hover change already applied** but without `allowedDevOrigins`: 7 controls fail. Every React button receives the click with no effect, while links, preset chips and the native radio still work;
+  - via `http://192.168.1.49:3000` after adding `allowedDevOrigins` and restarting dev: 10/10 work, and the new dev log has 0 blocked requests.
+- The allowlist semantics come from the version-matched docs at `node_modules/next/dist/docs/01-app/03-api-reference/05-config/01-next-config-js/allowedDevOrigins.md`: `*` matches exactly one hostname label, so `192.168.*.*` covers `192.168.x.y` and nothing broader.
+- `npm run typecheck`, `npm run lint`, `npm run build`, `git diff --check` → exit 0.
+
+FILES:
+- `next.config.ts`
+
+SECURITY NOTE:
+- This relaxes a dev-server safety default for the private `192.168.0.0/16` range only, and only in development. It does not affect production builds.

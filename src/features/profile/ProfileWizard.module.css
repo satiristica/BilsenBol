@@ -39,8 +39,10 @@
   transition: color 200ms var(--ease-out);
 }
 
-.back:hover:not(:disabled) {
-  color: var(--ink);
+@media (hover: hover) {
+  .back:hover:not(:disabled) {
+    color: var(--ink);
+  }
 }
 
 .back:disabled {
@@ -132,10 +134,12 @@
     transform 320ms var(--ease-spring);
 }
 
-.option:hover {
-  border-color: var(--accent-line);
-  background: var(--surface-hover);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .option:hover {
+    border-color: var(--accent-line);
+    background: var(--surface-hover);
+    transform: translateY(-2px);
+  }
 }
 
 .option input {
@@ -177,9 +181,11 @@
     transform 360ms var(--ease-spring);
 }
 
-.option:hover .icon {
-  color: var(--accent-bright);
-  transform: scale(1.06) rotate(-4deg);
+@media (hover: hover) {
+  .option:hover .icon {
+    color: var(--accent-bright);
+    transform: scale(1.06) rotate(-4deg);
+  }
 }
 
 .option:has(input:checked) .icon {
@@ -336,10 +342,12 @@
     transform 300ms var(--ease-spring);
 }
 
-.summaryChip:hover {
-  border-color: var(--accent-line);
-  background: var(--surface-hover);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .summaryChip:hover {
+    border-color: var(--accent-line);
+    background: var(--surface-hover);
+    transform: translateY(-2px);
+  }
 }
 
 .summaryChip:focus-visible {

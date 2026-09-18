@@ -32,15 +32,17 @@
   transition: transform 520ms var(--ease-out);
 }
 
-.card:hover {
-  border-color: var(--accent-line);
-  background: var(--surface-raised);
-  box-shadow: var(--shadow-lift);
-  transform: translateY(-4px);
-}
+@media (hover: hover) {
+  .card:hover {
+    border-color: var(--accent-line);
+    background: var(--surface-raised);
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-4px);
+  }
 
-.card:hover::before {
-  transform: scaleX(1);
+  .card:hover::before {
+    transform: scaleX(1);
+  }
 }
 
 .cardSelected {
@@ -111,8 +113,10 @@
   content: "";
 }
 
-.card:hover .score::before {
-  background: var(--surface-raised);
+@media (hover: hover) {
+  .card:hover .score::before {
+    background: var(--surface-raised);
+  }
 }
 
 .scoreInner {
@@ -242,8 +246,10 @@
   transform: rotate(180deg);
 }
 
-.summary:hover {
-  color: var(--accent-bright);
+@media (hover: hover) {
+  .summary:hover {
+    color: var(--accent-bright);
+  }
 }
 
 .summary:focus-visible {
