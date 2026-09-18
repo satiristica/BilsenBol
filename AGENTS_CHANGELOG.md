@@ -2197,3 +2197,41 @@ VERIFICATION:
 
 LIMITATIONS:
 - Three successful calls show the fix works but do not prove the failure can never recur; if it does, the chain still falls back to the next model.
+
+## TASK TASK-CLAUDE-20260918-brand-logo
+
+AGENT: CLAUDE
+STATUS: DONE
+BRANCH: feat/ai-roadmap
+SCOPE: Use the team's logo as the site favicon and as the brand mark in the headers.
+
+### COMPLETE TASK-CLAUDE-20260918-brand-logo
+
+AGENT: CLAUDE
+STATUS: DONE
+
+SUMMARY:
+- The mark (the "B" with the book and road) was cropped from the supplied 1254×1254 logo by detecting ink rows. The mark sits at x 317–964, y 245–760; the wordmark band (y 822–992) is excluded, because it is illegible at icon sizes.
+- Generated per the Next 16 metadata file conventions (`node_modules/next/dist/docs/.../01-metadata/app-icons.md`):
+  - `src/app/favicon.ico` (16/32/48, 5% padding so the mark stays large at 16 px);
+  - `src/app/icon.png` (256×256, rounded tile, 42 KB after optimisation from 126 KB);
+  - `src/app/apple-icon.png` (180×180, square, since iOS rounds it);
+  - `public/brand/logo-mark.png` (256×256) for the UI.
+  Next emits the `<link rel="icon">` / `apple-touch-icon` tags itself, with cache-busting query strings.
+- The mark is dark green, which would vanish on the dark page, so it sits on a light rounded tile everywhere.
+- The letter "B" tiles in all three headers (landing, journey, AI plan) are replaced with one shared `BrandMark` component instead of three copies of tile styles. The user asked for the main page; all three were changed because a new logo on the landing next to the old "B" inside would break the unified visual system the case requires. The hover tilt is kept under `@media (hover: hover)`.
+- README "Источники" notes the logo is the team's own.
+
+FILES:
+- `src/app/{favicon.ico,icon.png,apple-icon.png}` (new), `public/brand/logo-mark.png` (new)
+- `src/components/{BrandMark.tsx,BrandMark.module.css}` (new)
+- `src/app/page.tsx`, `src/features/journey/JourneyExperience.tsx`, `src/features/roadmap/AiPlanPage.tsx`
+- `src/app/globals.css`, `src/features/journey/JourneyExperience.module.css`, `src/features/roadmap/AiPlanPage.module.css` (old `.brand-mark` / `.brandMark` rules removed)
+- `README.md`
+
+VERIFICATION:
+- `npm run typecheck`, `npm run lint`, `npm run build`, `git diff --check` → exit 0; the build lists `/icon.png` and `/apple-icon.png`.
+- `/favicon.ico`, `/icon.png`, `/apple-icon.png`, `/brand/logo-mark.png` → HTTP 200 with the right content types; three icon link tags are present in the rendered `<head>`.
+- The edited stylesheets have balanced braces, no reference to the old mark classes remains, and there are 0 top-level :hover rules outside `@media (hover: hover)`.
+- A preview sheet at 48, 32 and 16 px and a simulated browser tab confirm the mark stays legible. Header screenshots at 390 px (landing, journey) and 1280 px (landing) reviewed.
+- Tap suite 11/11.

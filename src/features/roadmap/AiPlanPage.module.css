@@ -34,16 +34,6 @@
   text-decoration: none;
 }
 
-.brandMark {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  border-radius: 11px;
-  background: linear-gradient(140deg, var(--accent-bright), var(--accent-deep));
-  color: var(--bg-deep);
-  font-weight: 800;
-}
 
 .backLink {
   display: inline-flex;

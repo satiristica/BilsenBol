@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { ActionLink } from "@/components/ActionButton";
+import { BrandMark } from "@/components/BrandMark";
 import { buildDiagnosis } from "@/domain/diagnosis";
 import { rankPrograms } from "@/domain/matching";
 import type { ApplicantProfile } from "@/domain/profile";
@@ -29,9 +30,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div className={styles.shell}>
       <header className={styles.topBar}>
         <Link className={styles.brand} href="/">
-          <span aria-hidden="true" className={styles.brandMark}>
-            B
-          </span>
+          <BrandMark size={34} />
           <span>BilsenBol</span>
         </Link>
         <Link className={styles.backLink} href="/journey">

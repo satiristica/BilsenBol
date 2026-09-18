@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { ActionButton } from "@/components/ActionButton";
+import { BrandMark } from "@/components/BrandMark";
 import { DEMO_DATA_BADGE } from "@/data/programs";
 import { buildDiagnosis } from "@/domain/diagnosis";
 import { rankPrograms, type ProgramMatch } from "@/domain/matching";
@@ -179,9 +180,7 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
     <div className={styles.shell}>
       <header className={styles.topBar}>
         <Link className={styles.brand} href="/">
-          <span aria-hidden="true" className={styles.brandMark}>
-            B
-          </span>
+          <BrandMark size={34} />
           <span>BilsenBol</span>
         </Link>
         <div className={styles.topActions}>

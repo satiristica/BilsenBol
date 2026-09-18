@@ -165,23 +165,6 @@ main {
   text-decoration: none;
 }
 
-.brand-mark {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  place-items: center;
-  border-radius: 11px;
-  background: linear-gradient(140deg, var(--accent-bright), var(--accent-deep));
-  color: var(--bg-deep);
-  font-weight: 800;
-  transition: transform 400ms var(--ease-spring);
-}
-
-@media (hover: hover) {
-  .brand:hover .brand-mark {
-    transform: rotate(-8deg) scale(1.08);
-  }
-}
 
 .status-pill {
   display: inline-flex;

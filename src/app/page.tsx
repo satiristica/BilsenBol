@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ActionLink } from "@/components/ActionButton";
+import { BrandMark } from "@/components/BrandMark";
 import { LivingBackground } from "@/components/LivingBackground";
 import { Reveal } from "@/components/Reveal";
 import { PROFILE_PRESETS } from "@/domain/profile";
@@ -45,9 +46,7 @@ export default function HomePage() {
       <main>
         <header className="site-header">
           <Link className="brand" href="/" aria-label="Главная BilsenBol">
-            <span className="brand-mark" aria-hidden="true">
-              B
-            </span>
+            <BrandMark />
             <span>BilsenBol</span>
           </Link>
           <span className="status-pill">Первая версия</span>
