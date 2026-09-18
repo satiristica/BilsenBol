@@ -1,15 +1,15 @@
 "use client";
 
-import { ArrowLeft, CheckCircle2, Leaf, Lock, type LucideIcon, Snowflake, Sparkles, Sprout } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Lock, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { ActionLink } from "@/components/ActionButton";
 import { BrandMark } from "@/components/BrandMark";
 import { buildDiagnosis } from "@/domain/diagnosis";
-import { rankPrograms } from "@/domain/matching";
+import { rankPrograms, type ProgramMatch } from "@/domain/matching";
 import type { ApplicantProfile } from "@/domain/profile";
-import { buildRoadmap, calculateProgress, listSteps, type RoadmapPhase, type RoadmapSeason } from "@/domain/roadmap";
+import { buildRoadmap, calculateProgress, listSteps, type RoadmapPhase } from "@/domain/roadmap";
 import { loadJourney } from "@/features/journey/journeyPersistence";
 import { JourneySkeleton } from "@/features/journey/JourneySkeleton";
 import { useIsClient } from "@/lib/useIsClient";
@@ -17,13 +17,11 @@ import { pluralRu } from "@/lib/plural";
 
 import { AiRoadmapCard } from "./AiRoadmapCard";
 import styles from "./AiPlanPage.module.css";
+import { RoadmapTree } from "./RoadmapTree";
 import { useRoadmapAdvice } from "./useRoadmapAdvice";
 
-const SEASON_ICONS: Record<RoadmapSeason, LucideIcon> = {
-  autumn: Leaf,
-  winter: Snowflake,
-  spring: Sprout,
-};
+/** Top programmes shown as the tree's goal nodes. */
+const TREE_GOALS = 3;
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
@@ -114,24 +112,29 @@ function UnlockGate({
     );
   }
 
-  return <AiPlanContent phases={phases} profile={profile} profileSummary={profileSummary} />;
+  return (
+    <AiPlanContent
+      goals={result.matches.slice(0, TREE_GOALS)}
+      phases={phases}
+      profile={profile}
+      profileSummary={profileSummary}
+    />
+  );
 }
 
 function AiPlanContent({
   profile,
   phases,
+  goals,
   profileSummary,
 }: {
   profile: ApplicantProfile;
   phases: RoadmapPhase[];
+  goals: ProgramMatch[];
   profileSummary: string;
 }) {
   const stepIds = useMemo(() => new Set(listSteps(phases).map((step) => step.id)), [phases]);
   const state = useRoadmapAdvice(profile, stepIds, true);
-  const adviceById =
-    state.status === "ready"
-      ? new Map(state.advice.steps.map((item) => [item.id, item.advice]))
-      : new Map<string, string>();
 
   return (
     <Shell>
@@ -154,39 +157,12 @@ function AiPlanContent({
         unavailableText="ИИ сейчас недоступен — попробуйте открыть страницу чуть позже."
       />
 
-      {state.status === "ready" && adviceById.size > 0 ? (
-        <>
-          <h2 className={styles.sectionTitle}>Разбор по шагам</h2>
-          <ol className={styles.phases}>
-            {phases.map((phase) => {
-              const SeasonIcon = SEASON_ICONS[phase.season];
-              const steps = phase.steps.filter((step) => adviceById.has(step.id));
-              if (steps.length === 0) {
-                return null;
-              }
-              return (
-                <li className={styles.phase} key={phase.season}>
-                  <span className={styles.season}>
-                    <SeasonIcon aria-hidden="true" size={13} strokeWidth={2.4} />
-                    {phase.period} · {phase.title}
-                  </span>
-                  <ul className={styles.steps}>
-                    {steps.map((step) => (
-                      <li className={styles.step} key={step.id}>
-                        <CheckCircle2 aria-hidden="true" size={16} strokeWidth={2.4} />
-                        <span className={styles.stepBody}>
-                          <span className={styles.stepTitle}>{step.title}</span>
-                          <p className={styles.stepAdvice}>{adviceById.get(step.id)}</p>
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              );
-            })}
-          </ol>
-        </>
-      ) : null}
+      <RoadmapTree
+        adviceState={state}
+        goals={goals}
+        phases={phases}
+        profileSummary={profileSummary}
+      />
 
       <div className={styles.actions}>
         <ActionLink href="/journey" variant="ghost">

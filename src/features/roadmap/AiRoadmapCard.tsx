@@ -1,18 +1,10 @@
 "use client";
 
-import { CloudOff, Info, Leaf, type LucideIcon, Snowflake, Sparkles, Sprout } from "lucide-react";
-
-import type { RoadmapSeason } from "@/domain/roadmap";
+import { CloudOff, Info, Sparkles } from "lucide-react";
 
 import styles from "./AiRoadmapCard.module.css";
 import { AI_PROVIDER_LABELS } from "./roadmapAdvice";
 import type { RoadmapAdviceState } from "./useRoadmapAdvice";
-
-const SEASONS: Record<RoadmapSeason, { label: string; icon: LucideIcon }> = {
-  autumn: { label: "Осень", icon: Leaf },
-  winter: { label: "Зима", icon: Snowflake },
-  spring: { label: "Весна", icon: Sprout },
-};
 
 interface AiRoadmapCardProps {
   state: RoadmapAdviceState;
@@ -21,7 +13,7 @@ interface AiRoadmapCardProps {
   unavailableText?: string;
 }
 
-/** Strategy and extra suggestions from the AI layer. */
+/** The AI strategy summary; extra suggestions live in the roadmap tree as nodes. */
 export function AiRoadmapCard({
   state,
   title = "План от ИИ",
@@ -68,30 +60,6 @@ export function AiRoadmapCard({
       </div>
 
       {advice.summary ? <p className={styles.summary}>{advice.summary}</p> : null}
-
-      {advice.extras.length > 0 ? (
-        <>
-          <p className={styles.extrasLabel}>Ещё предложения для вас</p>
-          <ul className={styles.extras}>
-            {advice.extras.map((extra) => {
-              const season = SEASONS[extra.season];
-              const SeasonIcon = season.icon;
-              return (
-                <li className={styles.extra} key={`${extra.season}-${extra.title}`}>
-                  <div className={styles.extraTop}>
-                    <span className={styles.season}>
-                      <SeasonIcon aria-hidden="true" size={12} strokeWidth={2.4} />
-                      {season.label}
-                    </span>
-                    <span className={styles.extraTitle}>{extra.title}</span>
-                  </div>
-                  <p className={styles.extraDetail}>{extra.detail}</p>
-                </li>
-              );
-            })}
-          </ul>
-        </>
-      ) : null}
 
       <p className={styles.disclaimer}>
         <Info aria-hidden="true" size={15} strokeWidth={2.2} />

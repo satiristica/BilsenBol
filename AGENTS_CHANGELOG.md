@@ -2335,3 +2335,54 @@ RISKS:
 - Prices and dates change. Several windows are for the 2026 intake because 2027 dates are not published.
 - The CTU per-semester wording rests on a search snippet of FIT's fee page.
 - The AITU English rule and the Inha Pre-University entry conditions are not stated on the pages that were fetched.
+
+## TASK TASK-CLAUDE-20260919-ai-roadmap-tree
+
+AGENT: CLAUDE
+STATUS: DONE (uncommitted, on top of feat/real-universities)
+SCOPE: Show the AI plan page (`/journey/ai`) as a clickable roadmap tree. Each node opens a detail menu. Zero extra model tokens.
+
+CHANGES:
+- New `src/features/roadmap/RoadmapTree.tsx` and its `.module.css`.
+  - Tree: applicant → three season branches → rule steps, plus the AI's extra suggestions (dashed nodes marked «ИИ»), ending at the top-3 programmes as «Цель» nodes.
+  - Connectors use plain CSS: three columns under a crossbar from 760 px, a left rail on phones.
+  - Nodes appear one after another; the animation is off under reduced motion.
+- New `TreeNodeDialog.tsx` and its `.module.css`: a `<dialog>`, shown as a bottom sheet on phones and a centred panel from 720 px.
+  - Step node: the rule text, the AI advice (labelled), and matching facts from the catalogue — application windows, scholarships, English requirements or tuition of the goal programmes.
+  - AI extra node: its text, labelled as a suggestion outside the base plan.
+  - Programme node: catalogue facts, the blocker and source links.
+  - Dates and requirements always come from `programs.ts`, never from the model.
+- `AiPlanPage.tsx` uses the tree in place of the old step list.
+- `AiRoadmapCard` no longer shows the extras; they are tree nodes now, so the page does not repeat them.
+- The tree structure is rule-based. It renders the same when AI is unavailable, so progress ids and the journey never depend on the model.
+
+VERIFICATION:
+- `ai-page.mjs` extended to cover:
+  - the tree's root, seasons and goal nodes;
+  - AI advice marks on nodes;
+  - the dialog from a step (advice plus catalogue facts);
+  - the close button;
+  - the applications step showing application windows;
+  - an AI extra node;
+  - a programme node with its sources;
+  - no horizontal overflow at 390 px;
+  - exactly one model request, with the result cached;
+  - the tree rendering while AI is unavailable;
+  - a clean console.
+  
+  All checks pass.
+- Screenshots reviewed: desktop tree at 1280 px, the mobile page and the mobile node sheet.
+- `npm run typecheck`, `npx eslint .`, `npm run build` → exit 0.
+
+### Follow-up: node-graph redesign (user feedback "динамичнее, меньше текста, в виде нодов")
+- `RoadmapTree` now draws round icon nodes with 1–2 word captions (`STEP_NODES` map by step id; an unknown id falls back to its full title). The full title stays in the button's aria-label and in the node menu.
+- Captions alternate sides of each season's spine (zigzag).
+- Motion (all off under reduced motion):
+  - dashed connectors flow downwards (sideways on the crossbar);
+  - the applicant node pulses with rings;
+  - nodes pop in one after another with a spring.
+- The AI-advice marker is a small sparkle badge on the node. AI extras are dashed nodes. Goal programmes are amber nodes labelled with the short university name (METU, ELTE, BME).
+- `BrandMark` loads eagerly: on the shorter AI page Next.js reported the logo as the LCP element (console warning).
+- `ai-page.mjs` selectors updated to the new captions and to `[data-ai-advice]`. Everything passes, console clean.
+- `tsc`, `eslint`, `build` → exit 0.
+- Desktop and mobile screenshots reviewed. On phones the seasons are joined by one continuous spine.

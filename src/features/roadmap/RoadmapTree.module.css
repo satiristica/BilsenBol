@@ -1,0 +1,448 @@
+.tree {
+  --rail: var(--accent-line);
+  --flow: var(--accent);
+  --gap: 26px;
+  --orb: 52px;
+
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 50% 0%, rgb(62 224 138 / 10%), transparent 60%),
+    var(--surface);
+  padding: 20px 16px 28px;
+}
+
+.headingRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  justify-self: stretch;
+  margin-bottom: 18px;
+}
+
+.heading {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* ---- Connectors: dashes that flow downwards, like energy through the tree. */
+
+.root::after,
+.goal::before,
+.nodes::before,
+.branch::before {
+  position: absolute;
+  width: 2px;
+  background: repeating-linear-gradient(to bottom, var(--flow) 0 6px, transparent 6px 14px);
+  background-size: 2px 14px;
+  content: "";
+  opacity: 0.7;
+  animation: flow-down 900ms linear infinite;
+}
+
+@keyframes flow-down {
+  to {
+    background-position: 0 14px;
+  }
+}
+
+@keyframes flow-side {
+  to {
+    background-position: 14px 0;
+  }
+}
+
+/* ---- Root */
+
+.root {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  max-width: 420px;
+  text-align: center;
+  animation: pop 700ms var(--ease-spring) both;
+}
+
+.root::after {
+  top: 100%;
+  left: calc(50% - 1px);
+  height: var(--gap);
+}
+
+.rootOrb {
+  position: relative;
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(145deg, var(--accent-bright), var(--accent-deep));
+  box-shadow: 0 0 28px rgb(62 224 138 / 45%);
+  color: var(--bg-deep);
+}
+
+/* Two rings pulse out of the applicant node. */
+.rootOrb::before,
+.rootOrb::after {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  content: "";
+  animation: ring 2.6s var(--ease-out) infinite;
+}
+
+.rootOrb::after {
+  animation-delay: 1.3s;
+}
+
+@keyframes ring {
+  from {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+
+.rootCaption {
+  margin-top: 6px;
+  color: var(--accent-bright);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rootText {
+  color: var(--ink-dim);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+/* ---- Seasons */
+
+.branches {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 26px;
+  width: 100%;
+  margin: var(--gap) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.branch {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  min-width: 0;
+}
+
+.season {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--accent-line);
+  border-radius: 999px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 8px 14px;
+  animation: pop 600ms var(--ease-spring) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+
+/* ---- Step nodes on a zigzag spine */
+
+.nodes {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  max-width: 320px;
+  margin: 0;
+  padding: 16px 0 4px;
+  list-style: none;
+}
+
+.nodes::before {
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 1px);
+}
+
+/* Stacked seasons on phones: one continuous spine from season to season. */
+.branch + .branch::before {
+  top: -26px;
+  left: calc(50% - 1px);
+  height: 26px;
+}
+
+.nodeItem {
+  position: relative;
+  animation: pop 620ms var(--ease-spring) both;
+  animation-delay: calc(120ms + var(--i, 0) * 55ms);
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+.node {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--orb) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: none;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+}
+
+.orb {
+  position: relative;
+  display: grid;
+  grid-column: 2;
+  grid-row: 1;
+  width: var(--orb);
+  height: var(--orb);
+  place-items: center;
+  border: 2px solid var(--accent-line);
+  border-radius: 50%;
+  background: var(--bg-deep);
+  color: var(--accent-bright);
+  transition:
+    transform 320ms var(--ease-spring),
+    border-color 200ms var(--ease-out),
+    box-shadow 260ms var(--ease-out);
+}
+
+.caption {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: start;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: left;
+  transition: color 200ms var(--ease-out);
+}
+
+/* Captions alternate sides so the spine reads as a tree, not a list. */
+.nodes .nodeItem:nth-child(even) .caption {
+  grid-column: 1;
+  justify-self: end;
+  text-align: right;
+}
+
+.aiDot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg-deep);
+}
+
+@media (hover: hover) {
+  .node:hover .orb {
+    border-color: var(--accent);
+    box-shadow: var(--glow);
+    transform: scale(1.12);
+  }
+
+  .node:hover .caption {
+    color: var(--accent-bright);
+  }
+}
+
+.node:active .orb {
+  transform: scale(0.92);
+}
+
+.node:focus-visible {
+  outline: none;
+}
+
+.node:focus-visible .orb {
+  outline: 2px solid var(--warn);
+  outline-offset: 4px;
+}
+
+/* AI suggestions: dashed, filled orb. */
+.nodeExtra .orb {
+  border-style: dashed;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.nodeExtra .caption {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--accent-bright);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+/* ---- Goal */
+
+.goal {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  width: 100%;
+  margin-top: calc(var(--gap) + 6px);
+}
+
+.goal::before {
+  bottom: 100%;
+  left: calc(50% - 1px);
+  height: var(--gap);
+}
+
+.goalHead {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--warn-line);
+  border-radius: 999px;
+  background: var(--warn-soft);
+  color: var(--warn-ink);
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 8px 14px;
+}
+
+.goalNodes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.goalNodes .node {
+  display: grid;
+  grid-template-columns: auto;
+  justify-items: center;
+  gap: 8px;
+  width: 96px;
+}
+
+.goalNodes .orb,
+.goalNodes .caption {
+  grid-column: 1;
+  grid-row: auto;
+}
+
+.goalNodes .caption {
+  justify-self: center;
+  text-align: center;
+}
+
+.nodeGoal .orb {
+  border-color: var(--warn-line);
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+@media (hover: hover) {
+  .nodeGoal:hover .orb {
+    border-color: var(--warn);
+    box-shadow: 0 0 0 1px var(--warn-line), 0 14px 40px rgb(255 180 92 / 22%);
+  }
+}
+
+/* From tablet width the seasons sit side by side under one crossbar. */
+@media (min-width: 760px) {
+  .tree {
+    padding: 24px 24px 32px;
+  }
+
+  .branches {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    padding-top: var(--gap);
+  }
+
+  .branches::before {
+    position: absolute;
+    top: 0;
+    left: calc(100% / 6);
+    right: calc(100% / 6);
+    height: 2px;
+    background: repeating-linear-gradient(to right, var(--flow) 0 6px, transparent 6px 14px);
+    background-size: 14px 2px;
+    content: "";
+    opacity: 0.7;
+    animation: flow-side 900ms linear infinite;
+  }
+
+  /* Side by side, each spine stops at its last node. */
+  .nodes::before {
+    bottom: 22px;
+  }
+
+  .branch::before,
+  .branch + .branch::before {
+    top: calc(var(--gap) * -1);
+    left: calc(50% - 1px);
+    height: var(--gap);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .season,
+  .nodeItem,
+  .rootOrb::before,
+  .rootOrb::after,
+  .root::after,
+  .goal::before,
+  .nodes::before,
+  .branch::before,
+  .branches::before {
+    animation: none;
+  }
+}
