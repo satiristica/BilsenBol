@@ -1,7 +1,13 @@
-import { DEMO_PROGRAMS, type Program } from "@/data/programs";
+import {
+  PROGRAMS,
+  annualTuitionUsd,
+  type Currency,
+  type EnglishTest,
+  type Program,
+} from "@/data/programs";
 import {
   BUDGET_CEILING_USD,
-  hasEnglishCertificate,
+  GRANT_COMPETITIVE_GPA,
   type ApplicantProfile,
 } from "@/domain/profile";
 import { YEARS, pluralRu } from "@/lib/plural";
@@ -10,8 +16,15 @@ import { YEARS, pluralRu } from "@/lib/plural";
  * Hard constraints decide eligibility, soft signals only decide order.
  * A programme that violates a hard constraint is never shown as a match,
  * regardless of how well it scores on preference.
+ *
+ * The school average is deliberately not a hard constraint: none of the
+ * catalogued universities publishes a cut-off on the five-point CIS scale, so
+ * it only ranks programmes that rely on a merit scholarship.
  */
-export type HardConstraint = "budget" | "gpa" | "language" | "region";
+export type HardConstraint = "budget" | "language" | "region";
+
+/** How this applicant can satisfy the programme's English requirement. */
+export type EnglishRoute = "not-required" | "certificate" | "own-test" | "foundation";
 
 export type MatchBadgeKind =
   | "budget-fit"
@@ -44,11 +57,15 @@ export interface ProgramMatch {
   /** A requirement the applicant does not meet yet, or null when nothing blocks. */
   blocker: string | null;
   improvementAction: string;
+  englishRoute: EnglishRoute;
+  /** Approximate yearly tuition in USD at the catalogue's reference rates. */
+  annualTuitionUsd: number;
+  /** The tuition exceeds the budget, so the programme fits only with its scholarship. */
+  needsScholarshipForBudget: boolean;
 }
 
 export interface ExclusionSummary {
   budget: number;
-  gpa: number;
   language: number;
   region: number;
 }
@@ -59,113 +76,170 @@ export interface RecommendationResult {
   totalConsidered: number;
 }
 
-function failedConstraint(
-  profile: ApplicantProfile,
-  program: Program,
-): HardConstraint | null {
-  if (profile.regions.length > 0 && !profile.regions.includes(program.region)) {
-    return "region";
+function certificateOf(profile: ApplicantProfile): EnglishTest | null {
+  return profile.english === "school" ? null : profile.english;
+}
+
+function isTaughtInEnglish(program: Program): boolean {
+  return program.teachingLanguage === "Английский";
+}
+
+export function isFreeTuition(program: Program): boolean {
+  return program.tuition.amount === 0;
+}
+
+export function hasFullFunding(program: Program): boolean {
+  return program.fullFunding !== null || isFreeTuition(program);
+}
+
+function findEnglishRoute(profile: ApplicantProfile, program: Program): EnglishRoute | null {
+  if (program.english === null) {
+    return "not-required";
   }
-  if (profile.budget === "grant-only") {
-    if (!program.hasFullGrant) {
-      return "budget";
-    }
-  } else if (program.annualTuitionUsd > BUDGET_CEILING_USD[profile.budget]) {
-    return "budget";
+  const certificate = certificateOf(profile);
+  const { accepts } = program.english;
+  if (certificate && (accepts === "unlisted" || accepts.includes(certificate))) {
+    return "certificate";
   }
-  if (program.minGpa > profile.gpa) {
-    return "gpa";
+  if (program.ownEnglishTest) {
+    return "own-test";
   }
-  if (
-    program.requiresEnglishCertificate &&
-    !hasEnglishCertificate(profile) &&
-    !program.hasFoundationYear
-  ) {
-    return "language";
+  const foundation = program.foundation;
+  if (foundation && (foundation.accepts === null || (certificate && foundation.accepts.includes(certificate)))) {
+    return "foundation";
   }
   return null;
 }
 
-function teachesInEnglish(program: Program): boolean {
-  return program.teachingLanguage !== "ru";
+interface Eligibility {
+  route: EnglishRoute;
+  tuitionUsd: number;
+  needsScholarshipForBudget: boolean;
+}
+
+function checkEligibility(
+  profile: ApplicantProfile,
+  program: Program,
+): { failure: HardConstraint } | { eligibility: Eligibility } {
+  if (profile.regions.length > 0 && !profile.regions.includes(program.region)) {
+    return { failure: "region" };
+  }
+  const tuitionUsd = annualTuitionUsd(program.tuition);
+  const fitsBudget = tuitionUsd <= BUDGET_CEILING_USD[profile.budget];
+  if (!fitsBudget && program.fullFunding === null) {
+    return { failure: "budget" };
+  }
+  const route = findEnglishRoute(profile, program);
+  if (route === null) {
+    return { failure: "language" };
+  }
+  return { eligibility: { route, tuitionUsd, needsScholarshipForBudget: !fitsBudget } };
 }
 
 function buildProgramBadges(program: Program): ProgramBadge[] {
   const badges: ProgramBadge[] = [];
-  if (program.hasFullGrant) {
-    badges.push({ label: "100% грант" });
+  if (isFreeTuition(program)) {
+    badges.push({ label: "Бесплатное обучение" });
   }
-  if (program.acceptsAfterGrade11) {
-    badges.push({ label: "Прямое поступление после 11 класса" });
+  if (program.fullFunding) {
+    badges.push({ label: `Стипендия ${program.fullFunding.name}` });
   }
-  if (teachesInEnglish(program)) {
+  if (isTaughtInEnglish(program)) {
     badges.push({ label: "Обучение на английском" });
+  } else {
+    badges.push({ label: `Обучение: ${program.teachingLanguage.toLowerCase()}` });
   }
-  if (program.hasFoundationYear) {
-    badges.push({ label: "Есть Foundation" });
+  if (program.foundation) {
+    badges.push({ label: "Есть подготовительная программа" });
+  }
+  if (program.entranceExam) {
+    badges.push({ label: "Вступительные испытания" });
   }
   return badges;
 }
 
-function scoreProgram(profile: ApplicantProfile, program: Program) {
-  const factors: MatchFactor[] = [
-    { label: "Проходит обязательные требования", delta: 6 },
-  ];
+const ROUTE_FACTORS: Record<EnglishRoute, { label: string; delta: number; reason: string }> = {
+  certificate: {
+    label: "Ваш сертификат принимают",
+    delta: 14,
+    reason: "Ваш языковой сертификат есть в списке принимаемых.",
+  },
+  "not-required": {
+    label: "Сертификат по английскому не нужен",
+    delta: 12,
+    reason: "Английский сертификат не указан среди требований к поступлению.",
+  },
+  "own-test": {
+    label: "Можно сдать экзамен вуза",
+    delta: 10,
+    reason: "Без сертификата можно сдать собственный экзамен вуза по английскому.",
+  },
+  foundation: {
+    label: "Через подготовительную программу",
+    delta: 8,
+    reason: "Подготовительная программа открывает путь, пока язык не подтверждён.",
+  },
+};
+
+function scoreProgram(profile: ApplicantProfile, program: Program, eligibility: Eligibility) {
+  const factors: MatchFactor[] = [{ label: "Проходит обязательные требования", delta: 6 }];
   const matchBadges: MatchBadge[] = [];
   const whyItFits: string[] = [];
-  const hasCertificate = hasEnglishCertificate(profile);
 
-  const wantsThisField =
-    profile.fields.length === 0 || profile.fields.includes(program.field);
+  const wantsThisField = profile.fields.length === 0 || profile.fields.includes(program.field);
   if (wantsThisField) {
     factors.push({ label: "Совпадает с выбранным направлением", delta: 34 });
+    matchBadges.push({ kind: "field-fit", label: "Ваше направление" });
     whyItFits.push("Направление совпадает с тем, что вы выбрали в профиле.");
   }
 
-  if (profile.budget === "grant-only" && program.hasFullGrant) {
-    factors.push({ label: "Полностью покрывается грантом", delta: 18 });
-    whyItFits.push("Программа существует в грантовом формате — платить за обучение не нужно.");
+  if (isFreeTuition(program)) {
+    factors.push({ label: "Обучение бесплатное", delta: 18 });
+    matchBadges.push({ kind: "budget-fit", label: "Подходит по бюджету" });
+    whyItFits.push("Обучение бесплатное — платить за учёбу не нужно.");
+  } else if (program.fullFunding?.awardedToAllAdmitted) {
+    factors.push({ label: "Стипендия всем зачисленным", delta: 18 });
+    matchBadges.push({ kind: "budget-fit", label: "Подходит по бюджету" });
+    whyItFits.push(`${program.fullFunding.name} получают все зачисленные иностранцы.`);
+  } else if (eligibility.needsScholarshipForBudget) {
+    // A contested scholarship is the whole plan for a grant-only family, but
+    // only a fallback for a family that set a budget.
+    factors.push({
+      label: "В бюджет — только со стипендией",
+      delta: profile.budget === "grant-only" ? 12 : 4,
+    });
+    whyItFits.push(`Стипендия ${program.fullFunding?.name} покрывает обучение, если её получить.`);
   } else {
     const ceiling = BUDGET_CEILING_USD[profile.budget];
     const headroom = Number.isFinite(ceiling)
-      ? 1 - program.annualTuitionUsd / Math.max(ceiling, 1)
+      ? 1 - eligibility.tuitionUsd / Math.max(ceiling, 1)
       : 1;
-    const budgetDelta = Math.round(6 + Math.max(headroom, 0) * 12);
-    factors.push({ label: "Стоимость укладывается в бюджет", delta: budgetDelta });
+    factors.push({
+      label: "Стоимость укладывается в бюджет",
+      delta: Math.round(6 + Math.max(headroom, 0) * 12),
+    });
     matchBadges.push({ kind: "budget-fit", label: "Подходит по бюджету" });
-    // No "chance" badge: the catalogue says a grant track exists, not that this
-    // applicant will win it. The programme badge "100% грант" states the fact.
-    if (program.hasFullGrant) {
-      whyItFits.push("У программы есть грантовый трек — расходы можно свести к нулю.");
-    } else {
-      whyItFits.push("Стоимость обучения помещается в указанный семейный бюджет.");
-    }
+    whyItFits.push("Стоимость обучения помещается в указанный семейный бюджет.");
   }
 
-  if (wantsThisField) {
-    matchBadges.push({ kind: "field-fit", label: "Ваше направление" });
-  }
-
-  if (hasCertificate && teachesInEnglish(program)) {
-    factors.push({ label: "Языковой сертификат уже есть", delta: 14 });
+  const route = ROUTE_FACTORS[eligibility.route];
+  factors.push({ label: route.label, delta: route.delta });
+  whyItFits.push(route.reason);
+  if (eligibility.route === "certificate") {
     matchBadges.push({ kind: "language-ready", label: "Язык подтверждён" });
-    whyItFits.push("Ваш языковой сертификат закрывает требование по английскому.");
-  } else if (!program.requiresEnglishCertificate) {
-    factors.push({ label: "Сертификат не требуется", delta: 12 });
-    whyItFits.push("Сертификат не нужен: вуз проверяет язык своими силами.");
-  } else if (program.hasFoundationYear) {
-    factors.push({ label: "Есть подготовительный год", delta: 9 });
-    matchBadges.push({ kind: "foundation-available", label: "Есть Foundation" });
-    whyItFits.push("Подготовительный год позволяет поступить без готового сертификата.");
+  } else if (eligibility.route === "foundation") {
+    matchBadges.push({ kind: "foundation-available", label: "Есть подготовительная" });
   }
 
-  const gpaMargin = Math.min(Math.max(profile.gpa - program.minGpa, 0), 0.7);
-  const gpaDelta = Math.round((gpaMargin / 0.7) * 14);
-  if (gpaDelta > 0) {
-    factors.push({ label: "Средний балл выше минимального", delta: gpaDelta });
-  }
-  if (gpaMargin >= 0.3) {
-    whyItFits.push("Ваш средний балл заметно выше минимального порога программы.");
+  // Scholarship contests are merit-based; the GPA threshold is our own
+  // heuristic (GRANT_COMPETITIVE_GPA), not a university cut-off.
+  if (program.fullFunding && profile.gpa >= GRANT_COMPETITIVE_GPA) {
+    const margin = Math.min(profile.gpa, 5) - GRANT_COMPETITIVE_GPA;
+    factors.push({
+      label: "Балл на уровне стипендиальных конкурсов",
+      delta: 8 + Math.round((margin / (5 - GRANT_COMPETITIVE_GPA)) * 6),
+    });
+    whyItFits.push("Ваш средний балл помогает в конкурсе на стипендию.");
   }
 
   if (profile.regions.includes(program.region)) {
@@ -173,8 +247,8 @@ function scoreProgram(profile: ApplicantProfile, program: Program) {
   }
 
   const appliesThisSeason = profile.grade !== "grade-9-10";
-  if (appliesThisSeason && program.acceptsAfterGrade11) {
-    factors.push({ label: "Поступление сразу после школы", delta: 6 });
+  if (appliesThisSeason && eligibility.route !== "foundation") {
+    factors.push({ label: "Можно поступать без подготовительного года", delta: 6 });
   }
 
   const score = Math.max(
@@ -185,76 +259,99 @@ function scoreProgram(profile: ApplicantProfile, program: Program) {
     ),
   );
 
-  return { score, factors, matchBadges, whyItFits, hasCertificate, wantsThisField, gpaMargin };
+  return { score, factors, matchBadges, whyItFits };
 }
 
-function describeTradeOff(profile: ApplicantProfile, program: Program): string {
-  if (program.annualTuitionUsd === 0 && program.hasFullGrant) {
-    return "Грантовых мест мало, поэтому конкурс выше, чем на платные программы.";
+function describeTradeOff(profile: ApplicantProfile, program: Program, eligibility: Eligibility): string {
+  if (program.fullFunding?.awardedToAllAdmitted) {
+    return `${program.fullFunding.name} получают все зачисленные иностранцы — конкурс идёт за место, а не за деньги.`;
   }
-  if (program.annualTuitionUsd >= 10000) {
-    return "Сильная программа, но стоимость обучения останется основной статьёй расходов.";
+  if (eligibility.needsScholarshipForBudget && program.fullFunding) {
+    return `Без стипендии ${program.fullFunding.name} стоимость выше вашего бюджета, а стипендия конкурсная.`;
+  }
+  if (program.fullFunding) {
+    return `Стипендия ${program.fullFunding.name} выдаётся ${program.fullFunding.eligibility} — это конкурс, а не гарантия.`;
   }
   if (!profile.fields.includes(program.field)) {
     return "Это не то направление, которое вы отметили основным — рассматривайте как запасной вариант.";
   }
-  if (program.durationYears >= 6) {
-    return `Учиться дольше обычного: ${program.durationYears} ${pluralRu(program.durationYears, YEARS)} вместо четырёх.`;
+  if (!isTaughtInEnglish(program)) {
+    return `Обучение на языке «${program.teachingLanguage.toLowerCase()}» — язык придётся выучить до уровня, который требует вуз.`;
   }
-  if (program.teachingLanguage === "ru") {
-    return "Обучение на русском — меньше языкового барьера, но и меньше международной практики.";
+  if (eligibility.tuitionUsd >= 10000) {
+    return "Сильная программа, но стоимость обучения останется основной статьёй расходов.";
   }
-  return "Окно подачи короткое, поэтому документы нужно готовить заранее.";
+  if (program.durationYears !== null && program.durationYears >= 6) {
+    return `Учиться дольше обычного: ${program.durationYears} ${pluralRu(program.durationYears, YEARS)}.`;
+  }
+  if (program.entranceExam) {
+    return "Кроме документов нужно пройти вступительные испытания вуза.";
+  }
+  return "Даты подачи привязаны к году набора — следите за ними на сайте вуза.";
 }
 
-function describeBlocker(profile: ApplicantProfile, program: Program): string | null {
-  if (
-    program.requiresEnglishCertificate &&
-    !hasEnglishCertificate(profile) &&
-    program.hasFoundationYear
-  ) {
-    return "Без сертификата поступление возможно только через подготовительный год.";
+function describeBlocker(profile: ApplicantProfile, program: Program, eligibility: Eligibility): string | null {
+  if (eligibility.route === "foundation" && program.foundation) {
+    return `Сейчас поступление возможно только через подготовительную программу: ${program.foundation.requirement}.`;
   }
-  if (!program.acceptsAfterGrade11 && profile.grade !== "grade-9-10") {
-    return "После 11 класса СНГ нужен подготовительный год — напрямую не зачисляют.";
+  if (eligibility.route === "own-test" && program.ownEnglishTest) {
+    return `Английский проверяют отдельно: ${program.ownEnglishTest}.`;
   }
-  if (profile.gpa - program.minGpa < 0.2) {
-    return `Средний балл почти на границе: программа ждёт минимум ${program.minGpa.toFixed(1)}.`;
+  if (eligibility.route === "certificate" && program.english?.accepts === "unlisted") {
+    return "Вуз называет уровень английского, но не список тестов — уточните, примут ли ваш сертификат.";
   }
-  if (program.hasFullGrant && profile.gpa < 4.7) {
-    return "На грант обычно проходят с более высоким средним баллом.";
+  if (eligibility.needsScholarshipForBudget && !program.fullFunding?.awardedToAllAdmitted) {
+    return "В ваш бюджет программа укладывается только со стипендией.";
+  }
+  if (program.entranceExam) {
+    return `Вступительные испытания: ${program.entranceExam}.`;
+  }
+  if (program.fullFunding && profile.gpa < GRANT_COMPETITIVE_GPA) {
+    return "Стипендии дают по заслугам, а ваш средний балл пока ниже грантового уровня.";
   }
   return null;
 }
 
-function describeImprovement(profile: ApplicantProfile, program: Program): string {
-  if (!hasEnglishCertificate(profile) && program.requiresEnglishCertificate) {
-    return "Сдайте IELTS или Duolingo — это снимет главное ограничение по этой программе.";
+const TEST_NAMES: Record<EnglishTest, string> = {
+  ielts: "IELTS",
+  toefl: "TOEFL",
+  duolingo: "Duolingo",
+};
+
+function describeImprovement(profile: ApplicantProfile, program: Program, eligibility: Eligibility): string {
+  const english = program.english;
+  const needsCertificate = eligibility.route === "foundation" || eligibility.route === "own-test";
+  if (needsCertificate && english && english.accepts !== "unlisted" && english.accepts.length > 0) {
+    const tests = english.accepts.map((test) => TEST_NAMES[test]).join(" или ");
+    return `Сдайте ${tests} (${english.minimum}) — это откроет прямое поступление.`;
   }
-  if (profile.gpa < program.minGpa + 0.3) {
-    return "Подтяните средний балл по профильным предметам в ближайшем семестре.";
+  if (program.entranceExam) {
+    return "Начните готовиться к вступительным испытаниям заранее — по ним и идёт отбор.";
   }
-  if (program.hasFullGrant) {
-    return "Соберите олимпиадные и проектные достижения — они решают исход грантового конкурса.";
+  if (program.fullFunding) {
+    return "Соберите олимпиадные и проектные достижения — они решают исход стипендиального конкурса.";
+  }
+  if (profile.english === "school" && !isTaughtInEnglish(program)) {
+    return `Начните учить язык обучения: ${program.teachingLanguage.toLowerCase()}.`;
   }
   return "Напишите мотивационное письмо под эту программу и запросите рекомендацию у учителя.";
 }
 
 export function rankPrograms(
   profile: ApplicantProfile,
-  catalogue: readonly Program[] = DEMO_PROGRAMS,
+  catalogue: readonly Program[] = PROGRAMS,
 ): RecommendationResult {
-  const excluded: ExclusionSummary = { budget: 0, gpa: 0, language: 0, region: 0 };
+  const excluded: ExclusionSummary = { budget: 0, language: 0, region: 0 };
   const matches: ProgramMatch[] = [];
 
   for (const program of catalogue) {
-    const failure = failedConstraint(profile, program);
-    if (failure) {
-      excluded[failure] += 1;
+    const check = checkEligibility(profile, program);
+    if ("failure" in check) {
+      excluded[check.failure] += 1;
       continue;
     }
-
-    const scored = scoreProgram(profile, program);
+    const { eligibility } = check;
+    const scored = scoreProgram(profile, program, eligibility);
     matches.push({
       program,
       score: scored.score,
@@ -262,9 +359,12 @@ export function rankPrograms(
       matchBadges: scored.matchBadges,
       programBadges: buildProgramBadges(program),
       whyItFits: scored.whyItFits,
-      tradeOff: describeTradeOff(profile, program),
-      blocker: describeBlocker(profile, program),
-      improvementAction: describeImprovement(profile, program),
+      tradeOff: describeTradeOff(profile, program, eligibility),
+      blocker: describeBlocker(profile, program, eligibility),
+      improvementAction: describeImprovement(profile, program, eligibility),
+      englishRoute: eligibility.route,
+      annualTuitionUsd: eligibility.tuitionUsd,
+      needsScholarshipForBudget: eligibility.needsScholarshipForBudget,
     });
   }
 
@@ -272,15 +372,34 @@ export function rankPrograms(
     if (right.score !== left.score) {
       return right.score - left.score;
     }
-    return left.program.annualTuitionUsd - right.program.annualTuitionUsd;
+    return left.annualTuitionUsd - right.annualTuitionUsd;
   });
 
   return { matches, excluded, totalConsidered: catalogue.length };
 }
 
+const CURRENCY_SIGNS: Partial<Record<Currency, string>> = { USD: "$", EUR: "€" };
+
+/** Tuition exactly as the university publishes it. */
 export function formatTuition(program: Program): string {
-  if (program.annualTuitionUsd === 0) {
-    return "0 $ — грант";
+  const { amount, currency, period } = program.tuition;
+  if (amount === 0) {
+    return "Бесплатно";
   }
-  return `${program.annualTuitionUsd.toLocaleString("ru-RU")} $ в год`;
+  const sign = CURRENCY_SIGNS[currency] ?? currency;
+  return `${amount.toLocaleString("ru-RU")} ${sign} ${period === "year" ? "в год" : "за семестр"}`;
+}
+
+/** Published tuition plus the dollar estimate the budget filter used. */
+export function formatTuitionWithEstimate(match: ProgramMatch): string {
+  const published = formatTuition(match.program);
+  const { amount, currency, period } = match.program.tuition;
+  if (amount === 0 || (currency === "USD" && period === "year")) {
+    return published;
+  }
+  return `${published} (≈ ${match.annualTuitionUsd.toLocaleString("ru-RU")} $ в год)`;
+}
+
+export function englishRequirementText(program: Program): string {
+  return program.english?.minimum ?? program.englishNote ?? "Не нужен";
 }

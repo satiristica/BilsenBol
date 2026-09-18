@@ -3,7 +3,7 @@
 import { Check, Sparkles, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-import { DEMO_DATA_NOTICE } from "@/data/programs";
+import { SOURCE_NOTICE } from "@/data/programs";
 import { buildComparisonRows, type ComparisonWinner } from "@/domain/comparison";
 import type { ProgramMatch } from "@/domain/matching";
 import { classNames } from "@/lib/classNames";
@@ -23,7 +23,7 @@ function describeVerdict(left: ProgramMatch, right: ProgramMatch): string {
   const leader = left.score > right.score ? left : right;
   const other = leader === left ? right : left;
   const cheaper =
-    leader.program.annualTuitionUsd <= other.program.annualTuitionUsd ? leader : other;
+    leader.annualTuitionUsd <= other.annualTuitionUsd ? leader : other;
 
   if (cheaper === leader) {
     return `«${leader.program.programName}» одновременно ближе к вашему профилю и дешевле — начните с неё.`;
@@ -116,7 +116,7 @@ export function ComparisonDialog({ isOpen, pair, onClose }: ComparisonDialogProp
             <Sparkles aria-hidden="true" size={18} strokeWidth={2.2} />
             <span>{describeVerdict(left, right)}</span>
           </p>
-          <p className={styles.demoNote}>{DEMO_DATA_NOTICE}</p>
+          <p className={styles.sourceNote}>{SOURCE_NOTICE}</p>
         </footer>
       </div>
     </dialog>

@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { ActionButton } from "@/components/ActionButton";
 import { BrandMark } from "@/components/BrandMark";
-import { DEMO_DATA_BADGE } from "@/data/programs";
+import { SOURCE_BADGE } from "@/data/programs";
 import { buildDiagnosis } from "@/domain/diagnosis";
 import { rankPrograms, type ProgramMatch } from "@/domain/matching";
 import { DEFAULT_PROFILE, type ApplicantProfile } from "@/domain/profile";
@@ -185,7 +185,7 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
         </Link>
         <div className={styles.topActions}>
           <ResetControl onReset={resetJourney} />
-          <span className={styles.demoTag}>{DEMO_DATA_BADGE}</span>
+          <span className={styles.sourceTag}>{SOURCE_BADGE}</span>
         </div>
       </header>
 

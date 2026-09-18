@@ -3,7 +3,7 @@ import {
   type ApplicantProfile,
   type StudyField,
 } from "@/domain/profile";
-import type { RecommendationResult } from "@/domain/matching";
+import { hasFullFunding, type RecommendationResult } from "@/domain/matching";
 
 export type RoadmapSeason = "autumn" | "winter" | "spring";
 
@@ -145,7 +145,7 @@ export function buildRoadmap(
     },
   ];
 
-  if (grantFocused || result.matches.some((match) => match.program.hasFullGrant)) {
+  if (grantFocused || result.matches.some((match) => hasFullFunding(match.program))) {
     winter.push({
       id: "winter-scholarships",
       season: "winter",

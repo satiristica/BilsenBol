@@ -11,7 +11,7 @@ import type { RoadmapSeason } from "@/domain/roadmap";
  */
 
 /** Bump when the prompt or the shape changes, so stale cached advice is ignored. */
-export const ROADMAP_ADVICE_VERSION = 2;
+export const ROADMAP_ADVICE_VERSION = 3;
 
 /** Same key on server and client: one profile, one model call. */
 export function adviceCacheKey(profile: ApplicantProfile): string {

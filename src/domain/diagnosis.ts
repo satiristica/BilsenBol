@@ -10,7 +10,7 @@ import {
   labelOf,
   type ApplicantProfile,
 } from "@/domain/profile";
-import type { RecommendationResult } from "@/domain/matching";
+import { hasFullFunding, type RecommendationResult } from "@/domain/matching";
 import { pluralRu } from "@/lib/plural";
 
 export type ReadinessStatus =
@@ -94,15 +94,15 @@ function buildStrength(profile: ApplicantProfile, result: RecommendationResult):
       detail: "Сертификат снимает основное ограничение и открывает англоязычные программы.",
     };
   }
-  const grantOptions = result.matches.filter((match) => match.program.hasFullGrant).length;
+  const grantOptions = result.matches.filter((match) => hasFullFunding(match.program)).length;
   if (grantOptions > 0) {
     return {
       kind: "strength",
       label: "Сильная сторона",
       title: pluralRu(grantOptions, {
-        one: `Доступна ${grantOptions} программа с полным грантом`,
-        few: `Доступны ${grantOptions} программы с полным грантом`,
-        many: `Доступно ${grantOptions} программ с полным грантом`,
+        one: `Доступна ${grantOptions} программа с бесплатным обучением или стипендией`,
+        few: `Доступны ${grantOptions} программы с бесплатным обучением или стипендией`,
+        many: `Доступно ${grantOptions} программ с бесплатным обучением или стипендией`,
       }),
       detail: "Даже при нулевом бюджете маршрут поступления остаётся рабочим.",
     };
@@ -134,16 +134,17 @@ function buildBottleneck(
             })} полностью, а часть доступна только через Foundation.`,
     };
   }
-  if (result.excluded.gpa > 0 && profile.gpa < 4.7) {
+  const scholarshipOnly = result.matches.filter((match) => match.needsScholarshipForBudget).length;
+  if (scholarshipOnly > 0 && profile.gpa < GRANT_COMPETITIVE_GPA) {
     return {
       kind: "bottleneck",
       label: "Главное узкое место",
-      title: "Средний балл ограничивает выбор",
-      detail: `${pluralRu(result.excluded.gpa, {
-        one: `${result.excluded.gpa} программа требует`,
-        few: `${result.excluded.gpa} программы требуют`,
-        many: `${result.excluded.gpa} программ требуют`,
-      })} балл выше вашего ${profile.gpa.toFixed(1)}.`,
+      title: "Средний балл ниже стипендиального уровня",
+      detail: `${pluralRu(scholarshipOnly, {
+        one: `${scholarshipOnly} программа укладывается`,
+        few: `${scholarshipOnly} программы укладываются`,
+        many: `${scholarshipOnly} программ укладываются`,
+      })} в бюджет только со стипендией, а стипендии дают по заслугам.`,
     };
   }
   if (result.excluded.budget > 0) {
@@ -155,7 +156,7 @@ function buildBottleneck(
         one: `${result.excluded.budget} программа стоит`,
         few: `${result.excluded.budget} программы стоят`,
         many: `${result.excluded.budget} программ стоят`,
-      })} дороже указанного бюджета — их заменяют грантовые треки.`,
+      })} дороже указанного бюджета и не дают полной стипендии.`,
     };
   }
   return {

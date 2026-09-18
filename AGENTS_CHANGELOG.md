@@ -2261,3 +2261,77 @@ VERIFICATION:
 - Desktop wizard screenshot reviewed.
 - No horizontal overflow on diagnosis, recommendations with the panel open, or roadmap at 360/390 px. Tap suite 11/11. The landing renders `<main class="landing">`.
 - `npm run lint`, `npm run build`, `git diff --check` → exit 0.
+
+## TASK TASK-CLAUDE-20260919-real-universities
+
+AGENT: CLAUDE
+STATUS: DONE (uncommitted on the branch)
+BASE_COMMIT: 5c482ee7ef93e8f7bb5ce17d84ed4957f7beb169
+BRANCH: feat/real-universities (master stays the deployable submission)
+SCOPE: Replace the fictional demo catalogue with real bachelor programmes whose facts come from official sources.
+
+FILES:
+- `src/data/programs.ts`
+- `src/domain/{matching,comparison,roadmap,diagnosis,profile}.ts`
+- `src/features/{recommendations,comparison,journey,diagnosis}/**`, `src/app/page.tsx`
+- `src/server/ai/roadmapPrompt.ts`
+- `README.md`, `AGENTS_CHANGELOG.md`
+
+ASSUMPTIONS:
+- Every displayed fact about a real institution carries an official source URL and a checked date (AGENTS.md section 4, case PDF). A fact that cannot be confirmed is shown as "уточняйте на сайте", never filled with a plausible value.
+- Universities do not publish thresholds on the CIS five-point scale, so `minGpa` stops being a per-programme hard constraint. GPA keeps influencing the result through an explicitly general rule (grant competitions favour a high average), not through invented thresholds.
+- Grant eligibility often depends on citizenship; it is stated in the grant note rather than modelled.
+
+ACCEPTANCE:
+- No fictional institution remains; every programme links to its official source.
+- The presets still yield at least three recommendations, or a preset is adjusted with the reason recorded.
+- `npm run typecheck`, `npm run lint`, `npm run build` exit 0; existing suites pass or are updated with reasons.
+
+CHANGES:
+- `src/data/programs.ts` holds 15 real programmes: NU, AITU, Inha Tashkent, BME, ELTE, Semmelweis, CTU FIT, WUT, Charles PPE, Jagiellonian IRAS, METU ×2, KAIST, ASU, MIT. Each has:
+  - `sources[]` with official URLs;
+  - tuition in the published currency and period, plus a note on who it applies to and for which year;
+  - `fullFunding` with coverage and eligibility (`awardedToAllAdmitted` for KAIST);
+  - the English certificates each university accepts;
+  - its own English exam, a foundation route, and entrance tests;
+  - the application window with its intake year.
+- Facts missing from the official pages are null ("Уточняйте на сайте", "Нет данных"). Conflicts between pages are kept in the text: Jagiellonian 5 000 € vs 4 500 €, ELTE B2 vs B1.
+- Conversion to USD is used only for the budget filter, at official rates (ECB 18.09.2026, National Bank of Kazakhstan, Central Bank of Uzbekistan), with those sources in the file.
+- Matching:
+  - `minGpa` is removed, so the `gpa` exclusion is gone;
+  - language eligibility now works per certificate: `certificate | not-required | own-test | foundation`;
+  - a programme above the budget passes only through its full scholarship and is flagged in the blocker;
+  - GPA ranks scholarship programmes only (the 4.5 heuristic, documented).
+- Other changes:
+  - comparison rows now read "Требование к английскому", "Вступительные испытания" and "Полное покрытие";
+  - each card shows the English requirement and visible source links;
+  - the "Демо-данные" labels became "Проверено 19.09.2026";
+  - `ROADMAP_ADVICE_VERSION` is bumped to 3, so cached advice about the demo programmes is ignored.
+- `DEFAULT_PROFILE.regions` now include "asia". With Europe and CIS only, the real catalogue gives 2 programmes for the default profile; with Asia it gives 4.
+- README updated: the logic, the sources, the limitations.
+
+VERIFICATION:
+- Research: four parallel research agents plus manual fetches, official domains only. Notes are in the session scratchpad `research/*.md`.
+- Domain harness (`domaincheck/check.js`, `extra.js`, all pass). The hard-constraint check was rewritten for the new model. Recommendations per preset:
+
+  | Preset | Programmes |
+  | --- | --- |
+  | grant-ace | 7 |
+  | it-mid-budget | 6 |
+  | foundation-path | 3 |
+  | default | 4 |
+
+  15 programmes, all with https sources and unique ids.
+- Browser suites against `next dev`:
+  - tap 11/11 (run with a clean profile dir, because stored state from earlier runs pre-selected the grade);
+  - persist: all scenarios pass;
+  - ai-page: all pass;
+  - impact: all pass after updating data-dependent expectations — "6 → 4" programmes; the no-op edit is now "+Гуманитарные", because Duolingo → TOEFL legitimately changes the real catalogue; the medicine programme name;
+  - overflow at 360/390/1280 px: 0 px.
+- Screenshots reviewed: desktop recommendations; mobile card with sources; mobile comparison dialog.
+- `npm run typecheck`, `npx eslint .`, `npm run build` → exit 0.
+
+RISKS:
+- Prices and dates change. Several windows are for the 2026 intake because 2027 dates are not published.
+- The CTU per-semester wording rests on a search snippet of FIT's fee page.
+- The AITU English rule and the Inha Pre-University entry conditions are not stated on the pages that were fetched.

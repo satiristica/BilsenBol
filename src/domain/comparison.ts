@@ -1,4 +1,9 @@
-import { formatTuition, type ProgramMatch } from "@/domain/matching";
+import {
+  englishRequirementText,
+  formatTuitionWithEstimate,
+  hasFullFunding,
+  type ProgramMatch,
+} from "@/domain/matching";
 import { YEARS, pluralRu } from "@/lib/plural";
 
 export type ComparisonWinner = "left" | "right" | "tie";
@@ -10,12 +15,6 @@ export interface ComparisonRow {
   /** Which side is better for the applicant on this single criterion. */
   winner: ComparisonWinner;
 }
-
-const TEACHING_LANGUAGE_LABELS = {
-  en: "Английский",
-  ru: "Русский",
-  "en-ru": "Английский и русский",
-} as const;
 
 function compareNumbers(left: number, right: number, lowerIsBetter: boolean): ComparisonWinner {
   if (left === right) {
@@ -32,6 +31,21 @@ function compareFlags(left: boolean, right: boolean): ComparisonWinner {
   return left ? "left" : "right";
 }
 
+function fundingText(match: ProgramMatch): string {
+  if (match.program.tuition.amount === 0) {
+    return "Бесплатное обучение";
+  }
+  return match.program.fullFunding ? `Стипендия ${match.program.fullFunding.name}` : "Нет";
+}
+
+function durationText(match: ProgramMatch): string {
+  const years = match.program.durationYears;
+  if (years === null) {
+    return "Уточняйте на сайте";
+  }
+  return Number.isInteger(years) ? `${years} ${pluralRu(years, YEARS)}` : `${years.toLocaleString("ru-RU")} года`;
+}
+
 export function buildComparisonRows(left: ProgramMatch, right: ProgramMatch): ComparisonRow[] {
   return [
     {
@@ -42,52 +56,45 @@ export function buildComparisonRows(left: ProgramMatch, right: ProgramMatch): Co
     },
     {
       label: "Стоимость обучения",
-      left: formatTuition(left.program),
-      right: formatTuition(right.program),
-      winner: compareNumbers(
-        left.program.annualTuitionUsd,
-        right.program.annualTuitionUsd,
-        true,
-      ),
+      left: formatTuitionWithEstimate(left),
+      right: formatTuitionWithEstimate(right),
+      winner: compareNumbers(left.annualTuitionUsd, right.annualTuitionUsd, true),
     },
     {
-      label: "Полный грант",
-      left: left.program.hasFullGrant ? "Есть" : "Нет",
-      right: right.program.hasFullGrant ? "Есть" : "Нет",
-      winner: compareFlags(left.program.hasFullGrant, right.program.hasFullGrant),
-    },
-    {
-      label: "Минимальный средний балл",
-      left: left.program.minGpa.toFixed(1),
-      right: right.program.minGpa.toFixed(1),
-      winner: compareNumbers(left.program.minGpa, right.program.minGpa, true),
+      label: "Полное покрытие обучения",
+      left: fundingText(left),
+      right: fundingText(right),
+      winner: compareFlags(hasFullFunding(left.program), hasFullFunding(right.program)),
     },
     {
       label: "Язык обучения",
-      left: TEACHING_LANGUAGE_LABELS[left.program.teachingLanguage],
-      right: TEACHING_LANGUAGE_LABELS[right.program.teachingLanguage],
+      left: left.program.teachingLanguage,
+      right: right.program.teachingLanguage,
       winner: "tie",
     },
     {
-      label: "Нужен языковой сертификат",
-      left: left.program.requiresEnglishCertificate ? "Да" : "Нет",
-      right: right.program.requiresEnglishCertificate ? "Да" : "Нет",
-      winner: compareFlags(
-        !left.program.requiresEnglishCertificate,
-        !right.program.requiresEnglishCertificate,
-      ),
+      label: "Требование к английскому",
+      left: englishRequirementText(left.program),
+      right: englishRequirementText(right.program),
+      winner: compareFlags(left.englishRoute !== "foundation", right.englishRoute !== "foundation"),
     },
     {
-      label: "Подготовительный год",
-      left: left.program.hasFoundationYear ? "Есть" : "Нет",
-      right: right.program.hasFoundationYear ? "Есть" : "Нет",
-      winner: compareFlags(left.program.hasFoundationYear, right.program.hasFoundationYear),
+      label: "Подготовительная программа",
+      left: left.program.foundation ? "Есть" : "Нет",
+      right: right.program.foundation ? "Есть" : "Нет",
+      winner: compareFlags(left.program.foundation !== null, right.program.foundation !== null),
+    },
+    {
+      label: "Вступительные испытания",
+      left: left.program.entranceExam ?? "Нет данных",
+      right: right.program.entranceExam ?? "Нет данных",
+      winner: "tie",
     },
     {
       label: "Срок обучения",
-      left: `${left.program.durationYears} ${pluralRu(left.program.durationYears, YEARS)}`,
-      right: `${right.program.durationYears} ${pluralRu(right.program.durationYears, YEARS)}`,
-      winner: compareNumbers(left.program.durationYears, right.program.durationYears, true),
+      left: durationText(left),
+      right: durationText(right),
+      winner: "tie",
     },
     {
       label: "Окно подачи",

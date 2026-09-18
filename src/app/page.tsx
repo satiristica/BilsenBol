@@ -159,7 +159,7 @@ export default function HomePage() {
 
         <footer className="site-footer">
           <strong>BilsenBol</strong>
-          <span className="footer-note">Демо-данные · фото Unsplash</span>
+          <span className="footer-note">Данные вузов с официальных сайтов · фото Unsplash</span>
         </footer>
       </main>
     </>

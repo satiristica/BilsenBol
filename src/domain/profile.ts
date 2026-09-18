@@ -99,7 +99,7 @@ export const DEFAULT_PROFILE: ApplicantProfile = {
   english: "school",
   budget: "up-to-3k",
   fields: ["it"],
-  regions: ["europe", "cis"],
+  regions: ["europe", "asia", "cis"],
 };
 
 export interface ProfilePreset {

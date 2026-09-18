@@ -3,7 +3,7 @@
 import { Info, SearchX } from "lucide-react";
 
 import { ActionButton } from "@/components/ActionButton";
-import { DEMO_DATA_NOTICE } from "@/data/programs";
+import { SOURCE_NOTICE } from "@/data/programs";
 import { pluralRu } from "@/lib/plural";
 import type { RecommendationResult } from "@/domain/matching";
 import {
@@ -37,7 +37,7 @@ function buildRelaxSuggestion(
   result: RecommendationResult,
 ): RelaxSuggestion | null {
   const { excluded } = result;
-  const worst = Math.max(excluded.budget, excluded.region, excluded.gpa, excluded.language);
+  const worst = Math.max(excluded.budget, excluded.region, excluded.language);
   if (worst === 0) {
     return null;
   }
@@ -82,7 +82,6 @@ function EmptyState({
   const suggestion = buildRelaxSuggestion(profile, result);
   const reasons: { label: string; count: number }[] = [
     { label: "Дороже бюджета", count: result.excluded.budget },
-    { label: "Выше нужен балл", count: result.excluded.gpa },
     { label: "Нужен сертификат", count: result.excluded.language },
     { label: "Другой регион", count: result.excluded.region },
   ].filter((reason) => reason.count > 0);
@@ -152,7 +151,7 @@ export function RecommendationList({
     <div className={styles.wrapper}>
       <p className={styles.notice}>
         <Info aria-hidden="true" size={16} strokeWidth={2.2} />
-        <span>{DEMO_DATA_NOTICE}</span>
+        <span>{SOURCE_NOTICE}</span>
       </p>
       <div className={styles.grid}>
         {result.matches.slice(0, 6).map((match, index) => (

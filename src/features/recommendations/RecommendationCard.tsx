@@ -1,10 +1,14 @@
 "use client";
 
-import { CalendarDays, Check, GraduationCap, TriangleAlert, Wallet } from "lucide-react";
+import { CalendarDays, Check, ExternalLink, Languages, TriangleAlert, Wallet } from "lucide-react";
 
 import { ActionButton } from "@/components/ActionButton";
-import { DEMO_DATA_BADGE } from "@/data/programs";
-import { formatTuition, type ProgramMatch } from "@/domain/matching";
+import {
+  englishRequirementText,
+  formatTuition,
+  isFreeTuition,
+  type ProgramMatch,
+} from "@/domain/matching";
 import { classNames } from "@/lib/classNames";
 import { useCountUp } from "@/lib/useCountUp";
 
@@ -35,7 +39,8 @@ export function RecommendationCard({
   const strongestFactor = Math.max(...match.factors.map((factor) => factor.delta));
   const hiddenReasons = match.whyItFits.slice(MAX_VISIBLE_REASONS);
   const visibleBadges = [
-    ...(program.hasFullGrant ? [{ label: "100% грант", isGrant: true }] : []),
+    ...(isFreeTuition(program) ? [{ label: "Бесплатно", isGrant: true }] : []),
+    ...(program.fullFunding ? [{ label: program.fullFunding.name, isGrant: true }] : []),
     ...match.matchBadges.map((badge) => ({ label: badge.label, isGrant: false })),
   ].slice(0, MAX_VISIBLE_BADGES);
 
@@ -74,7 +79,6 @@ export function RecommendationCard({
             {badge.label}
           </span>
         ))}
-        <span className={classNames(styles.badge, styles.badgeDemo)}>{DEMO_DATA_BADGE}</span>
       </div>
 
       <ul className={styles.reasons}>
@@ -124,6 +128,14 @@ export function RecommendationCard({
             <span className={styles.detailLabel}>Как усилить заявку</span>
             <p className={styles.detailText}>{match.improvementAction}</p>
           </div>
+          {program.fullFunding ? (
+            <div className={styles.detailBlock}>
+              <span className={styles.detailLabel}>{program.fullFunding.name}</span>
+              <p className={styles.detailText}>
+                Покрывает: {program.fullFunding.covers}. Кому: {program.fullFunding.eligibility}.
+              </p>
+            </div>
+          ) : null}
           <div className={styles.detailBlock}>
             <span className={styles.detailLabel}>Из чего сложилось совпадение</span>
             <ul className={styles.factors}>
@@ -154,10 +166,10 @@ export function RecommendationCard({
         </div>
         <div className={styles.fact}>
           <dt className={styles.factLabel}>
-            <GraduationCap aria-hidden="true" size={15} strokeWidth={2.2} />
-            <span className={styles.srOnly}>Минимальный балл</span>
+            <Languages aria-hidden="true" size={15} strokeWidth={2.2} />
+            <span className={styles.srOnly}>Английский</span>
           </dt>
-          <dd className={styles.factValue}>от {program.minGpa.toFixed(1)}</dd>
+          <dd className={styles.factValue}>{englishRequirementText(program)}</dd>
         </div>
         <div className={styles.fact}>
           <dt className={styles.factLabel}>
@@ -167,6 +179,22 @@ export function RecommendationCard({
           <dd className={styles.factValue}>{program.applicationWindow}</dd>
         </div>
       </dl>
+
+      <p className={styles.sources}>
+        <span className={styles.sourcesLabel}>Источники:</span>
+        {program.sources.map((source) => (
+          <a
+            className={styles.sourceLink}
+            href={source.url}
+            key={source.url}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {source.label}
+            <ExternalLink aria-hidden="true" size={12} strokeWidth={2.4} />
+          </a>
+        ))}
+      </p>
 
       <div className={styles.actions}>
         <ActionButton
