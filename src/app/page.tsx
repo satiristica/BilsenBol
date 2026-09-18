@@ -43,7 +43,7 @@ export default function HomePage() {
     <>
       <LivingBackground />
 
-      <main>
+      <main className="landing">
         <header className="site-header">
           <Link className="brand" href="/" aria-label="Главная BilsenBol">
             <BrandMark />

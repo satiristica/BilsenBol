@@ -131,7 +131,9 @@ a {
    Landing page
 -------------------------------------------------------------------------- */
 
-main {
+/* Landing only. A bare `main` selector also reached the journey pages, where
+   min-height stretched the wizard card and spread empty space into it. */
+.landing {
   position: relative;
   z-index: 1;
   min-height: 100vh;

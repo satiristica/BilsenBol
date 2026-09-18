@@ -95,8 +95,13 @@
   animation: rise 440ms var(--ease-out);
 }
 
+/* A rendered <legend> sits on the fieldset's border and skips the grid, so
+   the gap above never applied: the title stuck to the options with 0 px.
+   Floating it makes it an ordinary grid item while keeping its semantics. */
 .legend {
   display: block;
+  float: left;
+  width: 100%;
   padding: 0;
 }
 

@@ -2235,3 +2235,29 @@ VERIFICATION:
 - The edited stylesheets have balanced braces, no reference to the old mark classes remains, and there are 0 top-level :hover rules outside `@media (hover: hover)`.
 - A preview sheet at 48, 32 and 16 px and a simulated browser tab confirm the mark stays legible. Header screenshots at 390 px (landing, journey) and 1280 px (landing) reviewed.
 - Tap suite 11/11.
+
+## TASK TASK-CLAUDE-20260918-wizard-title-spacing
+
+AGENT: CLAUDE
+STATUS: DONE
+BRANCH: feat/ai-roadmap
+SCOPE: User report: the wizard question title sits too high relative to its options.
+
+### COMPLETE TASK-CLAUDE-20260918-wizard-title-spacing
+
+AGENT: CLAUDE
+STATUS: DONE
+
+ROOT CAUSES (both measured in headless Chrome before fixing):
+1. The title lives in a `<legend>`. A rendered legend sits on the fieldset border and is not a grid item, so the fieldset's `gap: 20px` never applied. Measured title-to-options distance: 0 px at 390 and 1280 px. Fix: `.legend { float: left; width: 100%; }`. A floated legend is not a "rendered legend" per the HTML spec, so it becomes an ordinary grid item and keeps its semantics. Title-to-options is now 20 px.
+2. A bare `main { min-height: 100vh }` in `globals.css`, meant for the landing, also matched the journey's and the AI page's `<main>`. It stretched the wizard card, and the grid spread the surplus into its rows, including 8 px (390) and 30 px (1280) of empty space inside the wizard header below the progress bar. That is why the gap above the title differed by viewport (30 vs 52 px). Fix: the rule is now `.landing`, applied only on the landing's `<main>`. Progress-bar-to-title is now 22 px at both widths, with 0 px of surplus in the header.
+
+FILES:
+- `src/features/profile/ProfileWizard.module.css`
+- `src/app/globals.css`, `src/app/page.tsx`
+
+VERIFICATION:
+- Measurements after the fix at 390 and 1280 px: progress→title 22 px, title→options 20 px, header surplus 0 px.
+- Desktop wizard screenshot reviewed.
+- No horizontal overflow on diagnosis, recommendations with the panel open, or roadmap at 360/390 px. Tap suite 11/11. The landing renders `<main class="landing">`.
+- `npm run lint`, `npm run build`, `git diff --check` → exit 0.
