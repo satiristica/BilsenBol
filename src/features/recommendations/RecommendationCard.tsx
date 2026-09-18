@@ -62,12 +62,44 @@ export function RecommendationCard({
             {program.city}, {program.country}
           </span>
         </div>
-        <p className={styles.score}>
-          <span className={styles.scoreInner}>
+        <div
+          aria-label={`Совпадение: ${match.score}%`}
+          aria-valuemax={100}
+          aria-valuemin={0}
+          aria-valuenow={match.score}
+          className={classNames(
+            styles.scoreRingContainer,
+            match.score >= 80 && styles.scoreRingHigh,
+            match.score >= 65 && match.score < 80 && styles.scoreRingMid,
+            match.score < 65 && styles.scoreRingLow,
+          )}
+          role="progressbar"
+        >
+          <svg className={styles.scoreSvg} height="72" viewBox="0 0 72 72" width="72">
+            <circle
+              className={styles.scoreBgCircle}
+              cx="36"
+              cy="36"
+              fill="transparent"
+              r="30"
+              strokeWidth="5"
+            />
+            <circle
+              className={styles.scoreFgCircle}
+              cx="36"
+              cy="36"
+              fill="transparent"
+              r="30"
+              strokeDasharray="188.5"
+              strokeDashoffset={188.5 - (188.5 * animatedScore) / 100}
+              strokeWidth="5"
+            />
+          </svg>
+          <div className={styles.scoreInner}>
             <span className={styles.scoreValue}>{animatedScore}</span>
             <span className={styles.scoreLabel}>совпад.</span>
-          </span>
-        </p>
+          </div>
+        </div>
       </header>
 
       <div className={styles.badges}>

@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Sparkles, X } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { SOURCE_NOTICE } from "@/data/programs";
 import { buildComparisonRows, type ComparisonWinner } from "@/domain/comparison";
@@ -33,6 +33,7 @@ function describeVerdict(left: ProgramMatch, right: ProgramMatch): string {
 
 export function ComparisonDialog({ isOpen, pair, onClose }: ComparisonDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const [diffOnly, setDiffOnly] = useState(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -51,7 +52,8 @@ export function ComparisonDialog({ isOpen, pair, onClose }: ComparisonDialogProp
   }
 
   const [left, right] = pair;
-  const rows = buildComparisonRows(left, right);
+  const allRows = buildComparisonRows(left, right);
+  const rows = diffOnly ? allRows.filter((r) => r.left !== r.right) : allRows;
 
   const valueClass = (side: "left" | "right", winner: ComparisonWinner) =>
     classNames(styles.value, winner === side && styles.valueWinner);
@@ -68,14 +70,23 @@ export function ComparisonDialog({ isOpen, pair, onClose }: ComparisonDialogProp
           <h2 className={styles.title} id="comparison-title">
             Сравнение
           </h2>
-          <button
-            aria-label="Закрыть сравнение"
-            className={styles.close}
-            onClick={onClose}
-            type="button"
-          >
-            <X aria-hidden="true" size={18} strokeWidth={2.4} />
-          </button>
+          <div className={styles.headerActions}>
+            <button
+              className={classNames(styles.diffToggle, diffOnly && styles.diffToggleActive)}
+              onClick={() => setDiffOnly((prev) => !prev)}
+              type="button"
+            >
+              {diffOnly ? "Все параметры" : "Только различия"}
+            </button>
+            <button
+              aria-label="Закрыть сравнение"
+              className={styles.close}
+              onClick={onClose}
+              type="button"
+            >
+              <X aria-hidden="true" size={18} strokeWidth={2.4} />
+            </button>
+          </div>
         </header>
 
         <div className={styles.heads}>

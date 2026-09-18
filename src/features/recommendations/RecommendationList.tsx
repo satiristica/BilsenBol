@@ -1,9 +1,10 @@
 "use client";
 
-import { Info, SearchX } from "lucide-react";
+import { ArrowUpDown, Info, SearchX } from "lucide-react";
+import { useMemo, useState } from "react";
 
 import { ActionButton } from "@/components/ActionButton";
-import { SOURCE_NOTICE } from "@/data/programs";
+import { annualTuitionUsd, SOURCE_NOTICE } from "@/data/programs";
 import { pluralRu } from "@/lib/plural";
 import type { RecommendationResult } from "@/domain/matching";
 import {
@@ -132,6 +133,22 @@ export function RecommendationList({
   onProfileChange,
   onEditFullProfile,
 }: RecommendationListProps) {
+  const [sortBy, setSortBy] = useState<"score" | "tuition" | "country">("score");
+
+  const sortedMatches = useMemo(() => {
+    const list = [...result.matches];
+    if (sortBy === "tuition") {
+      list.sort(
+        (a, b) => annualTuitionUsd(a.program.tuition) - annualTuitionUsd(b.program.tuition),
+      );
+    } else if (sortBy === "country") {
+      list.sort((a, b) => a.program.country.localeCompare(b.program.country, "ru"));
+    } else {
+      list.sort((a, b) => b.score - a.score);
+    }
+    return list;
+  }, [result.matches, sortBy]);
+
   if (result.matches.length === 0) {
     return (
       <div className={styles.wrapper}>
@@ -153,8 +170,36 @@ export function RecommendationList({
         <Info aria-hidden="true" size={16} strokeWidth={2.2} />
         <span>{SOURCE_NOTICE}</span>
       </p>
+
+      <div className={styles.toolbar}>
+        <span className={styles.countText}>
+          Показано: {sortedMatches.length}{" "}
+          {pluralRu(sortedMatches.length, {
+            one: "программа",
+            few: "программы",
+            many: "программ",
+          })}
+        </span>
+        <div className={styles.sortGroup}>
+          <label className={styles.sortLabel} htmlFor="sort-select">
+            <ArrowUpDown aria-hidden="true" size={14} strokeWidth={2.4} />
+            Сортировка:
+          </label>
+          <select
+            className={styles.sortSelect}
+            id="sort-select"
+            onChange={(e) => setSortBy(e.target.value as "score" | "tuition" | "country")}
+            value={sortBy}
+          >
+            <option value="score">По соответствию (рейтинг)</option>
+            <option value="tuition">По стоимости (от бюджетных)</option>
+            <option value="country">По странам (А–Я)</option>
+          </select>
+        </div>
+      </div>
+
       <div className={styles.grid}>
-        {result.matches.slice(0, 6).map((match, index) => (
+        {sortedMatches.slice(0, 8).map((match, index) => (
           <RecommendationCard
             canSelectForComparison={canSelectMore}
             isSelectedForComparison={comparedProgramIds.includes(match.program.id)}

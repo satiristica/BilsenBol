@@ -9,7 +9,7 @@ import { classNames } from "@/lib/classNames";
 
 import styles from "./ActionButton.module.css";
 
-type ActionVariant = "primary" | "ghost" | "warm";
+type ActionVariant = "primary" | "ghost" | "warm" | "outline";
 
 interface SharedProps {
   children: ReactNode;

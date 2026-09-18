@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, CheckCircle2, FileDown, Lock, Sparkles } from "lucide-react";
+import { ArrowLeft, CheckCircle2, FileDown, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
@@ -13,7 +13,6 @@ import { buildRoadmap, calculateProgress, listSteps, type RoadmapPhase } from "@
 import { loadJourney } from "@/features/journey/journeyPersistence";
 import { JourneySkeleton } from "@/features/journey/JourneySkeleton";
 import { useIsClient } from "@/lib/useIsClient";
-import { pluralRu } from "@/lib/plural";
 
 import { AiRoadmapCard } from "./AiRoadmapCard";
 import styles from "./AiPlanPage.module.css";
@@ -90,29 +89,6 @@ function UnlockGate({
     [profile, result],
   );
 
-  // Same rule as the button on the roadmap step: opening the URL directly
-  // before the plan is finished must not unlock it, nor spend a model call.
-  if (progress.percent < 100) {
-    const remaining = progress.totalCount - progress.completedCount;
-    return (
-      <Shell>
-        <section className={styles.stateCard}>
-          <Lock aria-hidden="true" size={28} strokeWidth={2} />
-          <h1 className={styles.stateTitle}>ИИ-план откроется, когда вы пройдёте весь маршрут</h1>
-          <p className={styles.stateText}>
-            Выполнено {progress.completedCount} из {progress.totalCount}. Осталось{" "}
-            {remaining} {pluralRu(remaining, { one: "шаг", few: "шага", many: "шагов" })}.
-          </p>
-          <div className={styles.actions}>
-            <ActionLink href="/journey" withArrow>
-              Вернуться к плану
-            </ActionLink>
-          </div>
-        </section>
-      </Shell>
-    );
-  }
-
   return (
     <AiPlanContent
       completedStepIds={completedStepIds}
@@ -120,6 +96,7 @@ function UnlockGate({
       phases={phases}
       profile={profile}
       profileSummary={profileSummary}
+      progressPercent={progress.percent}
     />
   );
 }
@@ -138,16 +115,19 @@ function AiPlanContent({
   goals,
   profileSummary,
   completedStepIds,
+  progressPercent,
 }: {
   profile: ApplicantProfile;
   phases: RoadmapPhase[];
   goals: ProgramMatch[];
   profileSummary: string;
   completedStepIds: string[];
+  progressPercent: number;
 }) {
   const stepIds = useMemo(() => new Set(listSteps(phases).map((step) => step.id)), [phases]);
   const state = useRoadmapAdvice(profile, stepIds, true);
   const completed = useMemo(() => new Set(completedStepIds), [completedStepIds]);
+  const isAllDone = progressPercent >= 100;
 
   return (
     <Shell>
@@ -162,13 +142,15 @@ function AiPlanContent({
         <section className={styles.hero}>
           <p className={styles.eyebrow}>
             <Sparkles aria-hidden="true" size={14} strokeWidth={2.4} />
-            ИИ-план
+            ИИ-план и стратегия
           </p>
           <h1 className={styles.title}>Ваш маршрут глазами ИИ</h1>
           <p className={styles.lead}>{profileSummary}</p>
           <span className={styles.doneChip}>
             <CheckCircle2 aria-hidden="true" size={15} strokeWidth={2.4} />
-            Все шаги плана выполнены
+            {isAllDone
+              ? "Все шаги плана выполнены"
+              : `Прогресс маршрута: ${completedStepIds.length} из ${stepIds.size} шагов (${progressPercent}%)`}
           </span>
           <div className={styles.exportRow}>
             <ActionButton compact onClick={printChecklist} variant="ghost">
@@ -187,6 +169,7 @@ function AiPlanContent({
 
         <RoadmapTree
           adviceState={state}
+          completedStepIds={completed}
           goals={goals}
           phases={phases}
           profileSummary={profileSummary}

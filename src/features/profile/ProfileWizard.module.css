@@ -114,6 +114,13 @@
   line-height: 1.06;
 }
 
+.microcopy {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 
 .options {
   display: grid;
@@ -247,6 +254,41 @@
   padding: 26px 20px;
 }
 
+.scaleValueRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  width: 100%;
+}
+
+.stepperBtn {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: var(--r-pill, 999px);
+  border: 1px solid var(--line-strong);
+  background: var(--surface-raised);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all var(--dur-normal, 250ms) var(--ease-spring);
+}
+
+.stepperBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+@media (hover: hover) {
+  .stepperBtn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: var(--surface-hover);
+    color: var(--accent-bright);
+    transform: scale(1.08);
+  }
+}
+
 .scaleValue {
   background: linear-gradient(120deg, var(--accent-bright), var(--accent));
   background-clip: text;
@@ -255,6 +297,8 @@
   font-weight: 800;
   letter-spacing: -0.06em;
   line-height: 0.9;
+  min-width: 120px;
+  text-align: center;
 }
 
 .slider {

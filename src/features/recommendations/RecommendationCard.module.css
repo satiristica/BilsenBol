@@ -89,49 +89,62 @@
   font-size: 0.85rem;
 }
 
-/* Score dial: conic ring filled to the match percentage. */
-.score {
+/* Score ring: accessible SVG donut ring. */
+.scoreRingContainer {
   position: relative;
   display: grid;
-  width: 74px;
-  height: 74px;
-  flex: none;
   place-items: center;
-  margin: 0;
-  border-radius: 50%;
-  background: conic-gradient(
-    var(--accent) calc(var(--score) * 1%),
-    rgb(233 247 239 / 9%) 0
-  );
+  width: 72px;
+  height: 72px;
+  flex: none;
 }
 
-.score::before {
-  position: absolute;
-  inset: 6px;
-  border-radius: 50%;
-  background: var(--surface);
-  content: "";
+.scoreSvg {
+  transform: rotate(-90deg);
 }
 
-@media (hover: hover) {
-  .card:hover .score::before {
-    background: var(--surface-raised);
-  }
+.scoreBgCircle {
+  stroke: rgb(233 247 239 / 8%);
+}
+
+.scoreFgCircle {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 600ms var(--ease-out);
+}
+
+.scoreRingHigh .scoreFgCircle {
+  stroke: var(--accent-bright);
+}
+
+.scoreRingMid .scoreFgCircle {
+  stroke: var(--accent);
+}
+
+.scoreRingLow .scoreFgCircle {
+  stroke: var(--warn);
 }
 
 .scoreInner {
-  position: relative;
-  display: grid;
-  justify-items: center;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 1px;
 }
 
 .scoreValue {
   color: var(--accent-bright);
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1;
+}
+
+.scoreRingLow .scoreValue {
+  color: var(--warn-ink);
 }
 
 .scoreLabel {

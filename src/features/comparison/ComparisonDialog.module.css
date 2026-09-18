@@ -41,10 +41,42 @@
   line-height: 1.08;
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.diffToggle {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill, 999px);
+  background: var(--surface-raised);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  transition: all var(--dur-normal, 250ms) var(--ease-out);
+}
+
+.diffToggleActive {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+}
+
+@media (hover: hover) {
+  .diffToggle:hover {
+    border-color: var(--accent-line);
+    color: var(--ink);
+  }
+}
+
 .close {
   display: grid;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   flex: none;
   place-items: center;
   border: 1px solid var(--line);

@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, Info, Sparkles, X } from "lucide-react";
+import { Check, ExternalLink, Info, Sparkles, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import {
@@ -9,6 +9,7 @@ import {
   type ProgramMatch,
 } from "@/domain/matching";
 import type { RoadmapStep } from "@/domain/roadmap";
+import { classNames } from "@/lib/classNames";
 
 import type { ExtraStep } from "./roadmapAdvice";
 import styles from "./TreeNodeDialog.module.css";
@@ -24,6 +25,8 @@ interface TreeNodeDialogProps {
   goals: ProgramMatch[];
   adviceStatus: RoadmapAdviceState["status"];
   onClose: () => void;
+  isCompleted?: boolean;
+  onToggleStep?: (stepId: string) => void;
 }
 
 /**
@@ -151,7 +154,14 @@ function titleOf(node: TreeNode): { eyebrow: string; title: string } {
   }
 }
 
-export function TreeNodeDialog({ node, goals, adviceStatus, onClose }: TreeNodeDialogProps) {
+export function TreeNodeDialog({
+  node,
+  goals,
+  adviceStatus,
+  onClose,
+  isCompleted,
+  onToggleStep,
+}: TreeNodeDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -194,6 +204,22 @@ export function TreeNodeDialog({ node, goals, adviceStatus, onClose }: TreeNodeD
               <X aria-hidden="true" size={18} strokeWidth={2.4} />
             </button>
           </header>
+
+          {node.kind === "step" && onToggleStep ? (
+            <div className={styles.actionRow}>
+              <button
+                className={classNames(
+                  styles.toggleButton,
+                  isCompleted && styles.toggleButtonDone
+                )}
+                onClick={() => onToggleStep(node.step.id)}
+                type="button"
+              >
+                <Check aria-hidden="true" size={16} strokeWidth={3} />
+                <span>{isCompleted ? "Выполнено (нажмите для отмены)" : "Отметить выполненным"}</span>
+              </button>
+            </div>
+          ) : null}
 
           {node.kind === "step" ? (
             <StepBody advice={node.advice} goals={goals} status={adviceStatus} step={node.step} />

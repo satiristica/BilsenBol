@@ -23,6 +23,7 @@ export interface ProfileQuestion {
   title: string;
   /** Short label for the summary rail. */
   chipLabel: string;
+  microcopy: string;
 }
 
 export const PROFILE_QUESTIONS: readonly ProfileQuestion[] = [
@@ -31,36 +32,42 @@ export const PROFILE_QUESTIONS: readonly ProfileQuestion[] = [
     kind: "single",
     title: "Где вы сейчас учитесь?",
     chipLabel: "Класс",
+    microcopy: "Поможет подобрать подходящие программы",
   },
   {
     id: "gpa",
     kind: "scale",
     title: "Какой у вас средний балл?",
     chipLabel: "Балл",
+    microcopy: "Влияет на шансы получить грант",
   },
   {
     id: "english",
     kind: "single",
     title: "Как у вас с английским?",
     chipLabel: "Английский",
+    microcopy: "Определит язык обучения",
   },
   {
     id: "budget",
     kind: "single",
     title: "Сколько семья готова платить за год?",
     chipLabel: "Бюджет",
+    microcopy: "Отсеет программы за пределами бюджета",
   },
   {
     id: "fields",
     kind: "multi",
     title: "Что вам интересно?",
     chipLabel: "Направление",
+    microcopy: "Покажет релевантные направления",
   },
   {
     id: "regions",
     kind: "multi",
     title: "Куда хотите поехать?",
     chipLabel: "Регионы",
+    microcopy: "Финальный штрих — почти готово!",
   },
 ];
 

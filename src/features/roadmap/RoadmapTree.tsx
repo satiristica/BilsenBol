@@ -69,10 +69,13 @@ function shortUniversity(name: string): string {
 }
 
 interface RoadmapTreeProps {
-  phases: RoadmapPhase[];
+  phases: readonly RoadmapPhase[];
   goals: ProgramMatch[];
   profileSummary: string;
   adviceState: RoadmapAdviceState;
+  completedStepIds?: ReadonlySet<string>;
+  nextStepId?: string | null;
+  onToggleStep?: (stepId: string) => void;
 }
 
 interface GraphNodeProps {
@@ -83,9 +86,11 @@ interface GraphNodeProps {
   hasAdvice?: boolean;
   order: number;
   onOpen: () => void;
+  isCompleted?: boolean;
+  isCurrent?: boolean;
 }
 
-function GraphNode({ icon: Icon, label, fullTitle, variant = "step", hasAdvice, order, onOpen }: GraphNodeProps) {
+function GraphNode({ icon: Icon, label, fullTitle, variant = "step", hasAdvice, order, onOpen, isCompleted, isCurrent }: GraphNodeProps) {
   return (
     <li className={styles.nodeItem} style={{ "--i": order } as React.CSSProperties}>
       <button
@@ -95,6 +100,8 @@ function GraphNode({ icon: Icon, label, fullTitle, variant = "step", hasAdvice, 
           styles.node,
           variant === "extra" && styles.nodeExtra,
           variant === "goal" && styles.nodeGoal,
+          isCompleted && styles.nodeCompleted,
+          isCurrent && styles.nodeCurrent
         )}
         onClick={onOpen}
         type="button"
@@ -106,9 +113,15 @@ function GraphNode({ icon: Icon, label, fullTitle, variant = "step", hasAdvice, 
               <Sparkles size={10} strokeWidth={2.8} />
             </span>
           ) : null}
+          {isCompleted ? (
+            <span aria-hidden="true" className={styles.completedBadge}>
+              <BadgeCheck size={12} strokeWidth={2.5} />
+            </span>
+          ) : null}
         </span>
         <span aria-hidden="true" className={styles.caption}>
           {label}
+          {isCurrent ? <span className={styles.currentBadge}>сейчас</span> : null}
         </span>
       </button>
     </li>
@@ -121,7 +134,15 @@ function GraphNode({ icon: Icon, label, fullTitle, variant = "step", hasAdvice, 
  * renders the same with or without AI; the model only fills node details and
  * may add a few extra nodes, marked as its suggestions.
  */
-export function RoadmapTree({ phases, goals, profileSummary, adviceState }: RoadmapTreeProps) {
+export function RoadmapTree({
+  phases,
+  goals,
+  profileSummary,
+  adviceState,
+  completedStepIds,
+  nextStepId,
+  onToggleStep,
+}: RoadmapTreeProps) {
   const [selected, setSelected] = useState<TreeNode | null>(null);
   const advice = adviceState.status === "ready" ? adviceState.advice : null;
   const adviceById = new Map(advice?.steps.map((item) => [item.id, item.advice]));
@@ -168,6 +189,8 @@ export function RoadmapTree({ phases, goals, profileSummary, adviceState }: Road
                       label={label}
                       onOpen={() => setSelected({ kind: "step", step, advice: stepAdvice })}
                       order={order++}
+                      isCompleted={completedStepIds?.has(step.id)}
+                      isCurrent={step.id === nextStepId}
                     />
                   );
                 })}
@@ -213,8 +236,10 @@ export function RoadmapTree({ phases, goals, profileSummary, adviceState }: Road
       <TreeNodeDialog
         adviceStatus={adviceState.status}
         goals={goals}
+        isCompleted={selected?.kind === "step" ? completedStepIds?.has(selected.step.id) : false}
         node={selected}
         onClose={() => setSelected(null)}
+        onToggleStep={onToggleStep}
       />
     </section>
   );

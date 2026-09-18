@@ -130,6 +130,21 @@
   }
 }
 
+.outline {
+  border-color: var(--accent-line);
+  background: transparent;
+  color: var(--accent-bright);
+}
+
+@media (hover: hover) {
+  .outline:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--ink);
+    transform: translateY(-2px);
+  }
+}
+
 /* Sizes ------------------------------------------------------------------- */
 
 .compact {

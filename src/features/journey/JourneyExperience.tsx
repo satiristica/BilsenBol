@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Info } from "lucide-react";
+import { ArrowLeft, Check, GitBranch, Info, ListFilter, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -10,7 +10,7 @@ import { SOURCE_BADGE } from "@/data/programs";
 import { buildDiagnosis } from "@/domain/diagnosis";
 import { rankPrograms, type ProgramMatch } from "@/domain/matching";
 import { DEFAULT_PROFILE, type ApplicantProfile } from "@/domain/profile";
-import { buildRoadmap, calculateProgress } from "@/domain/roadmap";
+import { buildRoadmap, calculateProgress, listSteps } from "@/domain/roadmap";
 import { ComparisonDialog } from "@/features/comparison/ComparisonDialog";
 import { ComparisonTray } from "@/features/comparison/ComparisonTray";
 import { DiagnosisPanel } from "@/features/diagnosis/DiagnosisPanel";
@@ -22,6 +22,8 @@ import {
 } from "@/features/recommendations/RecommendationList";
 import { NextActionCard, ProgressMeter } from "@/features/progress/ProgressPanel";
 import { RoadmapTimeline } from "@/features/roadmap/RoadmapTimeline";
+import { RoadmapTree } from "@/features/roadmap/RoadmapTree";
+import { useRoadmapAdvice } from "@/features/roadmap/useRoadmapAdvice";
 import { classNames } from "@/lib/classNames";
 import { pluralRu } from "@/lib/plural";
 
@@ -88,6 +90,13 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
     () => calculateProgress(phases, completedStepIds),
     [phases, completedStepIds],
   );
+
+  const [roadmapView, setRoadmapView] = useState<"tree" | "timeline">("tree");
+  const allStepIds = useMemo(
+    () => new Set(listSteps(phases).map((s) => s.id)),
+    [phases],
+  );
+  const adviceState = useRoadmapAdvice(profile, allStepIds, step === "roadmap");
 
   const comparedMatches = useMemo(
     () =>
@@ -190,28 +199,39 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
       </header>
 
       <nav aria-label="Этапы маршрута">
+        <div aria-live="polite" className={styles.srOnly}>
+          Шаг {stepIndex + 1} из {STEP_ORDER.length}: {STEP_NAMES[step]}
+        </div>
         <ol className={styles.stepper}>
-          {STEP_ORDER.map((item, index) => (
-            <li className={styles.stepperItem} key={item}>
-              <button
-                aria-current={item === step ? "step" : undefined}
+          {STEP_ORDER.map((item, index) => {
+            const isCompleted = index < stepIndex;
+            const isActive = item === step;
+            const isUpcoming = index > stepIndex;
+            return (
+              <li
                 className={classNames(
-                  styles.stepperButton,
-                  item === step && styles.stepperCurrent,
-                  index < stepIndex && styles.stepperDone,
+                  styles.stepperItem,
+                  isActive && styles.stepperCurrent,
+                  isCompleted && styles.stepperDone,
+                  isUpcoming && styles.stepperUpcoming
                 )}
-                disabled={item !== "profile" && !isProfileReady}
-                onClick={() => goToStep(item)}
-                type="button"
+                key={item}
               >
-                <span className={styles.stepperIndex}>
-                  <span className={styles.stepperWord}>Шаг </span>
-                  {index + 1}
-                </span>
-                <span className={styles.stepperName}>{STEP_NAMES[item]}</span>
-              </button>
-            </li>
-          ))}
+                <button
+                  aria-current={isActive ? "step" : undefined}
+                  className={styles.stepperButton}
+                  disabled={item !== "profile" && !isProfileReady}
+                  onClick={() => goToStep(item)}
+                  type="button"
+                >
+                  <span className={styles.stepCircle}>
+                    {isCompleted ? <Check size={14} strokeWidth={3} /> : index + 1}
+                  </span>
+                  <span className={styles.stepperName}>{STEP_NAMES[item]}</span>
+                </button>
+              </li>
+            );
+          })}
         </ol>
       </nav>
 
@@ -260,25 +280,70 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
           <>
             <ProgressMeter progress={progress} />
             <NextActionCard onComplete={completeRoadmapStep} progress={progress} />
-            <p className={styles.notice}>
-              <Info aria-hidden="true" size={16} strokeWidth={2.2} />
-              <span>
-                Шаги — общие ориентиры, а не требования конкретного вуза. Сроки и документы
-                проверяйте на сайте программы.
-              </span>
-            </p>
-            <RoadmapTimeline
-              completedStepIds={completedStepIds}
-              nextStepId={progress.nextStep?.id ?? null}
-              onToggleStep={toggleRoadmapStep}
-              phases={phases}
-            />
+
+            <div className={styles.roadmapViewToggle}>
+              <button
+                className={classNames(
+                  styles.viewToggleBtn,
+                  roadmapView === "tree" && styles.viewToggleBtnActive,
+                )}
+                onClick={() => setRoadmapView("tree")}
+                type="button"
+              >
+                <GitBranch aria-hidden="true" size={15} strokeWidth={2.4} />
+                <span>Интерактивное древо</span>
+              </button>
+              <button
+                className={classNames(
+                  styles.viewToggleBtn,
+                  roadmapView === "timeline" && styles.viewToggleBtnActive,
+                )}
+                onClick={() => setRoadmapView("timeline")}
+                type="button"
+              >
+                <ListFilter aria-hidden="true" size={15} strokeWidth={2.4} />
+                <span>Чек-лист по сезонам</span>
+              </button>
+              <Link className={styles.aiPlanPill} href="/journey/ai">
+                <Sparkles aria-hidden="true" size={14} strokeWidth={2.4} />
+                <span>ИИ-стратегия и PDF</span>
+              </Link>
+            </div>
+
+            {roadmapView === "tree" ? (
+              <RoadmapTree
+                adviceState={adviceState}
+                completedStepIds={completedStepIds}
+                goals={result.matches.slice(0, 3)}
+                nextStepId={progress.nextStep?.id ?? null}
+                onToggleStep={toggleRoadmapStep}
+                phases={phases}
+                profileSummary={diagnosis.profileSummary}
+              />
+            ) : (
+              <>
+                <p className={styles.notice}>
+                  <Info aria-hidden="true" size={16} strokeWidth={2.2} />
+                  <span>
+                    Шаги — общие ориентиры, а не требования конкретного вуза. Сроки и документы
+                    проверяйте на сайте программы.
+                  </span>
+                </p>
+                <RoadmapTimeline
+                  completedStepIds={completedStepIds}
+                  nextStepId={progress.nextStep?.id ?? null}
+                  onToggleStep={toggleRoadmapStep}
+                  phases={phases}
+                />
+              </>
+            )}
+
             {quickAdjust}
           </>
         ) : null}
       </main>
 
-      <div className={styles.nav}>
+      <div className={classNames(styles.nav, step === "recommendations" && styles.navWithTray)}>
         {stepIndex > 0 ? (
           <ActionButton
             onClick={() => goToStep(STEP_ORDER[stepIndex - 1])}

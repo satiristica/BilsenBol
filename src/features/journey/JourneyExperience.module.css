@@ -143,33 +143,50 @@
   transform: scaleX(1);
 }
 
-.stepperDone .stepperIndex {
-  color: var(--accent);
-}
-
-.stepperDone .stepperIndex::before {
-  content: "✓ ";
-}
-
-.stepperIndex {
-  font-size: 0.64rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.stepperName {
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
   overflow: hidden;
-  color: var(--ink-dim);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-overflow: ellipsis;
+  clip: rect(0, 0, 0, 0);
   white-space: nowrap;
+  border-width: 0;
 }
 
-/* "Шаг" is dropped on phones; the number alone keeps the order readable. */
-.stepperWord {
-  display: none;
+.stepCircle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border-radius: var(--r-pill, 999px);
+  background: var(--surface-raised);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  transition: all var(--dur-normal, 250ms) var(--ease-out);
+}
+
+.stepperCurrent .stepCircle {
+  background: var(--accent);
+  color: var(--bg-deep);
+  box-shadow: 0 0 10px rgb(62 224 138 / 40%);
+}
+
+.stepperDone .stepCircle {
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+}
+
+.stepperUpcoming {
+  opacity: 0.7;
+}
+
+.stepperDone {
+  border-color: var(--accent-line);
 }
 
 .stepperCurrent .stepperName {
@@ -231,6 +248,72 @@
   gap: 10px;
   border-top: 1px solid var(--line);
   padding-top: 20px;
+}
+
+.navWithTray {
+  padding-bottom: 95px;
+}
+
+.roadmapViewToggle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.viewToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill, 999px);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  transition: all var(--dur-normal, 250ms) var(--ease-spring);
+}
+
+.viewToggleBtnActive {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+}
+
+@media (hover: hover) {
+  .viewToggleBtn:hover:not(.viewToggleBtnActive) {
+    border-color: var(--accent-line);
+    color: var(--ink);
+  }
+}
+
+.aiPlanPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-pill, 999px);
+  background: var(--surface-raised);
+  color: var(--accent-bright);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 8px 14px;
+  text-decoration: none;
+  transition: all var(--dur-normal, 250ms) var(--ease-spring);
+}
+
+@media (hover: hover) {
+  .aiPlanPill:hover {
+    background: var(--accent);
+    color: var(--bg-deep);
+    box-shadow: var(--glow);
+    transform: translateY(-1px);
+  }
 }
 
 @media (min-width: 760px) {

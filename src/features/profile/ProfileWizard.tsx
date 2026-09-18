@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Check, type LucideIcon } from "lucide-react";
+import { ArrowLeft, Check, Minus, Plus, type LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { ActionButton } from "@/components/ActionButton";
@@ -196,13 +196,46 @@ export function ProfileWizard({ profile, onChange, onSubmit }: ProfileWizardProp
       <fieldset className={styles.question} key={question.id}>
         <legend className={styles.legend}>
           <h2 className={styles.title}>{question.title}</h2>
+          {question.microcopy ? (
+            <p className={styles.microcopy}>{question.microcopy}</p>
+          ) : null}
         </legend>
 
         {question.kind === "scale" ? (
           <div className={styles.scale}>
-            <output className={styles.scaleValue} htmlFor="gpa">
-              {formatGpa(profile.gpa)}
-            </output>
+            <div className={styles.scaleValueRow}>
+              <button
+                aria-label="Уменьшить балл на 0.1"
+                className={styles.stepperBtn}
+                disabled={profile.gpa <= GPA_MIN}
+                onClick={() =>
+                  onChange({
+                    ...profile,
+                    gpa: Number(Math.max(GPA_MIN, profile.gpa - GPA_STEP).toFixed(1)),
+                  })
+                }
+                type="button"
+              >
+                <Minus aria-hidden="true" size={18} strokeWidth={2.6} />
+              </button>
+              <output className={styles.scaleValue} htmlFor="gpa">
+                {formatGpa(profile.gpa)}
+              </output>
+              <button
+                aria-label="Увеличить балл на 0.1"
+                className={styles.stepperBtn}
+                disabled={profile.gpa >= GPA_MAX}
+                onClick={() =>
+                  onChange({
+                    ...profile,
+                    gpa: Number(Math.min(GPA_MAX, profile.gpa + GPA_STEP).toFixed(1)),
+                  })
+                }
+                type="button"
+              >
+                <Plus aria-hidden="true" size={18} strokeWidth={2.6} />
+              </button>
+            </div>
             <input
               aria-label="Средний балл аттестата"
               className={styles.slider}
@@ -216,7 +249,7 @@ export function ProfileWizard({ profile, onChange, onSubmit }: ProfileWizardProp
             />
             <div className={styles.scaleMarks}>
               <span>{formatGpa(GPA_MIN)}</span>
-              <span>{formatGpa(GRANT_COMPETITIVE_GPA)}</span>
+              <span>{formatGpa(GRANT_COMPETITIVE_GPA)} (грант)</span>
               <span>{formatGpa(GPA_MAX)}</span>
             </div>
             <p

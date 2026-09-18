@@ -42,8 +42,52 @@
   --shadow-lift: 0 30px 70px rgb(2 10 7 / 70%);
   --glow: 0 0 0 1px var(--accent-line), 0 16px 48px rgb(62 224 138 / 18%);
 
+  /* Typography — Major Third scale (1.25×). */
+  --text-xs: 0.72rem;    /* 11.5px */
+  --text-sm: 0.82rem;    /* 13px */
+  --text-base: 1rem;     /* 16px */
+  --text-md: 1.12rem;    /* 18px */
+  --text-lg: 1.35rem;    /* 21.6px */
+  --text-xl: 1.6rem;     /* 25.6px */
+  --text-2xl: 2rem;      /* 32px */
+  --text-3xl: 2.5rem;    /* 40px */
+  --text-4xl: 3.1rem;    /* 49.6px */
+
+  /* 8-point spacing grid. */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 32px;
+  --sp-8: 40px;
+  --sp-9: 48px;
+  --sp-10: 56px;
+  --sp-12: 64px;
+  --sp-16: 96px;
+  --sp-20: 128px;
+
+  /* Radii. */
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+
+  /* Dark-theme card border (Material Design 3 elevation via surface tint). */
+  --card-border: rgba(233 247 239 / 8%);
+  --card-border-hover: rgba(233 247 239 / 18%);
+  --card-border-active: var(--accent-line);
+
+  /* Unified animation durations. */
+  --dur-micro: 150ms;
+  --dur-normal: 250ms;
+  --dur-entrance: 300ms;
+  --dur-emphasis: 500ms;
+
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 
   color-scheme: dark;
 }
@@ -519,6 +563,184 @@ a {
   margin: 0;
   color: var(--muted);
   font-size: 0.92rem;
+}
+
+/* Trust Strip ------------------------------------------------------------- */
+
+.trust-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  margin-top: 24px;
+  padding: 14px 18px;
+  border-radius: var(--r-lg, 20px);
+  background: rgb(12 33 25 / 60%);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(10px);
+}
+
+.trust-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-dim);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.trust-icon {
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+}
+
+/* Rich Preset Chips -------------------------------------------------------- */
+
+.preset-chip-rich {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 18px;
+  border-radius: var(--r-md, 14px);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  text-decoration: none;
+  color: var(--ink);
+  transition: all var(--dur-normal, 250ms) var(--ease-spring);
+}
+
+.preset-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  font-weight: 750;
+  color: var(--ink);
+}
+
+.preset-head svg {
+  color: var(--accent);
+}
+
+.preset-desc {
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+@media (hover: hover) {
+  .preset-chip-rich:hover {
+    border-color: var(--accent);
+    background: var(--surface-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgb(2 10 7 / 40%);
+  }
+
+  .preset-chip-rich:hover .preset-head {
+    color: var(--accent-bright);
+  }
+}
+
+/* Features Showcase -------------------------------------------------------- */
+
+.features-section {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, calc(100% - 32px));
+  margin-inline: auto;
+  padding-block: clamp(40px, 7vw, 72px);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  margin-top: 32px;
+}
+
+.feature-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  border-radius: var(--r-lg, 20px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition: all var(--dur-normal, 250ms) var(--ease-spring);
+}
+
+@media (hover: hover) {
+  .feature-card:hover {
+    border-color: var(--accent-line);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card);
+  }
+}
+
+.feature-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+  margin-bottom: 4px;
+}
+
+.feature-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.feature-text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+/* CTA Banner --------------------------------------------------------------- */
+
+.cta-section {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, calc(100% - 32px));
+  margin-inline: auto;
+  padding-block: clamp(32px, 6vw, 64px);
+}
+
+.cta-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+  padding: clamp(36px, 6vw, 56px) 24px;
+  border-radius: var(--r-xl, 28px);
+  background:
+    radial-gradient(circle at 50% 0%, rgb(62 224 138 / 18%), transparent 70%),
+    var(--surface-raised);
+  border: 1px solid var(--accent-line);
+  box-shadow: var(--shadow-lift);
+}
+
+.cta-title {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  max-width: 24ch;
+}
+
+.cta-text {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 1rem;
+  max-width: 50ch;
+  line-height: 1.6;
 }
 
 .site-footer {

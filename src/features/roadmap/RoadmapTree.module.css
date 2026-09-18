@@ -281,6 +281,69 @@
   color: var(--bg-deep);
 }
 
+.completedBadge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--accent-deep);
+  color: var(--ink);
+  box-shadow: 0 0 8px rgb(62 224 138 / 35%);
+}
+
+.nodeCompleted .orb {
+  border-color: var(--accent);
+  background: var(--surface-raised);
+  color: var(--accent-bright);
+}
+
+.nodeCompleted .caption {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--accent-line);
+}
+
+.nodeCurrent .orb {
+  border-color: var(--warn);
+  box-shadow: 0 0 0 2px var(--warn-line), 0 0 22px rgb(255 180 92 / 36%);
+  animation: pulse-current 2s infinite ease-in-out;
+}
+
+@keyframes pulse-current {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 2px var(--warn-line), 0 0 16px rgb(255 180 92 / 30%);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 4px var(--warn), 0 0 28px rgb(255 180 92 / 50%);
+  }
+}
+
+.nodeCurrent .caption {
+  color: var(--warn-ink);
+}
+
+.currentBadge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: var(--r-pill, 999px);
+  background: var(--warn-soft);
+  border: 1px solid var(--warn-line);
+  color: var(--warn-ink);
+  font-size: 0.64rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
 @media (hover: hover) {
   .node:hover .orb {
     border-color: var(--accent);
@@ -429,6 +492,27 @@
     top: calc(var(--gap) * -1);
     left: calc(50% - 1px);
     height: var(--gap);
+  }
+}
+
+@media (max-width: 520px) {
+  .tree {
+    --orb: 44px;
+    padding: 16px 10px 24px;
+  }
+
+  .nodes {
+    max-width: 290px;
+    gap: 12px;
+  }
+
+  .caption {
+    font-size: 0.76rem;
+  }
+
+  .rootOrb {
+    width: 54px;
+    height: 54px;
   }
 }
 

@@ -17,9 +17,58 @@
   padding: 13px 15px;
 }
 
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 4px;
+}
+
+.countText {
+  color: var(--ink-dim);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.sortGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sortLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.sortSelect {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md, 14px);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: border-color var(--dur-normal, 250ms) var(--ease-out);
+}
+
+.sortSelect:focus-visible {
+  outline: 2px solid var(--warn);
+  border-color: var(--accent);
+}
+
 .grid {
   display: grid;
-  gap: 14px;
+  align-items: start;
+  gap: 16px;
 }
 
 .empty {
