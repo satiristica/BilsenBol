@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import type { ProgramMatch } from "@/domain/matching";
+import { shortUniversityName, type ProgramMatch } from "@/domain/matching";
 import type { RoadmapPhase, RoadmapSeason, RoadmapStep } from "@/domain/roadmap";
 import { classNames } from "@/lib/classNames";
 
@@ -61,11 +61,6 @@ function stepNode(step: RoadmapStep): { icon: LucideIcon; label: string } {
     return { icon: Rocket, label: "Проект" };
   }
   return STEP_NODES[step.id] ?? { icon: Circle, label: step.title };
-}
-
-/** "Middle East Technical University (METU)" → "METU". */
-function shortUniversity(name: string): string {
-  return name.match(/\(([^)]+)\)$/)?.[1] ?? name;
 }
 
 interface RoadmapTreeProps {
@@ -200,7 +195,7 @@ export function RoadmapTree({ phases, goals, profileSummary, adviceState }: Road
                 fullTitle={`${match.program.programName}, ${match.program.university}`}
                 icon={GraduationCap}
                 key={match.program.id}
-                label={shortUniversity(match.program.university)}
+                label={shortUniversityName(match.program)}
                 onOpen={() => setSelected({ kind: "program", match })}
                 order={order++}
                 variant="goal"

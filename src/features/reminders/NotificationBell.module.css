@@ -1,0 +1,253 @@
+.wrapper {
+  position: relative;
+}
+
+.bell {
+  position: relative;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    border-color 200ms var(--ease-out),
+    transform 280ms var(--ease-spring);
+}
+
+@media (hover: hover) {
+  .bell:hover {
+    border-color: var(--accent);
+  }
+
+  .calendar:hover {
+    border-color: var(--accent);
+    color: var(--ink);
+  }
+}
+
+.bell:focus-visible,
+.calendar:focus-visible {
+  outline: 2px solid var(--warn);
+  outline-offset: 3px;
+}
+
+/* An unread urgent reminder makes the bell ring now and then. */
+.bellUrgent svg {
+  animation: ring-bell 2.8s var(--ease-out) infinite;
+  transform-origin: 50% 10%;
+}
+
+@keyframes ring-bell {
+  0%,
+  70%,
+  100% {
+    transform: rotate(0);
+  }
+
+  76% {
+    transform: rotate(16deg);
+  }
+
+  82% {
+    transform: rotate(-14deg);
+  }
+
+  88% {
+    transform: rotate(8deg);
+  }
+
+  94% {
+    transform: rotate(-4deg);
+  }
+}
+
+.count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: grid;
+  min-width: 20px;
+  height: 20px;
+  place-items: center;
+  border: 2px solid var(--bg);
+  border-radius: 999px;
+  background: var(--warn);
+  color: var(--bg-deep);
+  font-size: 0.68rem;
+  font-weight: 900;
+  padding: 0 4px;
+  animation: pop-in 420ms var(--ease-spring);
+}
+
+@keyframes pop-in {
+  from {
+    transform: scale(0);
+  }
+}
+
+/* Dropdown under the bell; on phones it spans the screen width. */
+.panel {
+  position: fixed;
+  z-index: 40;
+  top: var(--panel-top, 72px);
+  right: 16px;
+  left: 16px;
+  display: grid;
+  max-height: min(calc(100dvh - var(--panel-top, 72px) - 16px), 560px);
+  gap: 12px;
+  overflow-y: auto;
+  border: 1px solid var(--line-strong);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lift);
+  padding: 16px;
+  animation: drop 320ms var(--ease-out);
+}
+
+@media (min-width: 640px) {
+  .panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    left: auto;
+    width: 380px;
+  }
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+}
+
+.panelHead {
+  display: grid;
+  gap: 2px;
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.panelHint,
+.empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg-deep);
+  padding: 10px;
+  animation: slide-in 380ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+}
+
+.itemUrgent {
+  border-color: var(--warn-line);
+  background: var(--warn-soft);
+}
+
+.icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+}
+
+.itemUrgent .icon {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.body {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.itemTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.newTag {
+  display: inline-block;
+  margin-right: 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--bg-deep);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+
+.itemDetail {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.calendar {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 5px;
+  min-height: 32px;
+  margin-top: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: none;
+  color: var(--ink-dim);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 5px 11px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bellUrgent svg,
+  .count,
+  .panel,
+  .item {
+    animation: none;
+  }
+}

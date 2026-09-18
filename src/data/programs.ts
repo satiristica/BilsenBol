@@ -53,6 +53,17 @@ export interface Foundation {
   requirement: string;
 }
 
+/**
+ * A dated deadline copied from `applicationWindow` for reminders. Only dates
+ * whose year the source states are listed; windows of a past intake and
+ * pages without a year stay text-only.
+ */
+export interface Deadline {
+  label: string;
+  /** ISO date, YYYY-MM-DD. */
+  date: string;
+}
+
 export interface SourceLink {
   label: string;
   url: string;
@@ -78,6 +89,7 @@ export interface Program {
   foundation: Foundation | null;
   entranceExam: string | null;
   applicationWindow: string;
+  deadlines?: readonly Deadline[];
   durationYears: number | null;
   highlights: string[];
   sources: SourceLink[];
@@ -392,6 +404,7 @@ export const PROGRAMS: readonly Program[] = [
     foundation: null,
     entranceExam: "Онлайн-тест: биология, химия, общий и медицинский английский, затем собеседование",
     applicationWindow: "До 31 мая 2027",
+    deadlines: [{ label: "Конец приёма заявок", date: "2027-05-31" }],
     durationYears: 6,
     highlights: ["Двенадцать семестров на английском", "Программа есть в Stipendium Hungaricum"],
     sources: [
@@ -425,6 +438,10 @@ export const PROGRAMS: readonly Program[] = [
     foundation: null,
     entranceExam: null,
     applicationWindow: "Ранний срок 28 февраля 2027, основной — 30 апреля 2027",
+    deadlines: [
+      { label: "Ранний срок подачи", date: "2027-02-28" },
+      { label: "Основной срок подачи", date: "2027-04-30" },
+    ],
     durationYears: 3,
     highlights: ["Построена по модели Oxford PPE", "Отбор по документам, без экзамена"],
     sources: [
@@ -550,6 +567,10 @@ export const PROGRAMS: readonly Program[] = [
     entranceExam: "Нужен академический результат: SAT, ACT, AP, IB, A-Level или национальный экзамен",
     applicationWindow:
       "Ранний раунд 22 сентября — 22 октября 2026, основной 10 ноября 2026 — 14 января 2027",
+    deadlines: [
+      { label: "Конец раннего раунда", date: "2026-10-22" },
+      { label: "Конец основного раунда", date: "2027-01-14" },
+    ],
     durationYears: null,
     highlights: ["Стипендия всем зачисленным иностранцам", "Специальность выбирают на втором курсе"],
     sources: [
@@ -660,6 +681,7 @@ export const PROGRAMS: readonly Program[] = [
     entranceExam: null,
     applicationWindow:
       "Приоритетный срок на осень 2026 был 15 января 2026; на весну 2027 — 1 ноября 2026",
+    deadlines: [{ label: "Приоритетный срок на весну 2027", date: "2026-11-01" }],
     durationYears: null,
     highlights: ["SAT и ACT не требуются", "120 кредитных часов, кампус Tempe"],
     sources: [

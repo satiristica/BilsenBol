@@ -380,6 +380,11 @@ export function rankPrograms(
 
 const CURRENCY_SIGNS: Partial<Record<Currency, string>> = { USD: "$", EUR: "€" };
 
+/** "Middle East Technical University (METU)" → "METU". */
+export function shortUniversityName(program: Program): string {
+  return program.university.match(/\(([^)]+)\)$/)?.[1] ?? program.university;
+}
+
 /** Tuition exactly as the university publishes it. */
 export function formatTuition(program: Program): string {
   const { amount, currency, period } = program.tuition;

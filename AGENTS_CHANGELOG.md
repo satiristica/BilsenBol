@@ -2419,3 +2419,61 @@ VERIFICATION:
   - the rest of the suite passes.
 - The user's dev server on :3000 was not running. The suite ran against a temporary `next dev -p 3100`, which was stopped afterwards.
 - `tsc`, `eslint`, `build` → exit 0.
+
+## TASK TASK-CLAUDE-20260919-reminders
+
+AGENT: CLAUDE
+STATUS: DONE (uncommitted)
+SCOPE: In-site reminders about application deadlines and roadmap steps.
+
+DECISION:
+- Real push notifications while the site is closed would need a service worker, a push service, stored subscriptions and a scheduler. That is a backend the project does not have. Instead there are two things:
+  - a reminder centre (bell) computed from the journey state;
+  - «В календарь»: a downloaded `.ics` event with alarms 7 days and 1 day before. This puts a real reminder on the phone without accounts or a server.
+- Dates come only from the catalogue. Past intakes and pages without a stated year stay text-only.
+
+CHANGES:
+- `programs.ts`: new optional `deadlines: Deadline[]` (ISO dates), filled only where the official page gives a future date with its year:
+  - KAIST: 2026-10-22 and 2027-01-14;
+  - Charles PPE: 2027-02-28 and 2027-04-30;
+  - Semmelweis: 2027-05-31;
+  - ASU (spring 2027 priority): 2026-11-01.
+  - MIT is excluded because its page shows no year.
+- `src/domain/reminders.ts` is pure, with `today` injected:
+  - deadlines of the shown matches, excluding past ones and marking those within 30 days as urgent;
+  - grade 9–10 gets «Вы подаётесь через год» instead of deadlines of someone else's intake;
+  - an urgent «Не закрыты осенние шаги» once the calendar season has passed the next step's season, otherwise «Следующий шаг плана»;
+  - «Следите за датами набора» for top programmes without a published future date;
+  - stable ids, so the «seen» state survives reloads.
+- `shortUniversityName` moved to `matching.ts` and is shared with the tree.
+- `src/lib/calendar.ts`: a minimal RFC 5545 all-day event with 2 VALARMs and a download helper.
+- `NotificationBell` in the journey header:
+  - an unread counter; the bell rings only for unread urgent reminders;
+  - opening the panel marks everything as seen (`bilsenbol.seenReminders`, capped at 60) and tags the new items «Новое»;
+  - closes on outside tap or Escape;
+  - a fixed panel under the bell on phones, a dropdown from 640 px;
+  - animation is off under reduced motion.
+
+VERIFICATION:
+- Domain checks on fixed dates, all passing:
+  - KAIST in 33 days; urgent at 12 days;
+  - no past deadlines;
+  - grade 9–10 behaviour;
+  - behind in winter;
+  - next step once autumn is done;
+  - no step when the plan is complete;
+  - day counting across the new year;
+  - seasons; stable ids.
+- New `bell.mjs`:
+  - counter present; the panel shows KAIST;
+  - «Новое» tags; the counter clears;
+  - no overflow at 390 px;
+  - the downloaded `.ics` has DTSTART 20261022, 2 alarms and a URL;
+  - Escape closes the panel; «seen» persists after a reload;
+  - grade 9–10 text; clean console.
+  
+  All pass.
+- tap, persist and impact selectors narrowed to exclude the bell's `aria-expanded`.
+- tap, persist, impact, ai-page and bell all pass on a temporary `next dev -p 3100`. A stale headless Chrome left by a crashed run was killed first; the server was stopped afterwards.
+- Mobile and desktop screenshots reviewed. On phones the panel was first covering the bell; fixed by anchoring it to the bell's position.
+- `tsc`, `eslint`, `build` → exit 0.

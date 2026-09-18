@@ -10,6 +10,7 @@ import { SOURCE_BADGE } from "@/data/programs";
 import { buildDiagnosis } from "@/domain/diagnosis";
 import { rankPrograms, type ProgramMatch } from "@/domain/matching";
 import { DEFAULT_PROFILE, type ApplicantProfile } from "@/domain/profile";
+import { buildReminders } from "@/domain/reminders";
 import { buildRoadmap, calculateProgress } from "@/domain/roadmap";
 import { ComparisonDialog } from "@/features/comparison/ComparisonDialog";
 import { ComparisonTray } from "@/features/comparison/ComparisonTray";
@@ -21,6 +22,7 @@ import {
   RecommendationList,
 } from "@/features/recommendations/RecommendationList";
 import { NextActionCard, ProgressMeter } from "@/features/progress/ProgressPanel";
+import { NotificationBell } from "@/features/reminders/NotificationBell";
 import { RoadmapTimeline } from "@/features/roadmap/RoadmapTimeline";
 import { classNames } from "@/lib/classNames";
 import { pluralRu } from "@/lib/plural";
@@ -89,6 +91,14 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
     [phases, completedStepIds],
   );
 
+  const isProfileReady = profile.fields.length > 0 && profile.regions.length > 0;
+  // Today is read once per visit; reminders only need day precision.
+  const [today] = useState(() => new Date());
+  const reminders = useMemo(
+    () => (isProfileReady ? buildReminders({ profile, result, progress, today }) : []),
+    [isProfileReady, profile, result, progress, today],
+  );
+
   const comparedMatches = useMemo(
     () =>
       comparedProgramIds
@@ -102,7 +112,6 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
       ? [comparedMatches[0], comparedMatches[1]]
       : null;
 
-  const isProfileReady = profile.fields.length > 0 && profile.regions.length > 0;
   const stepIndex = STEP_ORDER.indexOf(step);
 
   const toggleComparison = (programId: string) => {
@@ -184,6 +193,7 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
           <span>BilsenBol</span>
         </Link>
         <div className={styles.topActions}>
+          <NotificationBell reminders={reminders} />
           <ResetControl onReset={resetJourney} />
           <span className={styles.sourceTag}>{SOURCE_BADGE}</span>
         </div>
