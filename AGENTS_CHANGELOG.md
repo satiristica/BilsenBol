@@ -1870,3 +1870,33 @@ VERIFICATION:
 LIMITATIONS:
 - A programme can be reported as "поднялась" because programmes above it dropped out, not because its own score rose. That is positionally true, but it is not always the most informative line.
 - The profile still asks only about English among exams; national exams (ЕНТ, ЕГЭ, SAT) are not modelled.
+
+## TASK TASK-CLAUDE-20260918-readme-submission
+
+AGENT: CLAUDE
+STATUS: DONE
+SCOPE: Rewrite README.md in Russian to cover every item the case PDF requires for submission.
+
+### COMPLETE TASK-CLAUDE-20260918-readme-submission
+
+AGENT: CLAUDE
+STATUS: DONE
+
+SUMMARY:
+- README now covers every PDF item — task, solution (mapped to all seven case stages and to each mandatory UX requirement), stack, architecture (layer layout, the factor-scoring table, persistence), launch, a test scenario mirroring the jury scenario, team, sources, AI/API, ready-made components, limitations — plus the technical reference the PDF allows inside the README.
+- States explicitly that the match score measures profile fit, not admission probability.
+- States honestly that the product calls no language model and that the automated checks run during development are not committed.
+
+FILES:
+- `README.md`
+
+VERIFICATION:
+- Every factual claim was cross-checked against source: 10 comparison criteria; factor weights 6 / 34 / 6–18 / 14–12–9 / 0–14 / 8 / 6; button labels "Дальше: …", "Построить мой маршрут", "Начать заново", "Ничего не подошло"; the empty-state suggestion text; package versions read from `node_modules`.
+- The empty-state recipe in the test scenario (IT preset + "$0 — только грант" + only USA) was run through the domain rules: 0 programmes, excluded budget 1 / GPA 1 / region 12.
+- `git diff --check` → exit 0.
+
+NOT VERIFIED:
+- The rendered README on GitHub.
+
+LIMITATIONS:
+- Two placeholders are marked "⚠ ЗАПОЛНИТЬ" and must be filled by the team: the deployed demo URL and the team roster with roles.
