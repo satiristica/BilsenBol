@@ -600,3 +600,15 @@ a {
     transform: none;
   }
 }
+
+/* Paper is white whatever the screen theme; margins are set per page. */
+@page {
+  margin: 14mm;
+}
+
+@media print {
+  body {
+    background: #fff;
+    color: #111;
+  }
+}

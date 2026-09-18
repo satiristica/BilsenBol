@@ -1,10 +1,10 @@
 "use client";
 
-import { ArrowLeft, CheckCircle2, Lock, Sparkles } from "lucide-react";
+import { ArrowLeft, CheckCircle2, FileDown, Lock, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import { ActionLink } from "@/components/ActionButton";
+import { ActionButton, ActionLink } from "@/components/ActionButton";
 import { BrandMark } from "@/components/BrandMark";
 import { buildDiagnosis } from "@/domain/diagnosis";
 import { rankPrograms, type ProgramMatch } from "@/domain/matching";
@@ -17,6 +17,7 @@ import { pluralRu } from "@/lib/plural";
 
 import { AiRoadmapCard } from "./AiRoadmapCard";
 import styles from "./AiPlanPage.module.css";
+import { PrintableChecklist } from "./PrintableChecklist";
 import { RoadmapTree } from "./RoadmapTree";
 import { useRoadmapAdvice } from "./useRoadmapAdvice";
 
@@ -114,6 +115,7 @@ function UnlockGate({
 
   return (
     <AiPlanContent
+      completedStepIds={completedStepIds}
       goals={result.matches.slice(0, TREE_GOALS)}
       phases={phases}
       profile={profile}
@@ -122,53 +124,80 @@ function UnlockGate({
   );
 }
 
+/** The saved file is named after the page title in most browsers. */
+function printChecklist() {
+  const screenTitle = document.title;
+  document.title = "BilsenBol — чек-лист поступления";
+  window.addEventListener("afterprint", () => (document.title = screenTitle), { once: true });
+  window.print();
+}
+
 function AiPlanContent({
   profile,
   phases,
   goals,
   profileSummary,
+  completedStepIds,
 }: {
   profile: ApplicantProfile;
   phases: RoadmapPhase[];
   goals: ProgramMatch[];
   profileSummary: string;
+  completedStepIds: string[];
 }) {
   const stepIds = useMemo(() => new Set(listSteps(phases).map((step) => step.id)), [phases]);
   const state = useRoadmapAdvice(profile, stepIds, true);
+  const completed = useMemo(() => new Set(completedStepIds), [completedStepIds]);
 
   return (
     <Shell>
-      <section className={styles.hero}>
-        <p className={styles.eyebrow}>
-          <Sparkles aria-hidden="true" size={14} strokeWidth={2.4} />
-          ИИ-план
-        </p>
-        <h1 className={styles.title}>Ваш маршрут глазами ИИ</h1>
-        <p className={styles.lead}>{profileSummary}</p>
-        <span className={styles.doneChip}>
-          <CheckCircle2 aria-hidden="true" size={15} strokeWidth={2.4} />
-          Все шаги плана выполнены
-        </span>
-      </section>
-
-      <AiRoadmapCard
-        state={state}
-        title="Стратегия"
-        unavailableText="ИИ сейчас недоступен — попробуйте открыть страницу чуть позже."
-      />
-
-      <RoadmapTree
+      <PrintableChecklist
         adviceState={state}
+        completedStepIds={completed}
         goals={goals}
         phases={phases}
         profileSummary={profileSummary}
       />
+      <div className={styles.screenOnly}>
+        <section className={styles.hero}>
+          <p className={styles.eyebrow}>
+            <Sparkles aria-hidden="true" size={14} strokeWidth={2.4} />
+            ИИ-план
+          </p>
+          <h1 className={styles.title}>Ваш маршрут глазами ИИ</h1>
+          <p className={styles.lead}>{profileSummary}</p>
+          <span className={styles.doneChip}>
+            <CheckCircle2 aria-hidden="true" size={15} strokeWidth={2.4} />
+            Все шаги плана выполнены
+          </span>
+          <div className={styles.exportRow}>
+            <ActionButton compact onClick={printChecklist} variant="ghost">
+              <FileDown aria-hidden="true" size={17} strokeWidth={2.4} />
+              Чек-лист в PDF
+            </ActionButton>
+            <span className={styles.exportHint}>Сохранить как PDF или распечатать</span>
+          </div>
+        </section>
 
-      <div className={styles.actions}>
-        <ActionLink href="/journey" variant="ghost">
-          <ArrowLeft aria-hidden="true" size={17} strokeWidth={2.4} />
-          Вернуться к плану
-        </ActionLink>
+        <AiRoadmapCard
+          state={state}
+          title="Стратегия"
+          unavailableText="ИИ сейчас недоступен — попробуйте открыть страницу чуть позже."
+        />
+
+        <RoadmapTree
+          adviceState={state}
+          goals={goals}
+          phases={phases}
+          profileSummary={profileSummary}
+        />
+
+        <div className={styles.actions}>
+          <ActionLink href="/journey" variant="ghost">
+            <ArrowLeft aria-hidden="true" size={17} strokeWidth={2.4} />
+            Вернуться к плану
+          </ActionLink>
+        </div>
       </div>
     </Shell>
   );

@@ -2386,3 +2386,36 @@ VERIFICATION:
 - `ai-page.mjs` selectors updated to the new captions and to `[data-ai-advice]`. Everything passes, console clean.
 - `tsc`, `eslint`, `build` → exit 0.
 - Desktop and mobile screenshots reviewed. On phones the seasons are joined by one continuous spine.
+
+## TASK TASK-CLAUDE-20260919-checklist-pdf
+
+AGENT: CLAUDE
+STATUS: DONE (uncommitted)
+SCOPE: Export the finished plan as a PDF checklist from `/journey/ai`, to save, print or open in any PDF viewer.
+
+DECISION: The export uses the browser's own print pipeline (`window.print()` → «Сохранить как PDF» or a printer). A PDF library such as jsPDF or pdfkit would add a dependency plus an embedded Cyrillic font of several hundred KB. Browser printing already supports Cyrillic and works on desktop, Android and iOS (share → save to Files). Trade-off: the user picks «Сохранить как PDF» in the dialog, instead of getting a one-click file download.
+
+CHANGES:
+- `PrintableChecklist.tsx` and its CSS module: a black-on-white sheet, hidden on screen, that is the only thing printed. It contains:
+  - the profile and date;
+  - the AI strategy, labelled as such;
+  - the target programmes with the catalogue facts and the first source URL;
+  - the steps per season with ✓ boxes for completed steps, the rule text and the AI advice (labelled);
+  - the AI extras;
+  - the source and AI disclaimers.
+- `AiPlanPage`:
+  - a «Чек-лист в PDF» button in the hero;
+  - `printChecklist` sets the document title so the saved file is named «BilsenBol — чек-лист поступления»;
+  - on-screen content is wrapped in `.screenOnly`, which keeps the grid gap and is hidden in print.
+- `globals.css`: `@page { margin: 14mm }` and a white body for print.
+
+VERIFICATION:
+- `ai-page.mjs`:
+  - the button is present;
+  - the sheet is `display: none` on screen;
+  - `Page.printToPDF` produced a 2-page PDF;
+  - `pdftotext` shows every section;
+  - page 1 was rendered and reviewed;
+  - the rest of the suite passes.
+- The user's dev server on :3000 was not running. The suite ran against a temporary `next dev -p 3100`, which was stopped afterwards.
+- `tsc`, `eslint`, `build` → exit 0.

@@ -144,3 +144,36 @@
     color: var(--ink);
   }
 }
+
+/* Keeps the page rhythm of .content for everything that is screen-only. */
+.screenOnly {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+}
+
+.exportRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 4px;
+}
+
+.exportHint {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* Printing shows only the checklist sheet. */
+@media print {
+  .shell {
+    width: auto;
+    padding: 0;
+  }
+
+  .topBar,
+  .screenOnly {
+    display: none;
+  }
+}
