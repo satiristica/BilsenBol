@@ -2540,3 +2540,17 @@ VERIFICATION:
   - the overflow suite now also runs at 330 px and passes;
   - tap and persist pass;
   - `tsc`, `eslint`, `build` → exit 0.
+
+## TASK TASK-CLAUDE-20260919-readme-short
+
+AGENT: CLAUDE
+STATUS: DONE (uncommitted)
+SCOPE: README shorter and easier to read, launch first, team filled in; every section the case requires is kept.
+
+CHANGES:
+- `README.md` rewritten, 262 → about 180 lines. Order: launch, task, solution with UX requirements, test scenario, architecture, stack, AI/API, sources, ready-made components, limitations, team, technical reference.
+- Updated to the current product: diagnosis meters, the AI tree, the PDF checklist, the reminder bell and `.ics`, the mobile check at 330 px, the 6 → 4 example.
+- Team: Алдияр Кайроллин — тимлид, разработчик; Альжан Кайназаров — разработчик; Галымжан Амантай — разработчик. The demo URL placeholder remains (not deployed yet).
+
+VERIFICATION:
+- Scenario numbers re-checked against the domain code: the IT preset gives 6 programmes, 4 at «До $3 000»; the empty state needs english «Только школьный» + «$0» + «США» (with Duolingo, MIT stays), so the README says so.
