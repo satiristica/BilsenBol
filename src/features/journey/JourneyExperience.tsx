@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
@@ -113,28 +114,18 @@ export function JourneyExperience({
   );
 
   const sectionCopy: Record<JourneyStep, { title: string; lead: React.ReactNode }> = {
-    profile: {
-      title: "Шаг 1. Ваш профиль",
-      lead: "Эти ответы — единственный источник для диагностики, подборки и плана. Изменить их можно в любой момент.",
-    },
-    diagnosis: {
-      title: "Шаг 2. Где вы сейчас",
-      lead: "Честная оценка профиля: что уже работает на вас, что мешает и сколько времени в запасе.",
-    },
+    profile: { title: "Ваш профиль", lead: null },
+    diagnosis: { title: "Где вы сейчас", lead: null },
     recommendations: {
-      title: "Шаг 3. Подходящие программы",
+      title: "Ваши программы",
       lead: (
         <>
-          Программы, которые проходят ваши обязательные условия.{" "}
-          <span className={styles.counter}>Подходит: {result.matches.length}</span>. Отметьте
-          две и сравните их лицом к лицу.
+          <span className={styles.counter}>{result.matches.length} подходят</span> · отметьте
+          две, чтобы сравнить
         </>
       ),
     },
-    roadmap: {
-      title: "Шаг 4. Ваш план поступления",
-      lead: "Маршрут по сезонам, одно ближайшее действие и шкала готовности, которая растёт вместе с отметками.",
-    },
+    roadmap: { title: "Ваш план", lead: null },
   };
 
   return (
@@ -175,9 +166,11 @@ export function JourneyExperience({
       {step === "profile" ? null : (
         <div className={styles.sectionHead}>
           <h1 className={styles.sectionTitle}>{sectionCopy[step].title}</h1>
-          <p aria-live="polite" className={styles.sectionLead}>
-            {sectionCopy[step].lead}
-          </p>
+          {sectionCopy[step].lead ? (
+            <p aria-live="polite" className={styles.sectionLead}>
+              {sectionCopy[step].lead}
+            </p>
+          ) : null}
         </div>
       )}
 
@@ -232,7 +225,7 @@ export function JourneyExperience({
             onClick={() => goToStep(STEP_ORDER[stepIndex - 1])}
             variant="ghost"
           >
-            ← Назад
+            <ArrowLeft aria-hidden="true" size={17} strokeWidth={2.4} /> Назад
           </ActionButton>
         ) : null}
         {stepIndex < STEP_ORDER.length - 1 && step !== "profile" ? (

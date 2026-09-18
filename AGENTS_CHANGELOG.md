@@ -1448,3 +1448,98 @@ LIMITATIONS:
 
 FOLLOW_UP:
 - Profile the landing on a mid-range phone and cut the blur radius further if frames drop.
+
+## TASK TASK-CLAUDE-20260918-less-text-more-visuals
+
+AGENT: CLAUDE
+STATUS: DONE
+BASE_COMMIT: 835ad3a66feaa4f8a81de9caebf7c072b465a417
+SCOPE: Cut on-screen copy across the journey and replace text with Lucide icons and licensed photography.
+
+FILES:
+- `package.json`, `package-lock.json` (lucide-react)
+- `public/images/**`
+- `src/app/**`
+- `src/components/**`
+- `src/domain/profile.ts` (option copy only)
+- `src/features/**`
+- `README.md`, `AGENTS_CHANGELOG.md`
+
+DEPENDENCIES:
+- `TASK-CLAUDE-20260918-living-background`
+
+ASSUMPTIONS:
+- Lucide is the icon set named by AGENTS.md section 6; it is added as the single icon dependency.
+- Photos come only from Unsplash under the Unsplash License and show generic student life, never an identifiable real campus: the catalogue institutions are fictional, and pairing them with a real building would fabricate a fact.
+- Photos are stored locally so the demo does not depend on a third-party CDN at presentation time.
+
+ACCEPTANCE:
+- Every screen shows materially less prose; explanations required by AGENTS.md section 8 remain reachable.
+- Emoji and text glyphs used as icons are replaced by Lucide icons.
+- Landing shows licensed photography with credits recorded in the repository.
+- `npm run typecheck`, `npm run lint`, `npm run build` exit 0.
+
+### COMPLETE TASK-CLAUDE-20260918-less-text-more-visuals
+
+AGENT: CLAUDE
+STATUS: DONE
+
+SUMMARY:
+- Visible text across the five main screens dropped by 38% (1273 → 787 words), measured against the previous commit rather than estimated. Landing −50%, roadmap −52%, recommendations −33%, profile wizard −30%, diagnosis −18%.
+- Lucide icons replaced every emoji and text glyph used as an icon, and replaced the explanatory hint lines under the wizard options.
+- The landing now leads with a photo and floating badges, and the "how it works" cards each carry a photo. The three presets became compact icon chips with short titles.
+- Recommendation cards show at most three badges and two reasons; the remaining reasons and the programme-format badges moved into the collapsed "Подробнее" section instead of disappearing. Facts became an icon row.
+- Roadmap steps show their explanation only on the step the user is on now; season headers carry icons.
+
+COMMITS:
+- UNCOMMITTED
+
+FILES:
+- `package.json`, `package-lock.json` (added `lucide-react@^1.47.0`)
+- `public/images/{hero-students,step-profile,step-match,step-plan}.jpg` (new)
+- `src/components/optionIcons.ts` (new)
+- `src/app/{page.tsx,globals.css}`
+- `src/components/{ActionButton.tsx,ActionButton.module.css}`
+- `src/domain/{profile.ts,roadmap.ts}`, `src/data/programs.ts`
+- `src/features/profile/{ProfileWizard.tsx,ProfileWizard.module.css,profileQuestions.ts,QuickAdjustBar.tsx,QuickAdjustBar.module.css}`
+- `src/features/diagnosis/{DiagnosisPanel.tsx,DiagnosisPanel.module.css}`
+- `src/features/recommendations/{RecommendationCard.tsx,RecommendationCard.module.css,RecommendationList.tsx,RecommendationList.module.css}`
+- `src/features/comparison/{ComparisonDialog.tsx,ComparisonDialog.module.css,ComparisonTray.tsx}`
+- `src/features/roadmap/{RoadmapTimeline.tsx,RoadmapTimeline.module.css}`
+- `src/features/progress/{ProgressPanel.tsx,Progress.module.css}`
+- `src/features/journey/JourneyExperience.tsx`
+- `README.md`
+
+CONTRACTS / INTERFACES:
+- `LabelledOption` lost its optional `hint` field and the domain options lost their hint strings: nothing rendered them once icons took their place.
+- `ProfilePreset` lost `emoji` and `description`; icons are a presentation concern and now live in the UI.
+- `RoadmapPhase` lost `summary`, which no screen rendered any more.
+- `DEMO_DATA_NOTICE` was shortened and is now the single source for the disclaimer in both the recommendation list and the comparison dialog.
+
+DATA / SCHEMA / STATE:
+- The diagnosis explanations were kept on purpose: AGENTS.md section 8 requires each recommendation and status to be explainable, which is why that screen shrank least.
+- Four photos were downloaded from `images.unsplash.com`, each viewed before use. Two further candidates were rejected: an ABC-blocks still life that reads as preschool, and a conference room of adults. No image depicts an identifiable real campus, because the catalogue institutions are fictional and pairing them with a real building would fabricate a fact. Source URLs and the licence are recorded in `README.md`; photographer names are not recorded because they were not verified.
+
+DEPENDENCIES / CONFIG:
+- `lucide-react@^1.47.0`: the icon set AGENTS.md section 6 names, one package with no transitive dependencies, peer range covers React 19, `npm audit` reports 0 vulnerabilities.
+
+VERIFICATION:
+- `npm run typecheck` → exit 0.
+- `npm run lint` → exit 0.
+- `npm run build` → exit 0.
+- `git diff --check` → exit 0.
+- Domain harness recreated in the scratchpad (the previous copy was lost when the scratchpad reset between days) and run against the changed domain: 25 of 25 assertions pass with the same figures as before (4 / 6 / 4 / 4 matches per preset, budget widening 4 → 11), so removing the presentational fields changed no ranking, diagnosis or roadmap behaviour.
+- Word counts: the previous commit was built in a temporary git worktree (webpack, because Turbopack rejects a symlinked `node_modules`) and served beside the current build; visible words were counted from the rendered HTML of both, excluding scripts, collapsed `<details>` bodies, screen-reader-only labels and the closed dialog. The worktree was removed afterwards.
+- All four photos return HTTP 200 through the Next image optimiser as WebP, 16–32 KB at 640 px width; every `<img>` carries a Russian `alt`.
+- Script checks: no `styles.X` reference without a matching class; no emoji or text glyph icon left in any TSX file.
+
+NOT VERIFIED:
+- The Chrome extension is still not connected, so the new layout, the photo tinting and the icon alignment were checked through markup and stylesheets, never by looking at the rendered page.
+- Mobile width: floating badges were pulled inside the gutter at ≤520 px by construction, but no 360 px measurement was taken.
+
+LIMITATIONS:
+- The keyboard digit shortcuts in the wizard still work but are no longer advertised, because the numbered badges gave way to icons.
+- Photographer attribution is not shown; the Unsplash License does not require it, but it is customary.
+
+FOLLOW_UP:
+- Add photographer credits once the names are confirmed on each Unsplash photo page.

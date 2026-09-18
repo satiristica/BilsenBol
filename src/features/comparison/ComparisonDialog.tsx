@@ -1,5 +1,6 @@
 "use client";
 
+import { Check, Sparkles, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import { DEMO_DATA_NOTICE } from "@/data/programs";
@@ -65,7 +66,7 @@ export function ComparisonDialog({ isOpen, pair, onClose }: ComparisonDialogProp
       <div className={styles.inner}>
         <header className={styles.header}>
           <h2 className={styles.title} id="comparison-title">
-            Сравнение лицом к лицу
+            Сравнение
           </h2>
           <button
             aria-label="Закрыть сравнение"
@@ -73,7 +74,7 @@ export function ComparisonDialog({ isOpen, pair, onClose }: ComparisonDialogProp
             onClick={onClose}
             type="button"
           >
-            ✕
+            <X aria-hidden="true" size={18} strokeWidth={2.4} />
           </button>
         </header>
 
@@ -96,17 +97,13 @@ export function ComparisonDialog({ isOpen, pair, onClose }: ComparisonDialogProp
               <span className={styles.rowLabel}>{row.label}</span>
               <span className={valueClass("left", row.winner)}>
                 {row.winner === "left" ? (
-                  <span aria-hidden="true" className={styles.winnerMark}>
-                    ▲
-                  </span>
+                  <Check aria-hidden="true" className={styles.winnerMark} size={14} strokeWidth={3} />
                 ) : null}
                 {row.left}
               </span>
               <span className={valueClass("right", row.winner)}>
                 {row.winner === "right" ? (
-                  <span aria-hidden="true" className={styles.winnerMark}>
-                    ▲
-                  </span>
+                  <Check aria-hidden="true" className={styles.winnerMark} size={14} strokeWidth={3} />
                 ) : null}
                 {row.right}
               </span>
@@ -116,7 +113,7 @@ export function ComparisonDialog({ isOpen, pair, onClose }: ComparisonDialogProp
 
         <footer className={styles.footer}>
           <p className={styles.verdict}>
-            <span aria-hidden="true">✦</span>
+            <Sparkles aria-hidden="true" size={18} strokeWidth={2.2} />
             <span>{describeVerdict(left, right)}</span>
           </p>
           <p className={styles.demoNote}>{DEMO_DATA_NOTICE}</p>

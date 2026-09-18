@@ -147,9 +147,14 @@
   font-weight: 700;
 }
 
+.verdict svg {
+  margin-top: 3px;
+  color: var(--accent);
+}
+
 .winnerMark {
-  font-size: 0.66rem;
-  font-weight: 800;
+  flex: none;
+  align-self: center;
 }
 
 .footer {
@@ -161,7 +166,8 @@
 
 .verdict {
   display: grid;
-  grid-template-columns: 22px 1fr;
+  grid-template-columns: 18px 1fr;
+  align-items: start;
   gap: 10px;
   margin: 0;
   border: 1px solid var(--accent-line);

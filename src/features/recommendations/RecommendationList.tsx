@@ -1,5 +1,7 @@
 "use client";
 
+import { Info, SearchX } from "lucide-react";
+
 import { ActionButton } from "@/components/ActionButton";
 import { DEMO_DATA_NOTICE } from "@/data/programs";
 import type { RecommendationResult } from "@/domain/matching";
@@ -78,19 +80,17 @@ function EmptyState({
 >) {
   const suggestion = buildRelaxSuggestion(profile, result);
   const reasons: { label: string; count: number }[] = [
-    { label: "Дороже вашего бюджета", count: result.excluded.budget },
-    { label: "Требуют более высокий средний балл", count: result.excluded.gpa },
-    { label: "Нужен языковой сертификат без Foundation", count: result.excluded.language },
-    { label: "Находятся вне выбранных регионов", count: result.excluded.region },
+    { label: "Дороже бюджета", count: result.excluded.budget },
+    { label: "Выше нужен балл", count: result.excluded.gpa },
+    { label: "Нужен сертификат", count: result.excluded.language },
+    { label: "Другой регион", count: result.excluded.region },
   ].filter((reason) => reason.count > 0);
 
   return (
     <div className={styles.empty}>
-      <h3 className={styles.emptyTitle}>Под текущие условия не подошла ни одна программа</h3>
-      <p className={styles.emptyText}>
-        Мы не показываем варианты, которые нарушают ваши обязательные условия. Вот почему
-        отсеялись все {result.totalConsidered} программ каталога:
-      </p>
+      <SearchX aria-hidden="true" className={styles.emptyIcon} size={30} strokeWidth={2} />
+      <h3 className={styles.emptyTitle}>Ничего не подошло</h3>
+      <p className={styles.emptyText}>Почему отсеялись {result.totalConsidered} программ:</p>
       <ul className={styles.reasons}>
         {reasons.map((reason) => (
           <li className={styles.reasonItem} key={reason.label}>
@@ -144,7 +144,7 @@ export function RecommendationList({
   return (
     <div className={styles.wrapper}>
       <p className={styles.notice}>
-        <span aria-hidden="true">ⓘ</span>
+        <Info aria-hidden="true" size={16} strokeWidth={2.2} />
         <span>{DEMO_DATA_NOTICE}</span>
       </p>
       <div className={styles.grid}>

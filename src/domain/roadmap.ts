@@ -18,7 +18,6 @@ export interface RoadmapPhase {
   season: RoadmapSeason;
   period: string;
   title: string;
-  summary: string;
   steps: RoadmapStep[];
 }
 
@@ -135,36 +134,23 @@ export function buildRoadmap(
     },
   ];
 
-  const seasonSummary: Record<RoadmapSeason, string> = {
-    autumn: planningAhead
-      ? "Разведка и язык: выбираем направление и снимаем главное ограничение."
-      : "Выбор и тесты: сужаем список и закрываем языковой вопрос.",
-    winter: planningAhead
-      ? "Репетиция подачи: проходим весь процесс без риска."
-      : "Подача заявок: документы, письма и дедлайны.",
-    spring: "Офферы и виза: выбираем финальный вариант и оформляем выезд.",
-  };
-
   return [
     {
       season: "autumn",
       period: "Осень",
       title: "Выбор и тесты",
-      summary: seasonSummary.autumn,
       steps: autumn,
     },
     {
       season: "winter",
       period: "Зима",
       title: "Подача заявок",
-      summary: seasonSummary.winter,
       steps: winter,
     },
     {
       season: "spring",
       period: "Весна",
       title: "Офферы и виза",
-      summary: seasonSummary.spring,
       steps: spring,
     },
   ];

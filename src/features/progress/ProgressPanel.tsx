@@ -1,5 +1,7 @@
 "use client";
 
+import { PartyPopper, Target } from "lucide-react";
+
 import { ActionButton } from "@/components/ActionButton";
 import type { RoadmapProgress } from "@/domain/roadmap";
 import { useCountUp } from "@/lib/useCountUp";
@@ -30,7 +32,7 @@ export function ProgressMeter({ progress }: ProgressMeterProps) {
         <span className={styles.fill} style={{ width: `${progress.percent}%` }} />
       </div>
       <p className={styles.meterCaption}>
-        Выполнено {progress.completedCount} из {progress.totalCount} шагов маршрута.
+        {progress.completedCount} из {progress.totalCount} шагов
       </p>
     </section>
   );
@@ -47,24 +49,20 @@ export function NextActionCard({ progress, onComplete }: NextActionCardProps) {
   if (!nextStep) {
     return (
       <section aria-live="polite" className={styles.finished}>
-        <h3 className={styles.finishedTitle}>Все шаги маршрута закрыты</h3>
-        <p className={styles.finishedText}>
-          Обновите профиль, если условия изменились, — маршрут пересоберётся под новые вводные.
-        </p>
+        <PartyPopper aria-hidden="true" className={styles.finishedIcon} size={30} strokeWidth={2} />
+        <h3 className={styles.finishedTitle}>Все шаги закрыты</h3>
       </section>
     );
   }
 
   return (
     <section aria-live="polite" className={styles.nextCard}>
-      <span className={styles.nextLabel}>🎯 Твоё следующее действие на этой неделе</span>
+      <span className={styles.nextLabel}>
+        <Target aria-hidden="true" size={16} strokeWidth={2.4} />
+        Следующий шаг{nextPhase ? ` · ${nextPhase.period}` : ""}
+      </span>
       <h3 className={styles.nextTitle}>{nextStep.title}</h3>
       <p className={styles.nextDetail}>{nextStep.detail}</p>
-      {nextPhase ? (
-        <span className={styles.nextMeta}>
-          Этап: {nextPhase.period} — {nextPhase.title}
-        </span>
-      ) : null}
       <div className={styles.nextAction}>
         <ActionButton onClick={() => onComplete(nextStep.id)} variant="warm">
           Выполнено

@@ -87,7 +87,7 @@
   gap: 20px;
   border: 0;
   margin: 0;
-  min-height: 330px;
+  min-height: 290px;
   align-content: start;
   padding: 0;
   animation: rise 440ms var(--ease-out);
@@ -99,7 +99,7 @@
 }
 
 .title {
-  margin: 0 0 8px;
+  margin: 0;
   max-width: 20ch;
   font-size: clamp(1.75rem, 5.6vw, 2.5rem);
   font-weight: 800;
@@ -107,13 +107,6 @@
   line-height: 1.06;
 }
 
-.hint {
-  margin: 0;
-  max-width: 54ch;
-  color: var(--muted);
-  font-size: 0.92rem;
-  line-height: 1.6;
-}
 
 .options {
   display: grid;
@@ -123,10 +116,10 @@
 .option {
   position: relative;
   display: grid;
-  grid-template-columns: 28px 1fr 26px;
+  grid-template-columns: 46px 1fr 26px;
   gap: 14px;
   align-items: center;
-  min-height: 68px;
+  min-height: 72px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 18px;
@@ -164,31 +157,35 @@
   background: var(--accent-soft);
 }
 
-/* Keyboard hint, doubles as the option's index. */
-.key {
+
+
+
+/* Icon tile: carries the meaning the old hint line used to spell out. */
+.icon {
   display: grid;
-  width: 28px;
-  height: 28px;
+  width: 46px;
+  height: 46px;
   place-items: center;
   border: 1px solid var(--line);
-  border-radius: 9px;
-  color: var(--muted);
-  font-size: 0.75rem;
-  font-weight: 800;
+  border-radius: 14px;
+  background: var(--surface-raised);
+  color: var(--ink-dim);
   transition:
     border-color 240ms var(--ease-out),
-    color 240ms var(--ease-out);
+    background-color 240ms var(--ease-out),
+    color 240ms var(--ease-out),
+    transform 360ms var(--ease-spring);
 }
 
-.option:has(input:checked) .key {
-  border-color: var(--accent);
+.option:hover .icon {
   color: var(--accent-bright);
+  transform: scale(1.06) rotate(-4deg);
 }
 
-.optionBody {
-  display: grid;
-  gap: 3px;
-  min-width: 0;
+.option:has(input:checked) .icon {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-bright);
 }
 
 .optionLabel {
@@ -198,15 +195,7 @@
   line-height: 1.25;
 }
 
-.optionHint {
-  color: var(--muted);
-  font-size: 0.84rem;
-  line-height: 1.45;
-}
 
-.option:has(input:checked) .optionHint {
-  color: var(--ink-dim);
-}
 
 /* Check indicator: a ring that fills when the option is chosen. */
 .tick {
@@ -217,8 +206,6 @@
   border: 2px solid var(--line-strong);
   border-radius: 50%;
   color: transparent;
-  font-size: 0.72rem;
-  font-weight: 800;
   transition:
     border-color 220ms var(--ease-out),
     background-color 220ms var(--ease-out),
@@ -402,6 +389,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .option:hover,
+  .option:hover .icon,
   .summaryChip:hover,
   .option:has(input:checked) .tick {
     transform: none;

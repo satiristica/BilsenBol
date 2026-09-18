@@ -1,9 +1,17 @@
 "use client";
 
-import type { RoadmapPhase } from "@/domain/roadmap";
+import { Leaf, type LucideIcon, Snowflake, Sprout } from "lucide-react";
+
+import type { RoadmapPhase, RoadmapSeason } from "@/domain/roadmap";
 import { classNames } from "@/lib/classNames";
 
 import styles from "./RoadmapTimeline.module.css";
+
+const SEASON_ICONS: Record<RoadmapSeason, LucideIcon> = {
+  autumn: Leaf,
+  winter: Snowflake,
+  spring: Sprout,
+};
 
 interface RoadmapTimelineProps {
   phases: readonly RoadmapPhase[];
@@ -24,6 +32,7 @@ export function RoadmapTimeline({
         const doneCount = phase.steps.filter((step) => completedStepIds.has(step.id)).length;
         const isComplete = doneCount === phase.steps.length;
         const holdsNextStep = phase.steps.some((step) => step.id === nextStepId);
+        const SeasonIcon = SEASON_ICONS[phase.season];
 
         return (
           <li
@@ -44,13 +53,15 @@ export function RoadmapTimeline({
           >
             <div className={styles.phaseHeader}>
               <div className={styles.phaseMeta}>
-                <span className={styles.period}>{phase.period}</span>
+                <span className={styles.period}>
+                  <SeasonIcon aria-hidden="true" size={13} strokeWidth={2.4} />
+                  {phase.period}
+                </span>
                 <span className={styles.phaseCount}>
                   {doneCount} из {phase.steps.length}
                 </span>
               </div>
               <h3 className={styles.phaseTitle}>{phase.title}</h3>
-              <p className={styles.phaseSummary}>{phase.summary}</p>
             </div>
 
             <ul className={styles.steps}>
@@ -70,7 +81,9 @@ export function RoadmapTimeline({
                           <span className={styles.nextMark}>сейчас</span>
                         ) : null}
                       </span>
-                      <span className={styles.stepDetail}>{step.detail}</span>
+                      {step.id === nextStepId ? (
+                        <span className={styles.stepDetail}>{step.detail}</span>
+                      ) : null}
                     </span>
                   </label>
                 </li>

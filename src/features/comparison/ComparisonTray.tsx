@@ -22,7 +22,7 @@ export function ComparisonTray({ selected, onOpen, onClear }: ComparisonTrayProp
     <aside aria-label="Панель сравнения" className={styles.tray}>
       <div className={styles.summary}>
         <p className={styles.title}>
-          {isReady ? "Готово к сравнению" : "Выберите вторую программу"}
+          {isReady ? "Готово" : "Выберите ещё одну"}
         </p>
         <p className={styles.names}>
           {selected.map((match) => match.program.programName).join("  ·  ")}

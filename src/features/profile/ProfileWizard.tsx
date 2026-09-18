@@ -1,8 +1,16 @@
 "use client";
 
+import { ArrowLeft, Check, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { ActionButton } from "@/components/ActionButton";
+import {
+  BUDGET_ICONS,
+  ENGLISH_ICONS,
+  FIELD_ICONS,
+  GRADE_ICONS,
+  REGION_ICONS,
+} from "@/components/optionIcons";
 import {
   BUDGET_OPTIONS,
   ENGLISH_OPTIONS,
@@ -51,6 +59,17 @@ function optionsFor(id: ProfileQuestion["id"]): readonly LabelledOption<string>[
     default:
       return [];
   }
+}
+
+function iconFor(id: ProfileQuestion["id"], value: string): LucideIcon | undefined {
+  const maps: Partial<Record<ProfileQuestion["id"], Record<string, LucideIcon>>> = {
+    grade: GRADE_ICONS,
+    english: ENGLISH_ICONS,
+    budget: BUDGET_ICONS,
+    fields: FIELD_ICONS,
+    regions: REGION_ICONS,
+  };
+  return maps[id]?.[value];
 }
 
 function selectedValues(profile: ApplicantProfile, id: ProfileQuestion["id"]): string[] {
@@ -160,8 +179,8 @@ export function ProfileWizard({ profile, onChange, onSubmit }: ProfileWizardProp
 
   const gpaNote =
     profile.gpa >= GRANT_COMPETITIVE_GPA
-      ? "Конкурентный балл для грантовых программ."
-      : `Для полных грантов обычно нужен балл от ${formatGpa(GRANT_COMPETITIVE_GPA)} — это можно успеть подтянуть.`;
+      ? "Хватает для грантов"
+      : `Для грантов нужно от ${formatGpa(GRANT_COMPETITIVE_GPA)}`;
 
   return (
     <section aria-label="Анкета профиля" className={styles.wizard}>
@@ -176,7 +195,7 @@ export function ProfileWizard({ profile, onChange, onSubmit }: ProfileWizardProp
             }}
             type="button"
           >
-            <span aria-hidden="true">←</span> Назад
+            <ArrowLeft aria-hidden="true" size={16} strokeWidth={2.4} /> Назад
           </button>
           <span className={styles.counter}>
             <b>{index + 1}</b> / {PROFILE_QUESTIONS.length}
@@ -200,7 +219,6 @@ export function ProfileWizard({ profile, onChange, onSubmit }: ProfileWizardProp
       <fieldset className={styles.question} key={question.id}>
         <legend className={styles.legend}>
           <h2 className={styles.title}>{question.title}</h2>
-          <p className={styles.hint}>{question.hint}</p>
         </legend>
 
         {question.kind === "scale" ? (
@@ -221,7 +239,7 @@ export function ProfileWizard({ profile, onChange, onSubmit }: ProfileWizardProp
             />
             <div className={styles.scaleMarks}>
               <span>{formatGpa(GPA_MIN)}</span>
-              <span>{formatGpa(GRANT_COMPETITIVE_GPA)} — уровень грантов</span>
+              <span>{formatGpa(GRANT_COMPETITIVE_GPA)}</span>
               <span>{formatGpa(GPA_MAX)}</span>
             </div>
             <p
@@ -235,7 +253,9 @@ export function ProfileWizard({ profile, onChange, onSubmit }: ProfileWizardProp
           </div>
         ) : (
           <div className={styles.options}>
-            {options.map((option, optionIndex) => (
+            {options.map((option) => {
+              const Icon = iconFor(question.id, option.value);
+              return (
               <label className={styles.option} key={option.value}>
                 <input
                   checked={selected.includes(option.value)}
@@ -248,15 +268,10 @@ export function ProfileWizard({ profile, onChange, onSubmit }: ProfileWizardProp
                   type={question.kind === "single" ? "radio" : "checkbox"}
                   value={option.value}
                 />
-                <span aria-hidden="true" className={styles.key}>
-                  {optionIndex + 1}
+                <span aria-hidden="true" className={styles.icon}>
+                  {Icon ? <Icon size={22} strokeWidth={2} /> : null}
                 </span>
-                <span className={styles.optionBody}>
-                  <span className={styles.optionLabel}>{option.label}</span>
-                  {option.hint ? (
-                    <span className={styles.optionHint}>{option.hint}</span>
-                  ) : null}
-                </span>
+                <span className={styles.optionLabel}>{option.label}</span>
                 <span
                   aria-hidden="true"
                   className={classNames(
@@ -264,10 +279,11 @@ export function ProfileWizard({ profile, onChange, onSubmit }: ProfileWizardProp
                     question.kind === "multi" && styles.tickSquare,
                   )}
                 >
-                  ✓
+                  <Check size={14} strokeWidth={3.2} />
                 </span>
               </label>
-            ))}
+              );
+            })}
           </div>
         )}
       </fieldset>
@@ -285,9 +301,7 @@ export function ProfileWizard({ profile, onChange, onSubmit }: ProfileWizardProp
               )}
               role="status"
             >
-              {canContinue
-                ? `Выбрано: ${selected.length}`
-                : "Выберите хотя бы один вариант"}
+              {canContinue ? `Выбрано: ${selected.length}` : "Выберите хотя бы один"}
             </p>
           ) : null}
         </div>

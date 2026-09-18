@@ -120,12 +120,6 @@
   line-height: 1.65;
 }
 
-.nextMeta {
-  color: var(--warn-ink);
-  font-size: 0.79rem;
-  font-weight: 700;
-}
-
 .nextAction {
   justify-self: start;
 }
@@ -150,12 +144,8 @@
   line-height: 1.12;
 }
 
-.finishedText {
-  margin: 0;
-  max-width: 58ch;
-  color: var(--ink-dim);
-  font-size: 0.92rem;
-  line-height: 1.65;
+.finishedIcon {
+  color: var(--accent-bright);
 }
 
 @media (prefers-reduced-motion: reduce) {

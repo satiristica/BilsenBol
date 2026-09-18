@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { type PointerEvent as ReactPointerEvent } from "react";
@@ -41,10 +42,10 @@ function actionClassName({ variant = "primary", compact, block, className }: Sha
 function ActionContent({ children, withArrow }: Pick<SharedProps, "children" | "withArrow">) {
   return (
     <>
-      <span>{children}</span>
+      <span className={styles.label}>{children}</span>
       {withArrow ? (
         <span aria-hidden="true" className={styles.arrow}>
-          <span className={styles.arrowGlyph}>→</span>
+          <ArrowRight className={styles.arrowGlyph} size={18} strokeWidth={2.6} />
         </span>
       ) : null}
     </>

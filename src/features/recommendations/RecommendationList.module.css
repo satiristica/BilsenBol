@@ -5,8 +5,9 @@
 
 .notice {
   display: grid;
-  grid-template-columns: 20px 1fr;
+  grid-template-columns: 16px 1fr;
   gap: 10px;
+  align-items: start;
   margin: 0;
   border: 1px dashed var(--line-strong);
   border-radius: 15px;
@@ -31,6 +32,10 @@
     var(--surface);
   padding: 24px;
   animation: rise 520ms var(--ease-out);
+}
+
+.emptyIcon {
+  color: var(--warn);
 }
 
 .emptyTitle {

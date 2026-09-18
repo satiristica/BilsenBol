@@ -1,5 +1,7 @@
 "use client";
 
+import { Minus, PenLine, Plus, SlidersHorizontal } from "lucide-react";
+
 import {
   BUDGET_OPTIONS,
   ENGLISH_OPTIONS,
@@ -39,8 +41,10 @@ export function QuickAdjustBar({
   return (
     <section aria-label="Быстрая правка профиля" className={styles.bar}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Поменяйте условие — маршрут пересчитается сразу</h2>
-        <p className={styles.hint}>Подборка, диагностика и план обновляются на лету.</p>
+        <h2 className={styles.title}>
+          <SlidersHorizontal aria-hidden="true" size={17} strokeWidth={2.3} />
+          Попробуйте другие условия
+        </h2>
       </div>
 
       <div className={styles.rows}>
@@ -94,7 +98,7 @@ export function QuickAdjustBar({
               onClick={() => shiftGpa(-GPA_STEP)}
               type="button"
             >
-              −
+              <Minus aria-hidden="true" size={18} strokeWidth={2.6} />
             </button>
             <span aria-live="polite" className={styles.gpaValue}>
               {formatGpa(profile.gpa)}
@@ -106,14 +110,15 @@ export function QuickAdjustBar({
               onClick={() => shiftGpa(GPA_STEP)}
               type="button"
             >
-              +
+              <Plus aria-hidden="true" size={18} strokeWidth={2.6} />
             </button>
           </div>
         </div>
       </div>
 
       <button className={styles.editLink} onClick={onEditFullProfile} type="button">
-        Изменить профиль целиком
+        <PenLine aria-hidden="true" size={15} strokeWidth={2.3} />
+        Весь профиль
       </button>
     </section>
   );

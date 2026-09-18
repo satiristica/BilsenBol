@@ -1,5 +1,7 @@
 "use client";
 
+import { CalendarDays, Check, GraduationCap, TriangleAlert, Wallet } from "lucide-react";
+
 import { ActionButton } from "@/components/ActionButton";
 import { DEMO_DATA_BADGE } from "@/data/programs";
 import { formatTuition, type ProgramMatch } from "@/domain/matching";
@@ -7,6 +9,9 @@ import { classNames } from "@/lib/classNames";
 import { useCountUp } from "@/lib/useCountUp";
 
 import styles from "./RecommendationCard.module.css";
+
+const MAX_VISIBLE_BADGES = 3;
+const MAX_VISIBLE_REASONS = 2;
 
 interface RecommendationCardProps {
   match: ProgramMatch;
@@ -28,6 +33,13 @@ export function RecommendationCard({
   const compareDisabled = !isSelectedForComparison && !canSelectForComparison;
   const animatedScore = useCountUp(match.score);
   const strongestFactor = Math.max(...match.factors.map((factor) => factor.delta));
+  const hiddenReasons = match.whyItFits.slice(MAX_VISIBLE_REASONS);
+  const visibleBadges = [
+    ...(program.hasFullGrant ? [{ label: "100% грант", isGrant: true }] : []),
+    ...match.matchBadges
+      .filter((badge) => badge.kind !== "scholarship-chance" || !program.hasFullGrant)
+      .map((badge) => ({ label: badge.label, isGrant: false })),
+  ].slice(0, MAX_VISIBLE_BADGES);
 
   return (
     <article
@@ -56,19 +68,11 @@ export function RecommendationCard({
       </header>
 
       <div className={styles.badges}>
-        {match.programBadges.map((badge) => (
+        {visibleBadges.map((badge) => (
           <span
-            className={classNames(
-              styles.badge,
-              badge.label === "100% грант" && styles.badgeGrant,
-            )}
+            className={classNames(styles.badge, badge.isGrant ? styles.badgeGrant : styles.badgeMatch)}
             key={badge.label}
           >
-            {badge.label}
-          </span>
-        ))}
-        {match.matchBadges.map((badge) => (
-          <span className={classNames(styles.badge, styles.badgeMatch)} key={badge.kind}>
             {badge.label}
           </span>
         ))}
@@ -76,11 +80,9 @@ export function RecommendationCard({
       </div>
 
       <ul className={styles.reasons}>
-        {match.whyItFits.map((reason) => (
+        {match.whyItFits.slice(0, MAX_VISIBLE_REASONS).map((reason) => (
           <li className={styles.reason} key={reason}>
-            <span aria-hidden="true" className={styles.reasonMark}>
-              ✓
-            </span>
+            <Check aria-hidden="true" className={styles.reasonMark} size={16} strokeWidth={3} />
             <span>{reason}</span>
           </li>
         ))}
@@ -88,14 +90,34 @@ export function RecommendationCard({
 
       {match.blocker ? (
         <p className={styles.blocker}>
-          <span aria-hidden="true">!</span>
+          <TriangleAlert aria-hidden="true" size={16} strokeWidth={2.4} />
           <span>{match.blocker}</span>
         </p>
       ) : null}
 
       <details className={styles.details}>
-        <summary className={styles.summary}>Почему эта программа в подборке</summary>
+        <summary className={styles.summary}>Подробнее</summary>
         <div className={styles.detailsBody}>
+          {hiddenReasons.length > 0 ? (
+            <div className={styles.detailBlock}>
+              <span className={styles.detailLabel}>Ещё плюсы</span>
+              {hiddenReasons.map((reason) => (
+                <p className={styles.detailText} key={reason}>
+                  {reason}
+                </p>
+              ))}
+            </div>
+          ) : null}
+          <div className={styles.detailBlock}>
+            <span className={styles.detailLabel}>Формат</span>
+            <div className={styles.badges}>
+              {match.programBadges.map((badge) => (
+                <span className={styles.badge} key={badge.label}>
+                  {badge.label}
+                </span>
+              ))}
+            </div>
+          </div>
           <div className={styles.detailBlock}>
             <span className={styles.detailLabel}>Компромисс</span>
             <p className={styles.detailText}>{match.tradeOff}</p>
@@ -126,15 +148,24 @@ export function RecommendationCard({
 
       <dl className={styles.facts}>
         <div className={styles.fact}>
-          <dt className={styles.factLabel}>Стоимость</dt>
+          <dt className={styles.factLabel}>
+            <Wallet aria-hidden="true" size={15} strokeWidth={2.2} />
+            <span className={styles.srOnly}>Стоимость</span>
+          </dt>
           <dd className={styles.factValue}>{formatTuition(program)}</dd>
         </div>
         <div className={styles.fact}>
-          <dt className={styles.factLabel}>Минимальный балл</dt>
-          <dd className={styles.factValue}>{program.minGpa.toFixed(1)}</dd>
+          <dt className={styles.factLabel}>
+            <GraduationCap aria-hidden="true" size={15} strokeWidth={2.2} />
+            <span className={styles.srOnly}>Минимальный балл</span>
+          </dt>
+          <dd className={styles.factValue}>от {program.minGpa.toFixed(1)}</dd>
         </div>
         <div className={styles.fact}>
-          <dt className={styles.factLabel}>Окно подачи</dt>
+          <dt className={styles.factLabel}>
+            <CalendarDays aria-hidden="true" size={15} strokeWidth={2.2} />
+            <span className={styles.srOnly}>Окно подачи</span>
+          </dt>
           <dd className={styles.factValue}>{program.applicationWindow}</dd>
         </div>
       </dl>

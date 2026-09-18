@@ -29,20 +29,8 @@
   letter-spacing: -0.015em;
 }
 
-.title::before {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  content: "";
-  animation: pulse-dot 2.6s ease-out infinite;
-}
-
-.hint {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.8rem;
-  line-height: 1.5;
+.title svg {
+  color: var(--accent);
 }
 
 .rows {
@@ -163,6 +151,9 @@
 }
 
 .editLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   justify-self: start;
   border: 0;
   background: none;

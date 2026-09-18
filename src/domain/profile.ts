@@ -33,27 +33,26 @@ export const GRANT_COMPETITIVE_GPA = 4.5;
 export interface LabelledOption<T extends string> {
   value: T;
   label: string;
-  hint?: string;
 }
 
 export const GRADE_OPTIONS: readonly LabelledOption<GradeLevel>[] = [
-  { value: "grade-9-10", label: "9–10 класс", hint: "Есть время на подготовку" },
-  { value: "grade-11", label: "11 класс", hint: "Подача в этом сезоне" },
-  { value: "graduate", label: "Выпускник", hint: "Школа уже окончена" },
+  { value: "grade-9-10", label: "9–10 класс" },
+  { value: "grade-11", label: "11 класс" },
+  { value: "graduate", label: "Выпускник" },
 ];
 
 export const ENGLISH_OPTIONS: readonly LabelledOption<EnglishLevel>[] = [
-  { value: "school", label: "Только школьный", hint: "Сертификата пока нет" },
-  { value: "duolingo", label: "Duolingo", hint: "Быстрый онлайн-тест" },
-  { value: "toefl", label: "TOEFL", hint: "Принимают почти везде" },
-  { value: "ielts", label: "IELTS", hint: "Самый универсальный" },
+  { value: "school", label: "Только школьный" },
+  { value: "duolingo", label: "Duolingo" },
+  { value: "toefl", label: "TOEFL" },
+  { value: "ielts", label: "IELTS" },
 ];
 
 export const BUDGET_OPTIONS: readonly LabelledOption<BudgetTier>[] = [
-  { value: "grant-only", label: "$0 — только грант", hint: "Нужна полная стипендия" },
-  { value: "up-to-3k", label: "До $3 000 в год", hint: "Скромный семейный бюджет" },
-  { value: "up-to-8k", label: "До $8 000 в год", hint: "Средний бюджет" },
-  { value: "from-15k", label: "От $15 000 в год", hint: "Бюджет не ограничивает выбор" },
+  { value: "grant-only", label: "$0 — только грант" },
+  { value: "up-to-3k", label: "До $3 000 в год" },
+  { value: "up-to-8k", label: "До $8 000 в год" },
+  { value: "from-15k", label: "От $15 000 в год" },
 ];
 
 export const FIELD_OPTIONS: readonly LabelledOption<StudyField>[] = [
@@ -105,9 +104,7 @@ export const DEFAULT_PROFILE: ApplicantProfile = {
 
 export interface ProfilePreset {
   id: string;
-  emoji: string;
   title: string;
-  description: string;
   profile: ApplicantProfile;
 }
 
@@ -115,9 +112,7 @@ export interface ProfilePreset {
 export const PROFILE_PRESETS: readonly ProfilePreset[] = [
   {
     id: "grant-ace",
-    emoji: "🎓",
-    title: "11 класс: отличник",
-    description: "Ищу 100% грант или полную стипендию",
+    title: "Отличник, нужен грант",
     profile: {
       grade: "grade-11",
       gpa: 4.9,
@@ -129,9 +124,7 @@ export const PROFILE_PRESETS: readonly ProfilePreset[] = [
   },
   {
     id: "it-mid-budget",
-    emoji: "💻",
-    title: "10 класс: IT-направление",
-    description: "Умеренный бюджет, готовлюсь заранее",
+    title: "IT, средний бюджет",
     profile: {
       grade: "grade-9-10",
       gpa: 4.6,
@@ -143,9 +136,7 @@ export const PROFILE_PRESETS: readonly ProfilePreset[] = [
   },
   {
     id: "foundation-path",
-    emoji: "🌍",
-    title: "11 класс: пока без IELTS",
-    description: "Нужны программы с Foundation и подготовкой",
+    title: "Без IELTS, нужен Foundation",
     profile: {
       grade: "grade-11",
       gpa: 4.4,

@@ -134,6 +134,13 @@
   width: 100%;
 }
 
+/* Inline icons passed as children sit on the text's optical centre. */
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* The arrow slides out, then a second copy slides in behind it. */
 .arrow {
   display: inline-grid;

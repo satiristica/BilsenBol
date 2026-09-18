@@ -26,6 +26,22 @@ deliberately fictional institutions, and it is labelled `Демо-данные` 
 it is rendered. No unsourced admission facts are attributed to real
 universities, and the product does not produce admission probabilities.
 
+### Third-party assets
+
+- **Icons:** [Lucide](https://lucide.dev) via `lucide-react` (ISC License).
+- **Photos:** four photographs from [Unsplash](https://unsplash.com), used under
+  the [Unsplash License](https://unsplash.com/license), stored in
+  `public/images/` so the demo does not depend on a CDN at presentation time.
+  They show generic student life only: the catalogue institutions are
+  fictional, so no photo depicts a real, identifiable campus.
+
+  | File | Source |
+  | --- | --- |
+  | `hero-students.jpg` | https://images.unsplash.com/photo-1522202176988-66273c2fd55f |
+  | `step-profile.jpg` | https://images.unsplash.com/photo-1434030216411-0b793f4b4173 |
+  | `step-match.jpg` | https://images.unsplash.com/photo-1427504494785-3a9ca7044f45 |
+  | `step-plan.jpg` | https://images.unsplash.com/photo-1531482615713-2afd69097998 |
+
 ### Not implemented yet
 
 Journey state lives in memory only, so a page reload restarts the journey, and

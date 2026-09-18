@@ -9,7 +9,7 @@ import type { Region, StudyField } from "@/domain/profile";
  * show the `Демо-данные` label exported here.
  */
 export const DEMO_DATA_NOTICE =
-  "Каталог программ — демонстрационные данные вымышленных вузов. Перед подачей проверяйте требования на официальном сайте университета.";
+  "Демо-данные: вузы вымышленные, проверяйте требования на сайте вуза.";
 
 export const DEMO_DATA_BADGE = "Демо-данные";
 

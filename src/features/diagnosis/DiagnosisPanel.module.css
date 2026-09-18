@@ -94,28 +94,37 @@
   animation-delay: var(--delay, 0ms);
 }
 
-.insight::before {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 3px;
-  background: var(--accent);
-  content: "";
-}
-
 .insight:hover {
   border-color: var(--line-strong);
   background: var(--surface-raised);
   transform: translateY(-3px);
 }
 
-.insightBottleneck::before {
-  background: var(--warn);
+.insightHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.insightRunway::before {
-  background: #6fb4d8;
+.insightIcon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+}
+
+.insightBottleneck .insightIcon {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.insightRunway .insightIcon {
+  background: rgb(111 180 216 / 14%);
+  color: #8fc9e6;
 }
 
 .insightLabel {
@@ -141,8 +150,8 @@
 .insightDetail {
   margin: 0;
   color: var(--muted);
-  font-size: 0.9rem;
-  line-height: 1.6;
+  font-size: 0.85rem;
+  line-height: 1.55;
 }
 
 @media (min-width: 760px) {
