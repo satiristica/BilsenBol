@@ -1,4 +1,5 @@
 import { formatTuition, type ProgramMatch } from "@/domain/matching";
+import { YEARS, pluralRu } from "@/lib/plural";
 
 export type ComparisonWinner = "left" | "right" | "tie";
 
@@ -84,8 +85,8 @@ export function buildComparisonRows(left: ProgramMatch, right: ProgramMatch): Co
     },
     {
       label: "Срок обучения",
-      left: `${left.program.durationYears} года/лет`,
-      right: `${right.program.durationYears} года/лет`,
+      left: `${left.program.durationYears} ${pluralRu(left.program.durationYears, YEARS)}`,
+      right: `${right.program.durationYears} ${pluralRu(right.program.durationYears, YEARS)}`,
       winner: compareNumbers(left.program.durationYears, right.program.durationYears, true),
     },
     {

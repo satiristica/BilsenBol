@@ -4,6 +4,7 @@ import { Info, SearchX } from "lucide-react";
 
 import { ActionButton } from "@/components/ActionButton";
 import { DEMO_DATA_NOTICE } from "@/data/programs";
+import { pluralRu } from "@/lib/plural";
 import type { RecommendationResult } from "@/domain/matching";
 import {
   BUDGET_OPTIONS,
@@ -90,7 +91,13 @@ function EmptyState({
     <div className={styles.empty}>
       <SearchX aria-hidden="true" className={styles.emptyIcon} size={30} strokeWidth={2} />
       <h3 className={styles.emptyTitle}>Ничего не подошло</h3>
-      <p className={styles.emptyText}>Почему отсеялись {result.totalConsidered} программ:</p>
+      <p className={styles.emptyText}>
+        {pluralRu(result.totalConsidered, {
+          one: `Почему отсеялась ${result.totalConsidered} программа:`,
+          few: `Почему отсеялись ${result.totalConsidered} программы:`,
+          many: `Почему отсеялись ${result.totalConsidered} программ:`,
+        })}
+      </p>
       <ul className={styles.reasons}>
         {reasons.map((reason) => (
           <li className={styles.reasonItem} key={reason.label}>

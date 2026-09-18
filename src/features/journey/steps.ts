@@ -13,7 +13,7 @@ export const STEP_ORDER: readonly JourneyStep[] = [
 
 export const STEP_NAMES: Record<JourneyStep, string> = {
   profile: "Профиль",
-  diagnosis: "Диагностика",
+  diagnosis: "Разбор",
   recommendations: "Подбор",
   roadmap: "План",
 };

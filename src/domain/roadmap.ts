@@ -46,7 +46,7 @@ export function buildRoadmap(
       season: "autumn",
       title: "Составить короткий список из 4–6 программ",
       detail: topProgram
-        ? `Начните с подборки выше — сейчас лидирует «${topProgram.programName}», ${topProgram.city}.`
+        ? `Начните со своей подборки: сейчас лидирует «${topProgram.programName}», ${topProgram.city}.`
         : "Смягчите один из фильтров профиля, чтобы получить рабочий список программ.",
     },
     certified

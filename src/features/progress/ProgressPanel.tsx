@@ -5,6 +5,7 @@ import { PartyPopper, Target } from "lucide-react";
 import { ActionButton } from "@/components/ActionButton";
 import type { RoadmapProgress } from "@/domain/roadmap";
 import { useCountUp } from "@/lib/useCountUp";
+import { pluralRu } from "@/lib/plural";
 
 import styles from "./Progress.module.css";
 
@@ -14,6 +15,7 @@ interface ProgressMeterProps {
 
 export function ProgressMeter({ progress }: ProgressMeterProps) {
   const animatedPercent = useCountUp(progress.percent);
+  const stepsGenitive = pluralRu(progress.totalCount, { one: "шага", few: "шагов", many: "шагов" });
 
   return (
     <section aria-label="Готовность к поступлению" className={styles.meter}>
@@ -25,14 +27,14 @@ export function ProgressMeter({ progress }: ProgressMeterProps) {
         aria-valuemax={100}
         aria-valuemin={0}
         aria-valuenow={progress.percent}
-        aria-valuetext={`${progress.completedCount} из ${progress.totalCount} шагов выполнено`}
+        aria-valuetext={`${progress.completedCount} из ${progress.totalCount} ${stepsGenitive} выполнено`}
         className={styles.track}
         role="progressbar"
       >
         <span className={styles.fill} style={{ width: `${progress.percent}%` }} />
       </div>
       <p className={styles.meterCaption}>
-        {progress.completedCount} из {progress.totalCount} шагов
+        {progress.completedCount} из {progress.totalCount} {stepsGenitive}
       </p>
     </section>
   );

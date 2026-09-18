@@ -4,6 +4,7 @@ import {
   type ApplicantProfile,
 } from "@/domain/profile";
 import type { RecommendationResult } from "@/domain/matching";
+import { pluralRu } from "@/lib/plural";
 
 export type ReadinessStatus =
   | "ready-for-grants"
@@ -55,7 +56,7 @@ function describeStatus(
   const openings = result.matches.length;
   switch (status) {
     case "ready-for-grants":
-      return `Средний балл ${profile.gpa.toFixed(1)} и готовый языковой сертификат позволяют подаваться в этом сезоне: доступно ${openings} подходящих программ.`;
+      return `Средний балл ${profile.gpa.toFixed(1)} и готовый языковой сертификат позволяют подаваться в этом сезоне. Подходящих программ: ${openings}.`;
     case "needs-language":
       return "Профиль сильный, но без языкового сертификата часть программ открывается только через подготовительный год.";
     case "strengthen-academics":
@@ -87,7 +88,11 @@ function buildStrength(profile: ApplicantProfile, result: RecommendationResult):
     return {
       kind: "strength",
       label: "Сильная сторона",
-      title: `Доступно ${grantOptions} программ с полным грантом`,
+      title: pluralRu(grantOptions, {
+        one: `Доступна ${grantOptions} программа с полным грантом`,
+        few: `Доступны ${grantOptions} программы с полным грантом`,
+        many: `Доступно ${grantOptions} программ с полным грантом`,
+      }),
       detail: "Даже при нулевом бюджете маршрут поступления остаётся рабочим.",
     };
   }
@@ -108,7 +113,14 @@ function buildBottleneck(
       kind: "bottleneck",
       label: "Главное узкое место",
       title: "Нет языкового сертификата",
-      detail: `Из-за этого ${result.excluded.language} программ каталога закрыты полностью, а часть доступна только через Foundation.`,
+      detail:
+        result.excluded.language === 0
+          ? "Часть программ доступна только через подготовительный год Foundation."
+          : `Из-за этого ${pluralRu(result.excluded.language, {
+              one: `${result.excluded.language} программа каталога закрыта`,
+              few: `${result.excluded.language} программы каталога закрыты`,
+              many: `${result.excluded.language} программ каталога закрыты`,
+            })} полностью, а часть доступна только через Foundation.`,
     };
   }
   if (result.excluded.gpa > 0 && profile.gpa < 4.7) {
@@ -116,7 +128,11 @@ function buildBottleneck(
       kind: "bottleneck",
       label: "Главное узкое место",
       title: "Средний балл ограничивает выбор",
-      detail: `${result.excluded.gpa} программ требуют балл выше вашего ${profile.gpa.toFixed(1)}.`,
+      detail: `${pluralRu(result.excluded.gpa, {
+        one: `${result.excluded.gpa} программа требует`,
+        few: `${result.excluded.gpa} программы требуют`,
+        many: `${result.excluded.gpa} программ требуют`,
+      })} балл выше вашего ${profile.gpa.toFixed(1)}.`,
     };
   }
   if (result.excluded.budget > 0) {
@@ -124,7 +140,11 @@ function buildBottleneck(
       kind: "bottleneck",
       label: "Главное узкое место",
       title: "Бюджет отсекает часть вариантов",
-      detail: `${result.excluded.budget} программ стоят дороже указанного бюджета — их заменяют грантовые треки.`,
+      detail: `${pluralRu(result.excluded.budget, {
+        one: `${result.excluded.budget} программа стоит`,
+        few: `${result.excluded.budget} программы стоят`,
+        many: `${result.excluded.budget} программ стоят`,
+      })} дороже указанного бюджета — их заменяют грантовые треки.`,
     };
   }
   return {

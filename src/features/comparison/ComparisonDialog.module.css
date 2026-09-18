@@ -79,7 +79,11 @@
 
 .head {
   display: grid;
+  min-width: 0;
   gap: 5px;
+  /* Long Russian words ("Информационные") are wider than a phone column. */
+  hyphens: auto;
+  overflow-wrap: break-word;
   border: 1px solid var(--accent-line);
   border-radius: 16px;
   background:
@@ -99,7 +103,9 @@
 
 .headProgram {
   margin: 0;
-  font-size: 1.02rem;
+  /* Small enough that "Информационные" fits a phone column whole; hyphens
+     are not available for Russian on every engine. */
+  font-size: 0.86rem;
   font-weight: 750;
   letter-spacing: -0.025em;
   line-height: 1.25;
@@ -134,8 +140,11 @@
 
 .value {
   display: flex;
+  min-width: 0;
   align-items: baseline;
   gap: 6px;
+  hyphens: auto;
+  overflow-wrap: break-word;
   border-radius: 11px;
   color: var(--ink-dim);
   font-size: 0.88rem;
@@ -212,6 +221,10 @@
 
   .headsSpacer {
     display: block;
+  }
+
+  .headProgram {
+    font-size: 1.02rem;
   }
 }
 

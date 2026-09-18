@@ -4,6 +4,7 @@ import {
   hasEnglishCertificate,
   type ApplicantProfile,
 } from "@/domain/profile";
+import { YEARS, pluralRu } from "@/lib/plural";
 
 /**
  * Hard constraints decide eligibility, soft signals only decide order.
@@ -199,7 +200,7 @@ function describeTradeOff(profile: ApplicantProfile, program: Program): string {
     return "Это не то направление, которое вы отметили основным — рассматривайте как запасной вариант.";
   }
   if (program.durationYears >= 6) {
-    return `Учиться дольше обычного: ${program.durationYears} лет вместо четырёх.`;
+    return `Учиться дольше обычного: ${program.durationYears} ${pluralRu(program.durationYears, YEARS)} вместо четырёх.`;
   }
   if (program.teachingLanguage === "ru") {
     return "Обучение на русском — меньше языкового барьера, но и меньше международной практики.";

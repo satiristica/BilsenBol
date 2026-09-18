@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Info } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -22,8 +22,11 @@ import {
 import { NextActionCard, ProgressMeter } from "@/features/progress/ProgressPanel";
 import { RoadmapTimeline } from "@/features/roadmap/RoadmapTimeline";
 import { classNames } from "@/lib/classNames";
+import { pluralRu } from "@/lib/plural";
 
 import { clearJourney, saveJourney, type JourneySnapshot } from "./journeyPersistence";
+import { ProfileImpact } from "./ProfileImpact";
+import { collectFacts, describeProfileImpact, type ImpactItem } from "./profileImpact";
 import { ResetControl } from "./ResetControl";
 import { STEP_NAMES, STEP_ORDER, type JourneyStep } from "./steps";
 
@@ -43,6 +46,8 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
   const [isComparisonOpen, setComparisonOpen] = useState(false);
   // Bumped on reset so the wizard remounts at its first question.
   const [resetCount, setResetCount] = useState(0);
+  // What the latest edit on a result screen changed; `id` replays the entrance.
+  const [lastImpact, setLastImpact] = useState<{ id: number; items: ImpactItem[] } | null>(null);
 
   // Every change is written through to storage, so a reload resumes here.
   useEffect(() => {
@@ -56,7 +61,21 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
     setCompletedStepIds(new Set<string>());
     setComparedProgramIds([]);
     setComparisonOpen(false);
+    setLastImpact(null);
     setResetCount((count) => count + 1);
+  };
+
+  // Edits made from a result screen report their effect; wizard edits do not,
+  // because nothing has been computed for the user yet.
+  const applyProfileChange = (next: ApplicantProfile) => {
+    const items = describeProfileImpact(collectFacts(profile), collectFacts(next));
+    setProfile(next);
+    setLastImpact((previous) => ({ id: (previous?.id ?? 0) + 1, items }));
+  };
+
+  const moveToStep = (nextStep: JourneyStep) => {
+    setLastImpact(null);
+    setStep(nextStep);
   };
 
   // Everything downstream is derived from the profile, so any profile edit
@@ -117,15 +136,24 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
     if (nextStep !== "profile" && !isProfileReady) {
       return;
     }
-    setStep(nextStep);
+    moveToStep(nextStep);
   };
 
   const quickAdjust = (
-    <QuickAdjustBar
-      onChange={setProfile}
-      onEditFullProfile={() => setStep("profile")}
-      profile={profile}
-    />
+    <>
+      <QuickAdjustBar
+        onChange={applyProfileChange}
+        onEditFullProfile={() => moveToStep("profile")}
+        profile={profile}
+      />
+      {lastImpact ? (
+        <ProfileImpact
+          items={lastImpact.items}
+          key={lastImpact.id}
+          onDismiss={() => setLastImpact(null)}
+        />
+      ) : null}
+    </>
   );
 
   const sectionCopy: Record<JourneyStep, { title: string; lead: React.ReactNode }> = {
@@ -135,7 +163,11 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
       title: "Ваши программы",
       lead: (
         <>
-          <span className={styles.counter}>{result.matches.length} подходят</span> · отметьте
+          <span className={styles.counter}>
+            {result.matches.length}{" "}
+            {pluralRu(result.matches.length, { one: "подходит", few: "подходят", many: "подходят" })}
+          </span>{" "}
+          · отметьте
           две, чтобы сравнить
         </>
       ),
@@ -173,7 +205,10 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
                 onClick={() => goToStep(item)}
                 type="button"
               >
-                <span className={styles.stepperIndex}>Шаг {index + 1}</span>
+                <span className={styles.stepperIndex}>
+                  <span className={styles.stepperWord}>Шаг </span>
+                  {index + 1}
+                </span>
                 <span className={styles.stepperName}>{STEP_NAMES[item]}</span>
               </button>
             </li>
@@ -196,7 +231,7 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
         {step === "profile" ? (
           <ProfileWizard
             onChange={setProfile}
-            onSubmit={() => setStep("diagnosis")}
+            onSubmit={() => moveToStep("diagnosis")}
             profile={profile}
           />
         ) : null}
@@ -213,8 +248,8 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
             {quickAdjust}
             <RecommendationList
               comparedProgramIds={comparedProgramIds}
-              onEditFullProfile={() => setStep("profile")}
-              onProfileChange={setProfile}
+              onEditFullProfile={() => moveToStep("profile")}
+              onProfileChange={applyProfileChange}
               onToggleComparison={toggleComparison}
               profile={profile}
               result={result}
@@ -226,6 +261,13 @@ export function JourneyExperience({ initial }: JourneyExperienceProps) {
           <>
             <ProgressMeter progress={progress} />
             <NextActionCard onComplete={completeRoadmapStep} progress={progress} />
+            <p className={styles.notice}>
+              <Info aria-hidden="true" size={16} strokeWidth={2.2} />
+              <span>
+                Шаги — общие ориентиры, а не требования конкретного вуза. Сроки и документы
+                проверяйте на сайте программы.
+              </span>
+            </p>
             <RoadmapTimeline
               completedStepIds={completedStepIds}
               nextStepId={progress.nextStep?.id ?? null}

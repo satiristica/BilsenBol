@@ -1738,3 +1738,75 @@ LIMITATIONS:
 
 FOLLOW_UP:
 - Consider showing "Продолжить" on the landing page when a saved session exists.
+
+## TASK TASK-CLAUDE-20260918-ux-requirements-audit
+
+AGENT: CLAUDE
+STATUS: DONE
+BASE_COMMIT: bd7e6d04a210418a111b19885abf723cf7d1a87f (on top of the uncommitted journey-persistence work)
+SCOPE: Audit the product against the hackathon's mandatory UX/UI requirements and fix the gaps found.
+
+FILES:
+- `src/**` as the audit requires
+- `AGENTS_CHANGELOG.md`
+
+DEPENDENCIES:
+- `TASK-CLAUDE-20260918-journey-persistence`
+
+ACCEPTANCE:
+- Each of the six mandatory requirements is checked against rendered screens, not only against source.
+- Every gap found is fixed or reported with a reason.
+- `npm run typecheck`, `npm run lint`, `npm run build` exit 0.
+
+### COMPLETE TASK-CLAUDE-20260918-ux-requirements-audit
+
+AGENT: CLAUDE
+STATUS: DONE
+
+SUMMARY:
+- First audit against rendered pages rather than source: headless Chrome screenshots at 390 and 1280 px, plus a scripted horizontal-overflow measurement at 360, 390 and 1280 px on every screen, the comparison dialog included.
+- Found and fixed eight problems against the six mandatory requirements:
+  1. (req. 4) Every journey screen scrolled sideways on phones: 74 px at 360, 44 px at 390. Measured cause: the shell grid's single `1fr` column blew out to the stepper's 418 px min-content. Fixed with `minmax(0, 1fr)`; now 0 px everywhere.
+  2. (req. 1) The phone stepper hid step 4 off-screen. It is now four equal columns at every width; the step is renamed "Разбор" so all names fit (the landing already says "разбор"), and the word "Шаг" hides on phones.
+  3. (req. 2) Number agreement was wrong ("1 программ требуют", "года/лет", "из 11 шагов" regardless of count). Added `pluralRu` on `Intl.PluralRules("ru-RU")` and fixed every count phrase; the edge cases 0, 1, 2, 4, 5, 11–14, 21, 22, 25, 101, 111 were checked. Where verb agreement would be clumsy, the sentence was rebuilt as "Подходящих программ: N".
+  4. (req. 2) The roadmap said "start from the shortlist above" on a screen that has none; reworded.
+  5. (req. 4) The comparison dialog clipped long Russian words on phones. The heading size is now 0.86rem so they fit whole, with `overflow-wrap: break-word` as a last resort. `hyphens: auto` alone was not enough: headless Linux Chrome has no Russian hyphenation.
+  6. (req. 3) On desktop, the English chips stretched to the height of the budget row; fixed with `align-items: start`.
+  7. (req. 4) On a phone, the first screen of the recommendations step was all controls. The conditions panel now collapses to a single "Ваши условия" line with an "Изменить" disclosure, so a programme card is visible on the first screen.
+  8. (req. 5) A profile edit only changed numbers in place, and on the roadmap step often nothing visible changed. Added a "Что изменилось" banner next to the control used. It reports the programme count (with direction), the new status, a new leading programme, and plan steps added or removed, named individually. When an edit changes nothing, it says so. The plan comparison uses step ids, not counts, because swapping one step for another keeps the count identical.
+  9. (req. 6) The roadmap's general advice about documents and deadlines had no label nearby; added a notice between the next action and the timeline.
+- Checked and found satisfied without change: req. 2 explanation depth (reasons, trade-off, blocker, improvement per card) and req. 6 on cards, the comparison dialog and the top bar.
+
+FILES:
+- `src/lib/plural.ts` (new)
+- `src/features/journey/{profileImpact.ts,ProfileImpact.tsx,ProfileImpact.module.css}` (new)
+- `src/features/journey/{JourneyExperience.tsx,JourneyExperience.module.css,steps.ts}`
+- `src/features/profile/{QuickAdjustBar.tsx,QuickAdjustBar.module.css}`
+- `src/features/comparison/ComparisonDialog.module.css`
+- `src/features/progress/ProgressPanel.tsx`
+- `src/features/recommendations/RecommendationList.tsx`
+- `src/domain/{diagnosis.ts,roadmap.ts,matching.ts,comparison.ts}` (copy and pluralisation only; no ranking, eligibility or roadmap rule changed)
+
+VERIFICATION:
+- `npm run typecheck` → exit 0.
+- `npm run lint` → exit 0.
+- `npm run build` → exit 0.
+- `git diff --check` → exit 0.
+- Horizontal overflow at 360 / 390 / 1280 px on landing, wizard, diagnosis, recommendations, roadmap and the comparison dialog → 0 px everywhere; before the fix, 74 and 44 px on every journey screen at phone widths.
+- Impact banner scenarios in the browser, all pass:
+  - the panel starts collapsed and shows the current conditions;
+  - no banner appears before an edit;
+  - budget $8k → $3k shows "Программ: 6 → 5" and the collapsed line updates;
+  - Duolingo → TOEFL shows the no-change message;
+  - school → IELTS on the roadmap names the new status and the swapped plan step;
+  - the banner clears on step change;
+  - the roadmap notice is present.
+- Regressions: the tap suite at 11/11 (one step added to open the collapsed panel), the persistence suite passes in full with zero console errors and no hydration warning, no `styles.X` without a CSS class, and 0 top-level :hover rules outside `@media (hover: hover)`.
+- Screenshots reviewed by eye for the phone stepper, the phone recommendations first screen, the comparison dialog, the roadmap notice and the impact banner.
+
+NOT VERIFIED:
+- Still no physical-device run; phone behaviour is headless Chrome emulation.
+
+LIMITATIONS:
+- The collapsed conditions line truncates with an ellipsis on narrow phones (for example "До $8 000 в год · Duoling…"); the full values are one tap away.
+- The impact banner reports only edits made from result screens; edits in the wizard are not diffed, because nothing has been shown to the user yet.
