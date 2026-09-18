@@ -11,7 +11,7 @@ import type { RoadmapSeason } from "@/domain/roadmap";
  */
 
 /** Bump when the prompt or the shape changes, so stale cached advice is ignored. */
-export const ROADMAP_ADVICE_VERSION = 1;
+export const ROADMAP_ADVICE_VERSION = 2;
 
 /** Same key on server and client: one profile, one model call. */
 export function adviceCacheKey(profile: ApplicantProfile): string {
@@ -52,8 +52,19 @@ export interface RoadmapAdvice {
   extras: ExtraStep[];
 }
 
+export type AiProvider = "gemini" | "groq";
+
+export const AI_PROVIDER_LABELS: Record<AiProvider, string> = {
+  gemini: "Gemini",
+  groq: "Groq",
+};
+
+export function isAiProvider(value: unknown): value is AiProvider {
+  return value === "gemini" || value === "groq";
+}
+
 export type RoadmapAdviceResponse =
-  | { status: "ready"; advice: RoadmapAdvice; model: string }
+  | { status: "ready"; advice: RoadmapAdvice; provider: AiProvider; model: string }
   | { status: "unavailable" };
 
 /**

@@ -6,6 +6,8 @@
  * integration dependency-free. The adapter never throws; callers get a reason.
  */
 
+import { modelList, tryModels, type AiResult, type JsonRequest } from "./types";
+
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 /**
  * Chosen by live measurement on the free tier (2026-09-18): gemini-3.8-flash
@@ -14,20 +16,6 @@ const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
  * lite models answered the full roadmap prompt in about four seconds.
  */
 const DEFAULT_MODELS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
-
-export type GeminiFailure = "no-key" | "timeout" | "http" | "blocked" | "malformed";
-
-export type GeminiResult =
-  | { ok: true; data: unknown; model: string }
-  | { ok: false; reason: GeminiFailure; status?: number };
-
-interface GenerateJsonRequest {
-  system: string;
-  user: string;
-  jsonSchema: Record<string, unknown>;
-  /** Per model attempt; the fallback model gets its own budget. */
-  timeoutMs: number;
-}
 
 interface GeminiPart {
   text?: string;
@@ -40,42 +28,27 @@ interface GeminiResponse {
   promptFeedback?: { blockReason?: string };
 }
 
-/** `GEMINI_MODEL` may list several models, comma-separated, in order of preference. */
 export function geminiModels(): string[] {
-  const configured = (process.env.GEMINI_MODEL ?? "")
-    .split(",")
-    .map((name) => name.trim())
-    .filter(Boolean);
-  return configured.length > 0 ? configured : DEFAULT_MODELS;
+  return modelList(process.env.GEMINI_MODEL, DEFAULT_MODELS);
 }
 
-/**
- * Tries each model in turn. Overload, quota, timeout and HTTP errors move on
- * to the next model; a blocked or malformed answer does not, since another
- * model given the same prompt is no more likely to be safe or well-formed.
- */
-export async function generateJson(request: GenerateJsonRequest): Promise<GeminiResult> {
+/** Tries each configured Gemini model in turn (see `tryModels`). */
+export async function generateJsonWithGemini(request: JsonRequest): Promise<AiResult> {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) {
     return { ok: false, reason: "no-key" };
   }
-
-  let lastFailure: GeminiResult = { ok: false, reason: "http" };
-  for (const model of geminiModels()) {
-    const result = await attempt(model, apiKey, request);
-    if (result.ok || (result.reason !== "timeout" && result.reason !== "http")) {
-      return result;
-    }
-    lastFailure = result;
-  }
-  return lastFailure;
+  return tryModels(geminiModels(), request, (model, timeoutMs) =>
+    attempt(model, apiKey, request, timeoutMs),
+  );
 }
 
 async function attempt(
   model: string,
   apiKey: string,
-  { system, user, jsonSchema, timeoutMs }: GenerateJsonRequest,
-): Promise<GeminiResult> {
+  { system, user, jsonSchema }: JsonRequest,
+  timeoutMs: number,
+): Promise<AiResult> {
   let response: Response;
   try {
     response = await fetch(`${ENDPOINT}/${encodeURIComponent(model)}:generateContent`, {

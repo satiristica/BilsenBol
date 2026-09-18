@@ -136,7 +136,13 @@ export function buildRoadmapPrompt(profile: ApplicantProfile): RoadmapPrompt {
           items: {
             type: "object",
             properties: {
-              season: { type: "string", enum: ["autumn", "winter", "spring"] },
+              // The payload names seasons in Russian, so spell out the mapping:
+              // without it Groq's strict mode sometimes rejected the reply.
+              season: {
+                type: "string",
+                enum: ["autumn", "winter", "spring"],
+                description: "autumn — осень, winter — зима, spring — весна.",
+              },
               title: { type: "string", description: "Короткое название шага, без цифр." },
               detail: { type: "string", description: "Зачем и как это сделать, без цифр." },
             },

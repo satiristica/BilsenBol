@@ -2097,3 +2097,103 @@ VERIFICATION:
 
 LIMITATIONS:
 - As raised with the user: behind the 100% gate, the jury only sees the AI after completing 11–12 steps. The step advice is shown after the steps are done, so it is framed as "Разбор по шагам". A visible locked button before 100% would improve discoverability and is a one-line change if wanted.
+
+## TASK TASK-CLAUDE-20260918-groq-fallback
+
+AGENT: CLAUDE
+STATUS: DONE
+BRANCH: feat/ai-roadmap
+SCOPE: Add Groq as a fallback provider when Gemini is unavailable or its answer fails validation.
+
+FILES:
+- `src/server/ai/**`
+- `src/app/api/roadmap/route.ts`
+- `src/features/roadmap/**` (provider label, cache version)
+- `.env.example`, `README.md`, `AGENTS_CHANGELOG.md`
+
+ASSUMPTIONS:
+- Groq is used only after the Gemini chain fails, including when Gemini's answer yields nothing usable after validation. The same prompt, the same no-digits filter and the same validation apply to both providers.
+- Total model time must stay inside `maxDuration = 30`.
+- The UI must name the provider that actually answered, not always "Gemini".
+
+ACCEPTANCE:
+- With Gemini failing (error, timeout, missing key or unusable answer), a Groq answer is shown and labelled as Groq.
+- With both failing, the page shows the unavailable state.
+- `npm run typecheck`, `npm run lint`, `npm run build` exit 0.
+
+### COMPLETE TASK-CLAUDE-20260918-groq-fallback
+
+AGENT: CLAUDE
+STATUS: DONE (branch `feat/ai-roadmap`, uncommitted)
+
+SUMMARY:
+- Provider chain: Gemini (`gemini-3.5-flash-lite` → `gemini-3.1-flash-lite`), then Groq (`openai/gpt-oss-120b` → `openai/gpt-oss-20b`).
+- The chain validates before accepting. A provider that errors, times out, has no key, is blocked, or answers with nothing that survives `sanitizeRoadmapAdvice` hands over to the next one.
+- One shared deadline (26 s, inside `maxDuration = 30`); per-attempt ceilings are 8 s for Gemini and 6 s for Groq.
+- The UI labels the answer with the provider that actually produced it ("Gemini" / "Groq", model id in the tooltip). The page eyebrow no longer hard-codes Gemini.
+
+FILES:
+- `src/server/ai/types.ts` (new): shared `AiResult` / `JsonRequest`, `modelList`, `tryModels`.
+- `src/server/ai/groq.ts` (new): OpenAI-compatible adapter. The strict JSON schema is derived from the shared one with `additionalProperties: false` on every object, and the Gemini schema is left untouched. Reasoning settings per model family: gpt-oss `reasoning_effort: low` + `include_reasoning: false`; qwen `reasoning_effort: none` + `reasoning_format: hidden`.
+- `src/server/ai/adviceChain.ts` (new): provider chain with validation and injectable providers.
+- `src/server/ai/gemini.ts`: moved onto the shared types and the deadline.
+- `src/app/api/roadmap/route.ts`: uses the chain and logs a fallback only with provider and model.
+- `src/features/roadmap/{roadmapAdvice.ts,useRoadmapAdvice.ts,AiRoadmapCard.tsx,AiPlanPage.tsx}`: `AiProvider`, labels, the provider carried through client state and cache. `ROADMAP_ADVICE_VERSION` bumped to 2, so v1 cache entries without a provider are ignored.
+- `.env.example`, `README.md`.
+
+DECISIONS:
+- Groq model chosen by live measurement on the production prompt with a strict schema. The docs list only gpt-oss-20b, gpt-oss-120b and qwen3.8-27b as strict-capable. Results: gpt-oss-120b 2.3 s, gpt-oss-20b 1.0 s, qwen3.8-27b 3.8 s; all three passed the validator at 100% with zero digits. 120b is primary because 20b's strategy text contradicted the profile (it said "compensate for" a GPA the prompt described as grant-competitive).
+- At the provider level, a block also moves on to the next provider, because the input is benign student data and the output is validated anyway. At the model level within one provider, blocked or malformed still stops, as before.
+
+BUG FOUND BY TESTS:
+- The first version skipped every attempt whenever `attemptTimeoutMs` was below the 1.5 s floor, because the floor was compared to min(ceiling, remaining). The floor now applies only to the time left before the shared deadline.
+
+VERIFICATION:
+- `npm run typecheck` → exit 0.
+- `npm run lint` → exit 0.
+- `npm run build` → exit 0.
+- `git diff --check` → exit 0.
+- Mocked unit checks:
+  - Groq adapter plus chain, 24/24: no key; success with the default model; endpoint and Bearer auth; messages; strict `json_schema` with `additionalProperties: false` on nested objects; reasoning options for gpt-oss and qwen; 429 moving to 20b; `length` → malformed; `content_filter` → blocked; null content; timeout; no attempt with under 1.5 s left; the source schema not mutated; Gemini success skips Groq; Gemini 503, missing key, invalid answer or block each go to Groq; both failing report only reasons; an exhausted deadline skips the provider; each provider gets its own ceiling and the same deadline.
+  - Gemini adapter 19/19 and filter/prompt 24/24 still pass.
+- Live runs:
+  - normal: Gemini served in 4.0 s;
+  - `GEMINI_MODEL` pointed at a nonexistent model: Groq gpt-oss-120b served in 3.2 s, logged as `served by fallback groq`;
+  - both providers pointed at nonexistent models: `unavailable` in 0.9 s, log `gemini:http 404, groq:http 404`, zero profile fields logged;
+  - browser with Gemini broken: the AI plan page rendered Groq's answer labelled "Groq" with the model id in the tooltip; a planted v1 cache entry was ignored and a v2 entry with `provider: "groq"` written; zero console errors. Screenshot reviewed.
+- Observed in the wild: Groq's free tier allows 8000 tokens per minute per model (response headers). After a burst of test calls, gpt-oss-120b hit that limit and the chain moved to gpt-oss-20b on its own. That is documented in the README limitations.
+- An intended "Groq broken too" run first went wrong because zsh does not word-split an unquoted `$1`, so `GROQ_MODEL` was never set. Re-run with the variables set explicitly: result as above.
+- Regressions after restarting the dev server normally: AI page suite 22/22 (its mock now includes `provider`), tap suite 11/11, persistence suite passes, change-banner suite passes.
+
+LIMITATIONS:
+- Groq's free-tier limit is about two roadmap requests per minute per model. Caching and the server throttle absorb normal use; a burst can exhaust both providers and show the unavailable state.
+
+## TASK TASK-CLAUDE-20260918-season-schema-hint
+
+AGENT: CLAUDE
+STATUS: DONE
+BRANCH: feat/ai-roadmap
+SCOPE: Stop Groq strict mode from rejecting replies over the extras `season` value.
+
+### COMPLETE TASK-CLAUDE-20260918-season-schema-hint
+
+AGENT: CLAUDE
+STATUS: DONE
+
+SUMMARY:
+- Found while measuring token usage: one of four live Groq `gpt-oss-120b` calls failed with "Generated JSON does not match the expected schema … /extras/0/season … value must be one of 'autumn', 'winter', 'spring'". Groq did not report which value the model wrote. The likely cause is that the payload names step seasons in Russian ("осень") while the schema enum is English. The chain already recovered by moving to `gpt-oss-20b`, at the cost of an extra request and quota.
+- Added `description: "autumn — осень, winter — зима, spring — весна."` to the `season` field of the shared response schema. No change to the payload, the validator or the UI. `ROADMAP_ADVICE_VERSION` is not bumped: the reply's meaning is unchanged, so cached advice stays valid and the quota is not spent again.
+- Also corrected the README quota line from my earlier estimate of about 4000 tokens per plan to the measured values: about 2100 tokens on Gemini (1264–1278 in, 823–838 out, 0 thinking) and about 2354 on Groq gpt-oss-120b (1547 in, 807 out, 38 reasoning). Groq's free tier allows 200K tokens and 1000 requests per day per model, so tokens are the binding limit: about 85 plans per day per model, about 170 across both Groq models.
+
+FILES:
+- `src/server/ai/roadmapPrompt.ts`
+- `README.md`
+
+VERIFICATION:
+- Filter and prompt unit checks 24/24.
+- Live Groq `gpt-oss-120b` on the failing profile (foundation-path), three calls spaced 20 s to stay under the per-minute token limit: 3/3 HTTP 200 in 2.2–2.4 s, extras seasons were valid enum values, the filter kept 11/11 advice and 3/3 extras each time. Before the change, the same profile had failed in one of two calls.
+- Live Gemini `gemini-3.5-flash-lite` accepts the schema with the new description, and its seasons are valid.
+- `npm run typecheck`, `npm run lint`, `npm run build`, `git diff --check` → exit 0.
+
+LIMITATIONS:
+- Three successful calls show the fix works but do not prove the failure can never recur; if it does, the chain still falls back to the next model.

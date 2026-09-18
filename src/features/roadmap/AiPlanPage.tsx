@@ -139,7 +139,7 @@ function AiPlanContent({
       <section className={styles.hero}>
         <p className={styles.eyebrow}>
           <Sparkles aria-hidden="true" size={14} strokeWidth={2.4} />
-          ИИ-план · Gemini
+          ИИ-план
         </p>
         <h1 className={styles.title}>Ваш маршрут глазами ИИ</h1>
         <p className={styles.lead}>{profileSummary}</p>

@@ -1,19 +1,15 @@
 import { parseApplicantProfile } from "@/domain/profile";
-import {
-  adviceCacheKey,
-  sanitizeRoadmapAdvice,
-  type RoadmapAdviceResponse,
-} from "@/features/roadmap/roadmapAdvice";
-import { generateJson } from "@/server/ai/gemini";
-import { ROADMAP_SYSTEM_INSTRUCTION, buildRoadmapPrompt } from "@/server/ai/roadmapPrompt";
+import { adviceCacheKey, type RoadmapAdviceResponse } from "@/features/roadmap/roadmapAdvice";
+import { generateRoadmapAdvice } from "@/server/ai/adviceChain";
+import { buildRoadmapPrompt } from "@/server/ai/roadmapPrompt";
 
 // The model call is bounded well below this; the platform limit is a backstop.
 export const maxDuration = 30;
 
-// Two model attempts of 12 s each stay inside maxDuration.
-const MODEL_TIMEOUT_MS = 12_000;
+// All providers together must finish before this, leaving headroom under maxDuration.
+const MODEL_BUDGET_MS = 26_000;
 const CACHE_LIMIT = 200;
-/** Upstream calls allowed per instance per minute: protects the free-tier quota. */
+/** Requests allowed to reach the providers per instance per minute: protects free-tier quotas. */
 const CALLS_PER_MINUTE = 20;
 
 // Per-instance memory. Serverless instances do not share it, so the browser
@@ -72,26 +68,23 @@ export async function POST(request: Request) {
   // The skeleton is rebuilt here from the validated profile; nothing the
   // client says about its roadmap is trusted.
   const prompt = buildRoadmapPrompt(profile);
-  const result = await generateJson({
-    system: ROADMAP_SYSTEM_INSTRUCTION,
-    user: prompt.user,
-    jsonSchema: prompt.jsonSchema,
-    timeoutMs: MODEL_TIMEOUT_MS,
-  });
+  const outcome = await generateRoadmapAdvice(prompt, Date.now() + MODEL_BUDGET_MS);
 
-  if (!result.ok) {
-    // Reason only: the profile itself is never logged.
-    console.warn(`[roadmap-ai] unavailable: ${result.reason}${result.status ? ` ${result.status}` : ""}`);
+  if (!outcome.ok) {
+    // Reasons only: the profile itself is never logged.
+    console.warn(`[roadmap-ai] unavailable: ${outcome.failures.join(", ")}`);
     return Response.json(unavailable);
   }
-
-  const advice = sanitizeRoadmapAdvice(result.data, prompt.allowedStepIds);
-  if (!advice) {
-    console.warn("[roadmap-ai] unavailable: nothing usable after validation");
-    return Response.json(unavailable);
+  if (outcome.provider !== "gemini") {
+    console.info(`[roadmap-ai] served by fallback ${outcome.provider} (${outcome.model})`);
   }
 
-  const response: RoadmapAdviceResponse = { status: "ready", advice, model: result.model };
+  const response: RoadmapAdviceResponse = {
+    status: "ready",
+    advice: outcome.advice,
+    provider: outcome.provider,
+    model: outcome.model,
+  };
   remember(key, response);
   return Response.json(response);
 }

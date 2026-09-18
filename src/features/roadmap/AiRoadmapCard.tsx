@@ -5,6 +5,7 @@ import { CloudOff, Info, Leaf, type LucideIcon, Snowflake, Sparkles, Sprout } fr
 import type { RoadmapSeason } from "@/domain/roadmap";
 
 import styles from "./AiRoadmapCard.module.css";
+import { AI_PROVIDER_LABELS } from "./roadmapAdvice";
 import type { RoadmapAdviceState } from "./useRoadmapAdvice";
 
 const SEASONS: Record<RoadmapSeason, { label: string; icon: LucideIcon }> = {
@@ -61,7 +62,9 @@ export function AiRoadmapCard({
           <Sparkles aria-hidden="true" size={18} strokeWidth={2.3} />
           {title}
         </h2>
-        <span className={styles.modelTag}>Gemini</span>
+        <span className={styles.modelTag} title={state.model}>
+          {AI_PROVIDER_LABELS[state.provider]}
+        </span>
       </div>
 
       {advice.summary ? <p className={styles.summary}>{advice.summary}</p> : null}

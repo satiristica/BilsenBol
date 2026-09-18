@@ -8,13 +8,15 @@ import { readJson, writeJson } from "@/lib/browserStorage";
 import {
   ROADMAP_ADVICE_VERSION,
   adviceCacheKey,
+  isAiProvider,
   sanitizeRoadmapAdvice,
+  type AiProvider,
   type RoadmapAdvice,
 } from "./roadmapAdvice";
 
 export type RoadmapAdviceState =
   | { status: "loading" }
-  | { status: "ready"; advice: RoadmapAdvice; model: string }
+  | { status: "ready"; advice: RoadmapAdvice; provider: AiProvider; model: string }
   | { status: "unavailable" };
 
 const STORAGE_KEY = "bilsenbol.roadmapAdvice";
@@ -29,6 +31,7 @@ const UNAVAILABLE: RoadmapAdviceState = { status: "unavailable" };
 interface CachedEntry {
   key: string;
   advice: unknown;
+  provider: unknown;
   model: unknown;
 }
 
@@ -44,9 +47,14 @@ function readEntries(): CachedEntry[] {
 }
 
 /** Cached advice is re-validated: storage is as untrusted as the model. */
-function toState(advice: unknown, model: unknown, allowedStepIds: ReadonlySet<string>): RoadmapAdviceState {
+function toState(
+  { advice, provider, model }: { advice: unknown; provider: unknown; model: unknown },
+  allowedStepIds: ReadonlySet<string>,
+): RoadmapAdviceState {
   const clean = sanitizeRoadmapAdvice(advice, allowedStepIds);
-  return clean && typeof model === "string" ? { status: "ready", advice: clean, model } : UNAVAILABLE;
+  return clean && isAiProvider(provider) && typeof model === "string"
+    ? { status: "ready", advice: clean, provider, model }
+    : UNAVAILABLE;
 }
 
 function readCached(key: string, allowedStepIds: ReadonlySet<string>): RoadmapAdviceState | null {
@@ -54,13 +62,13 @@ function readCached(key: string, allowedStepIds: ReadonlySet<string>): RoadmapAd
   if (!entry) {
     return null;
   }
-  const state = toState(entry.advice, entry.model, allowedStepIds);
+  const state = toState(entry, allowedStepIds);
   return state.status === "ready" ? state : null;
 }
 
 function writeCached(key: string, state: Extract<RoadmapAdviceState, { status: "ready" }>) {
   const entries = readEntries().filter((item) => item.key !== key);
-  entries.unshift({ key, advice: state.advice, model: state.model });
+  entries.unshift({ key, advice: state.advice, provider: state.provider, model: state.model });
   writeJson(STORAGE_KEY, { version: ROADMAP_ADVICE_VERSION, entries: entries.slice(0, MAX_CACHED) });
 }
 
@@ -93,10 +101,12 @@ export function useRoadmapAdvice(
           signal: controller.signal,
         });
         const data = (response.ok ? await response.json() : null) as
-          | { status?: unknown; advice?: unknown; model?: unknown }
+          | { status?: unknown; advice?: unknown; provider?: unknown; model?: unknown }
           | null;
         const state =
-          data?.status === "ready" ? toState(data.advice, data.model, allowedStepIds) : UNAVAILABLE;
+          data?.status === "ready"
+            ? toState({ advice: data.advice, provider: data.provider, model: data.model }, allowedStepIds)
+            : UNAVAILABLE;
         if (state.status === "ready") {
           writeCached(key, state);
         }
